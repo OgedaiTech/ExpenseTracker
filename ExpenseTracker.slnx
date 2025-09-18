@@ -1,7 +1,9 @@
 <Solution>
   <Folder Name="/src/">
     <Project Path="src/ExpenseTracker.AppHost/ExpenseTracker.AppHost.csproj" />
-    <Project Path="src/ExpenseTracker.Expenses/ExpenseTracker.Expenses.csproj" />
     <Project Path="src/ExpenseTracker.ServiceDefaults/ExpenseTracker.ServiceDefaults.csproj" />
+  </Folder>
+  <Folder Name="/src/ExpenseModule/">
+    <Project Path="src/ExpenseModule/ExpenseTracker.Expenses/ExpenseTracker.Expenses.csproj" />
   </Folder>
 </Solution>
