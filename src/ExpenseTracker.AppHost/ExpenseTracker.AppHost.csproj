@@ -10,4 +10,8 @@
     <PackageReference Include="Aspire.Hosting.AppHost" Version="9.4.2" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="../ExpenseTracker.WebAPI/ExpenseTracker.WebAPI.csproj" />
+  </ItemGroup>
+
 </Project>

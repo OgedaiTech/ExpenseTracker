@@ -1,7 +1,7 @@
 using ExpenseTracker.Expenses.Endpoints.Create;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace ExpenseTracker.Expenses.Endpoints;
+namespace ExpenseTracker.Expenses;
 
 public static class ExpenseRepositoryExtensions
 {

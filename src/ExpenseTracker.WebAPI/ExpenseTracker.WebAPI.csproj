@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.9" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../ExpenseModule/ExpenseTracker.Expenses/ExpenseTracker.Expenses.csproj" />
+    <ProjectReference Include="../ExpenseTracker.ServiceDefaults/ExpenseTracker.ServiceDefaults.csproj" />
+  </ItemGroup>
+
+</Project>
