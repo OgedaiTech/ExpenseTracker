@@ -1,4 +1,5 @@
 using ExpenseTracker.Expenses;
+using ExpenseTracker.Expenses.Data;
 using FastEndpoints;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -6,6 +7,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.AddServiceDefaults();
 
 builder.Services.AddFastEndpoints();
+
+builder.AddNpgsqlDbContext<ExpenseDbContext>("Ext");
 
 builder.Services.AddExpenseServices();
 builder.Services.AddExpenseRepositories();

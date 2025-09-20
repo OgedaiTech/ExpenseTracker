@@ -3,7 +3,7 @@ using FastEndpoints;
 namespace ExpenseTracker.Expenses.Endpoints.Create;
 
 internal class CreateExpenseEndpoint
-  (ICreateExpenseService createExpenseService) : EndpointWithoutRequest
+  (ICreateExpenseService createExpenseService) : Endpoint<CreateExpenseRequest>
 {
   override public void Configure()
   {
@@ -11,9 +11,9 @@ internal class CreateExpenseEndpoint
     AllowAnonymous();
   }
 
-  public override async Task HandleAsync(CancellationToken ct)
+  public override async Task HandleAsync(CreateExpenseRequest request, CancellationToken ct)
   {
-    await createExpenseService.CreateExpenseAsync();
+    await createExpenseService.CreateExpenseAsync(request.Name, ct);
     await Send.CreatedAtAsync("expenses", cancellation: ct);
   }
 }
