@@ -1,12 +1,11 @@
 @ExpenseTracker.WebAPI_HostAddress = http://localhost:5077
 
-GET {{ExpenseTracker.WebAPI_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###
-
 POST {{ExpenseTracker.WebAPI_HostAddress}}/expenses/
 Content-Type: application/json
 Accept: application/json
+
+{
+  "name": "Lunch"
+}
 
 ###
