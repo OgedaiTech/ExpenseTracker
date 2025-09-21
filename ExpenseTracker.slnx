@@ -1,6 +1,7 @@
 <Solution>
   <Folder Name="/src/">
     <Project Path="src/ExpenseTracker.AppHost/ExpenseTracker.AppHost.csproj" />
+    <Project Path="src/ExpenseTracker.MigrationService/ExpenseTracker.MigrationService.csproj" />
     <Project Path="src/ExpenseTracker.ServiceDefaults/ExpenseTracker.ServiceDefaults.csproj" />
     <Project Path="src/ExpenseTracker.WebAPI/ExpenseTracker.WebAPI.csproj" />
   </Folder>

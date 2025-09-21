@@ -11,9 +11,15 @@ var postgresDbServer = builder
   .WithPgAdmin(configureContainer: p => p.WithImageTag("9.8"));
 var postgresDb = postgresDbServer.AddDatabase("ExT");
 
+var migrations = builder.AddProject<ExpenseTracker_MigrationService>("migration")
+  .WithReference(postgresDb)
+  .WaitFor(postgresDb);
+
 builder
   .AddProject<ExpenseTracker_WebAPI>("webapi")
-  .WithReference(postgresDb);
+  .WithReference(postgresDb)
+  .WithReference(migrations)
+  .WaitForCompletion(migrations);
 
 
 await builder.Build().RunAsync();
