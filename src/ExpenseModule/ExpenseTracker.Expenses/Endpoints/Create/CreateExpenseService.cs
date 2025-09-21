@@ -1,5 +1,3 @@
-using System;
-
 namespace ExpenseTracker.Expenses.Endpoints.Create;
 
 public class CreateExpenseService(ICreateExpenseRepository createExpenseRepository) : ICreateExpenseService
