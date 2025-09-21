@@ -8,7 +8,7 @@ builder.AddServiceDefaults();
 
 builder.Services.AddFastEndpoints();
 
-builder.AddNpgsqlDbContext<ExpenseDbContext>("Ext");
+builder.AddNpgsqlDbContext<ExpenseDbContext>("ExT");
 
 builder.Services.AddExpenseServices();
 builder.Services.AddExpenseRepositories();
