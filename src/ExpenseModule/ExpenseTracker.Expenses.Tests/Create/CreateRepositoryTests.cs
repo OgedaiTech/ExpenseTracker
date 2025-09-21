@@ -27,7 +27,7 @@ public class CreateRepositoryTests
     // Assert
     var expenses = await _dbContext.Expenses.ToListAsync();
     Assert.Single(expenses);
-    var expense = expenses.First();
+    var expense = expenses[0];
     Assert.Equal(expenseName, expense.Name);
     Assert.NotEqual(default, expense.CreatedAt);
   }
