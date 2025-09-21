@@ -12,4 +12,4 @@ builder
   .WithReference(postgresDb);
 
 
-builder.Build().Run();
+await builder.Build().RunAsync();
