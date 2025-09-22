@@ -4,7 +4,7 @@ using FastEndpoints;
 
 namespace ExpenseTracker.WebAPI;
 
-public static partial class Program
+public partial class Program
 {
   private static void Main(string[] args)
   {
@@ -35,4 +35,4 @@ public static partial class Program
     app.Run();
   }
 }
-public static partial class Program { }
+public partial class Program { }
