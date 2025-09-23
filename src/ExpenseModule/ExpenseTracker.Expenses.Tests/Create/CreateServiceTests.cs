@@ -29,4 +29,38 @@ public class CreateServiceTests
     Mock.Get(_repository)
       .Verify(r => r.CreateExpenseAsync(expenseName, It.IsAny<CancellationToken>()), Times.Once);
   }
+
+  [Fact]
+  public async Task CreateService_WithEmptyName_ReturnsFailureResultAsync()
+  {
+    // Arrange
+    var emptyName = "   ";  // String with only whitespace
+
+    // Act
+    var result = await _service.CreateExpenseAsync(emptyName, CancellationToken.None);
+
+    // Assert
+    Assert.Multiple(() =>
+    {
+      Assert.False(result.Success);
+      Assert.Equal("Expense name cannot be empty.", result.Message);
+    });
+  }
+
+  [Fact]
+  public async Task CreateService_WithLongNameThan128_ReturnsFailureResultAsync()
+  {
+    // Arrange
+    var longName = new string('a', 129);  // String with 129 characters
+
+    // Act
+    var result = await _service.CreateExpenseAsync(longName, CancellationToken.None);
+
+    // Assert
+    Assert.Multiple(() =>
+    {
+      Assert.False(result.Success);
+      Assert.Equal("Expense name cannot exceed 128 characters.", result.Message);
+    });
+  }
 }
