@@ -32,7 +32,7 @@ public class CreateEndpointTests
     var ct = CancellationToken.None;
     _createExpenseService
         .Setup(s => s.CreateExpenseAsync("Test Expense", ct))
-        .Returns(Task.CompletedTask);
+        .ReturnsAsync(new ServiceResult());
 
     // Act
     await _endpoint.HandleAsync(request, ct);
@@ -41,5 +41,25 @@ public class CreateEndpointTests
     _createExpenseService.Verify(
         s => s.CreateExpenseAsync("Test Expense", ct),
         Times.Once);
+  }
+
+  [Fact]
+  public async Task GivenInvalidRequest_WhenHandleAsync_ThenShouldReturnBadRequestAsync()
+  {
+    // Arrange
+    var request = new CreateExpenseRequest { Name = "" };
+    var ct = CancellationToken.None;
+    _createExpenseService
+        .Setup(s => s.CreateExpenseAsync("", ct))
+        .ReturnsAsync(new ServiceResult("Expense name cannot be empty."));
+
+    // Act
+    await _endpoint.HandleAsync(request, ct);
+
+    // Assert
+    _createExpenseService.Verify(
+        s => s.CreateExpenseAsync("", ct),
+        Times.Once);
+    Assert.Equal(400, _endpoint.HttpContext.Response.StatusCode);
   }
 }
