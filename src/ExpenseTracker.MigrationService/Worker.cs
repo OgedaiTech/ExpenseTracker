@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using ExpenseTracker.Expenses.Data;
+using ExpenseTracker.Receipts.Data;
 using Microsoft.EntityFrameworkCore;
 
 namespace ExpenseTracker.MigrationService;
@@ -18,9 +19,11 @@ public class Worker(
     try
     {
       using var scope = serviceProvider.CreateScope();
-      var dbContext = scope.ServiceProvider.GetRequiredService<ExpenseDbContext>();
+      var expenseDbContext = scope.ServiceProvider.GetRequiredService<ExpenseDbContext>();
+      await RunMigrationForExpenseDbAsync(expenseDbContext, stoppingToken);
 
-      await RunMigrationAsync(dbContext, stoppingToken);
+      var receiptDbContext = scope.ServiceProvider.GetRequiredService<ReceiptDbContext>();
+      await RunMigrationForReceiptDbAsync(receiptDbContext, stoppingToken);
     }
     catch (Exception ex)
     {
@@ -31,7 +34,17 @@ public class Worker(
     hostApplicationLifetime.StopApplication();
   }
 
-  private static async Task RunMigrationAsync(ExpenseDbContext dbContext, CancellationToken cancellationToken)
+  private static async Task RunMigrationForExpenseDbAsync(ExpenseDbContext dbContext, CancellationToken cancellationToken)
+  {
+    var strategy = dbContext.Database.CreateExecutionStrategy();
+    await strategy.ExecuteAsync(async () =>
+    {
+      // Run migration in a transaction to avoid partial migration if it fails.
+      await dbContext.Database.MigrateAsync(cancellationToken);
+    });
+  }
+
+  private static async Task RunMigrationForReceiptDbAsync(ReceiptDbContext dbContext, CancellationToken cancellationToken)
   {
     var strategy = dbContext.Database.CreateExecutionStrategy();
     await strategy.ExecuteAsync(async () =>
