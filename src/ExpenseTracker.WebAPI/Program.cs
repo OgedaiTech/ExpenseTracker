@@ -1,3 +1,4 @@
+using System.Reflection;
 using ExpenseTracker.Expenses;
 using ExpenseTracker.Expenses.Data;
 using ExpenseTracker.Receipts;
@@ -19,12 +20,20 @@ public partial class Program
     builder.AddNpgsqlDbContext<ExpenseDbContext>("ExT");
     builder.AddNpgsqlDbContext<ReceiptDbContext>("ExT");
 
-    builder.Services.AddExpenseServices();
+    // Add Module Services and Repositories
+    List<Assembly> mediatRAssemblies = [typeof(Program).Assembly];
+    builder.Services.AddExpenseServices(mediatRAssemblies);
     builder.Services.AddExpenseRepositories();
-    builder.Services.AddReceiptServices();
+    builder.Services.AddReceiptServices(mediatRAssemblies);
     builder.Services.AddReceiptRepositories();
 
     builder.Services.AddOpenApi();
+
+    // Set Mediatr
+    builder.Services.AddMediatR(cfg =>
+    {
+      cfg.RegisterServicesFromAssemblies(mediatRAssemblies.ToArray());
+    });
 
     var app = builder.Build();
 

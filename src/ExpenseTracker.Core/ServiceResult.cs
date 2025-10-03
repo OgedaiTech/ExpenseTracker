@@ -1,4 +1,4 @@
-namespace ExpenseTracker.Expenses;
+namespace ExpenseTracker.Core;
 
 public class ServiceResult
 {
@@ -20,6 +20,11 @@ public class ServiceResult
 public class ServiceResult<T> : ServiceResult
 {
   public T? Data { get; set; }
+
+  public ServiceResult(T data) : base()
+  {
+    Data = data;
+  }
 
   public ServiceResult(string message, T? data = default) : base(message)
   {

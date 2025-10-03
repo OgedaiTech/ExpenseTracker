@@ -1,3 +1,5 @@
+using ExpenseTracker.Core;
+
 namespace ExpenseTracker.Receipts.Endpoints.Create;
 
 public interface ICreateReceiptService

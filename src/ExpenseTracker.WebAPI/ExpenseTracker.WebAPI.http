@@ -15,7 +15,7 @@ Accept: application/json
 Content-Type: application/json
 
 {
-  "expenseId": "99999999-9999-9999-9999-999999999999",
+  "expenseId": "0199ab41-b472-7b24-b543-b596286b5ec0",
   "amount": 20,
   "date": "2024-06-20T12:00:00Z",
   "receiptNo": "R123456",
