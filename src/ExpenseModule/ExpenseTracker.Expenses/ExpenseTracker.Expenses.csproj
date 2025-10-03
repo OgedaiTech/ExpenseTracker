@@ -5,6 +5,7 @@
 
   <ItemGroup>
     <PackageReference Include="FastEndpoints" Version="7.0.1" />
+    <PackageReference Include="MediatR" Version="13.0.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.9" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.9">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -16,6 +17,10 @@
 
   <ItemGroup>
     <InternalsVisibleTo Include="ExpenseTracker.Expenses.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../ExpenseTracker.Expenses.Contracts/ExpenseTracker.Expenses.Contracts.csproj" />
   </ItemGroup>
 
 </Project>

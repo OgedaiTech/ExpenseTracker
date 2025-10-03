@@ -1,3 +1,4 @@
+using ExpenseTracker.Core;
 using ExpenseTracker.Expenses.Endpoints.Create;
 using FastEndpoints;
 using Microsoft.AspNetCore.Http;

@@ -1,11 +1,13 @@
 <Solution>
   <Folder Name="/src/">
     <Project Path="src/ExpenseTracker.AppHost/ExpenseTracker.AppHost.csproj" />
+    <Project Path="src/ExpenseTracker.Core/ExpenseTracker.Core.csproj" />
     <Project Path="src/ExpenseTracker.MigrationService/ExpenseTracker.MigrationService.csproj" />
     <Project Path="src/ExpenseTracker.ServiceDefaults/ExpenseTracker.ServiceDefaults.csproj" />
     <Project Path="src/ExpenseTracker.WebAPI/ExpenseTracker.WebAPI.csproj" />
   </Folder>
   <Folder Name="/src/ExpenseModule/">
+    <Project Path="src/ExpenseModule/ExpenseTracker.Expenses.Contracts/ExpenseTracker.Expenses.Contracts.csproj" />
     <Project Path="src/ExpenseModule/ExpenseTracker.Expenses.Tests/ExpenseTracker.Expenses.Tests.csproj" />
     <Project Path="src/ExpenseModule/ExpenseTracker.Expenses/ExpenseTracker.Expenses.csproj" />
   </Folder>
