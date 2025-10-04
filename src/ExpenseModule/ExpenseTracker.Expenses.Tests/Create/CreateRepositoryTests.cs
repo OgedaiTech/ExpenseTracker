@@ -25,10 +25,13 @@ public class CreateRepositoryTests
     await _repository.CreateExpenseAsync(expenseName, CancellationToken.None);
 
     // Assert
-    var expenses = await _dbContext.Expenses.ToListAsync();
-    Assert.Single(expenses);
-    var expense = expenses[0];
-    Assert.Equal(expenseName, expense.Name);
-    Assert.NotEqual(default, expense.CreatedAt);
+    Assert.Multiple(async () =>
+    {
+      var expenses = await _dbContext.Expenses.ToListAsync();
+      Assert.Single(expenses);
+      var expense = expenses[0];
+      Assert.Equal(expenseName, expense.Name);
+      Assert.NotEqual(default, expense.CreatedAt);
+    });
   }
 }
