@@ -109,10 +109,13 @@ public class CreateEndpointTests
     await _endpoint.HandleAsync(request, It.IsAny<CancellationToken>());
 
     // Assert
-    _createReceiptService.Verify(
+    Assert.Multiple(() =>
+    {
+      _createReceiptService.Verify(
         s => s.CreateReceiptAsync(request, It.IsAny<CancellationToken>()),
         Times.Once);
-    Assert.Equal(400, _endpoint.HttpContext.Response.StatusCode);
+      Assert.Equal(400, _endpoint.HttpContext.Response.StatusCode);
+    });
   }
 }
 

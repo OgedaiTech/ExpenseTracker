@@ -33,9 +33,12 @@ public class CreateRepositoryTests
     await _repository.CreateReceiptAsync(request, It.IsAny<CancellationToken>());
 
     // Assert
-    var receipts = await _dbContext.Receipts.ToListAsync();
-    Assert.Single(receipts);
-    var receipt = receipts[0];
-    Assert.Equal(request.ReceiptNo, receipt.ReceiptNo);
+    Assert.Multiple(async () =>
+    {
+      var receipts = await _dbContext.Receipts.ToListAsync();
+      Assert.Single(receipts);
+      var receipt = receipts[0];
+      Assert.Equal(request.ReceiptNo, receipt.ReceiptNo);
+    });
   }
 }
