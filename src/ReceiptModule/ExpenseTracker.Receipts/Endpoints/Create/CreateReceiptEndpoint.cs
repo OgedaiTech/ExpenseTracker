@@ -1,15 +1,12 @@
-using ExpenseTracker.Receipts.UseCases;
 using FastEndpoints;
-using MediatR;
 using Microsoft.AspNetCore.Http;
 
 namespace ExpenseTracker.Receipts.Endpoints.Create;
 
 internal class CreateReceiptEndpoint(
-  ICreateReceiptService createReceiptService,
-  IMediator mediator) : Endpoint<CreateReceiptRequest>
+  ICreateReceiptService createReceiptService) : Endpoint<CreateReceiptRequest>
 {
-  override public void Configure()
+  public override void Configure()
   {
     Post("/receipts");
     AllowAnonymous();
@@ -20,26 +17,17 @@ internal class CreateReceiptEndpoint(
     var serviceResult = await createReceiptService.CreateReceiptAsync(request, ct);
     if (!serviceResult.Success)
     {
-      var problem = Results.Problem(
-        title: "Invalid request",
-        detail: serviceResult.Message,
-        statusCode: StatusCodes.Status400BadRequest,
-        instance: HttpContext.Request.Path);
-      await Send.ResultAsync(problem);
+      var result = serviceResult.Message switch
+      {
+        ServiceConstants.CANT_ADD_AMOUNT_TO_EXPENSE
+          => Results.Problem(serviceResult.Message, statusCode: StatusCodes.Status400BadRequest),
+        _ => Results.Problem("Invalid Request", statusCode: StatusCodes.Status400BadRequest)
+      };
+
+      await Send.ResultAsync(result);
       return;
     }
-    var command = new AddAmountToExpenseCommand(request.ExpenseId, request.Amount);
-    var increseAmountResult = await mediator.Send(command, ct);
-    if (!increseAmountResult.Success)
-    {
-      var problem = Results.Problem(
-        title: "Could not add amount to expense",
-        detail: increseAmountResult.Message,
-        statusCode: StatusCodes.Status400BadRequest,
-        instance: HttpContext.Request.Path);
-      await Send.ResultAsync(problem);
-      return;
-    }
+
     await Send.CreatedAtAsync("receipts", cancellation: ct);
   }
 }
