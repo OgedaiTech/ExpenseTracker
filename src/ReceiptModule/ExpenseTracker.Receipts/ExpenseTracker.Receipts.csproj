@@ -19,4 +19,8 @@
     <ProjectReference Include="../../ExpenseModule/ExpenseTracker.Expenses.Contracts/ExpenseTracker.Expenses.Contracts.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="ExpenseTracker.Receipts.Tests" />
+  </ItemGroup>
+
 </Project>
