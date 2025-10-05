@@ -17,6 +17,7 @@ var migrations = builder.AddProject<ExpenseTracker_MigrationService>("migration"
 
 builder
   .AddProject<ExpenseTracker_WebAPI>("webapi")
+  .WithHttpHealthCheck("/health")
   .WithReference(postgresDb)
   .WithReference(migrations)
   .WaitForCompletion(migrations);
