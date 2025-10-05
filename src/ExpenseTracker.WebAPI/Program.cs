@@ -33,6 +33,7 @@ public partial class Program
     builder.Services.AddMediatR(cfg =>
     {
       cfg.RegisterServicesFromAssemblies(mediatRAssemblies.ToArray());
+      cfg.LicenseKey = builder.Configuration["MediatR:LicenseKey"];
     });
 
     var app = builder.Build();

@@ -11,6 +11,8 @@ on:
 jobs:
   build:
     name: dotnet-build
+    env:
+      MediatR__LicenseKey: ${{ secrets.MEDIATR_LICENSE_KEY }}
     runs-on: ubuntu-latest
 
     steps:
