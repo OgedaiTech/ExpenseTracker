@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using ExpenseTracker.Expenses.Data;
 using ExpenseTracker.Receipts.Data;
+using ExpenseTracker.Tenants.Data;
 using Microsoft.EntityFrameworkCore;
 
 namespace ExpenseTracker.MigrationService;
@@ -24,6 +25,9 @@ public class Worker(
 
       var receiptDbContext = scope.ServiceProvider.GetRequiredService<ReceiptDbContext>();
       await RunMigrationForReceiptDbAsync(receiptDbContext, stoppingToken);
+
+      var tenantDbContext = scope.ServiceProvider.GetRequiredService<TenantDbContext>();
+      await RunMigrationForTenantDbAsync(tenantDbContext, stoppingToken);
     }
     catch (Exception ex)
     {
@@ -45,6 +49,16 @@ public class Worker(
   }
 
   private static async Task RunMigrationForReceiptDbAsync(ReceiptDbContext dbContext, CancellationToken cancellationToken)
+  {
+    var strategy = dbContext.Database.CreateExecutionStrategy();
+    await strategy.ExecuteAsync(async () =>
+    {
+      // Run migration in a transaction to avoid partial migration if it fails.
+      await dbContext.Database.MigrateAsync(cancellationToken);
+    });
+  }
+
+  private static async Task RunMigrationForTenantDbAsync(TenantDbContext dbContext, CancellationToken cancellationToken)
   {
     var strategy = dbContext.Database.CreateExecutionStrategy();
     await strategy.ExecuteAsync(async () =>

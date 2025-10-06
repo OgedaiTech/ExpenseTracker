@@ -17,6 +17,7 @@
     <ProjectReference Include="../ExpenseModule/ExpenseTracker.Expenses/ExpenseTracker.Expenses.csproj" />
     <ProjectReference Include="../ExpenseTracker.ServiceDefaults/ExpenseTracker.ServiceDefaults.csproj" />
     <ProjectReference Include="../ReceiptModule/ExpenseTracker.Receipts/ExpenseTracker.Receipts.csproj" />
+    <ProjectReference Include="../TenantModule/ExpenseTracker.Tenants/ExpenseTracker.Tenants.csproj" />
   </ItemGroup>
 
 </Project>
