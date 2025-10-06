@@ -16,6 +16,7 @@
     <Project Path="src/ReceiptModule/ExpenseTracker.Receipts/ExpenseTracker.Receipts.csproj" />
   </Folder>
   <Folder Name="/src/TenantModule/">
+    <Project Path="src/TenantModule/ExpenseTracker.Tenants.Tests/ExpenseTracker.Tenants.Tests.csproj" />
     <Project Path="src/TenantModule/ExpenseTracker.Tenants/ExpenseTracker.Tenants.csproj" />
   </Folder>
 </Solution>

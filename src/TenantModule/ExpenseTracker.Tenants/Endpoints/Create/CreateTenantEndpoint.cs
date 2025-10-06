@@ -2,7 +2,7 @@ using FastEndpoints;
 
 namespace ExpenseTracker.Tenants.Endpoints.Create;
 
-internal class CreateReceiptEndpoint(
+internal class CreateTenantEndpoint(
   ICreateTenantService createTenantService) : Endpoint<CreateTenantRequest>
 {
   public override void Configure()
@@ -17,7 +17,7 @@ internal class CreateReceiptEndpoint(
 
     if (serviceResult.Success)
     {
-      await Send.CreatedAtAsync("receipts", cancellation: ct);
+      await Send.CreatedAtAsync("tenants", cancellation: ct);
     }
   }
 }
