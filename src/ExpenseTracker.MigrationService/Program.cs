@@ -1,6 +1,7 @@
 using ExpenseTracker.Expenses.Data;
 using ExpenseTracker.MigrationService;
 using ExpenseTracker.Receipts.Data;
+using ExpenseTracker.Tenants.Data;
 
 var builder = Host.CreateApplicationBuilder(args);
 
@@ -12,6 +13,7 @@ builder.Services.AddOpenTelemetry()
 
 builder.AddNpgsqlDbContext<ExpenseDbContext>("ExT");
 builder.AddNpgsqlDbContext<ReceiptDbContext>("ExT");
+builder.AddNpgsqlDbContext<TenantDbContext>("ExT");
 
 var host = builder.Build();
 host.Run();
