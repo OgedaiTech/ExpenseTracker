@@ -17,6 +17,8 @@ public partial class Program
 
     builder.Services.AddFastEndpoints();
 
+    builder.Services.AddHealthChecks();
+
     builder.AddNpgsqlDbContext<ExpenseDbContext>("ExT");
     builder.AddNpgsqlDbContext<ReceiptDbContext>("ExT");
 
@@ -46,6 +48,8 @@ public partial class Program
     app.UseHttpsRedirection();
 
     app.UseFastEndpoints();
+
+    app.MapHealthChecks("/health");
 
     app.Run();
   }
