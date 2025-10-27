@@ -5,6 +5,7 @@ using ExpenseTracker.Receipts;
 using ExpenseTracker.Receipts.Data;
 using ExpenseTracker.Tenants;
 using ExpenseTracker.Tenants.Data;
+using ExpenseTracker.Users;
 using FastEndpoints;
 
 namespace ExpenseTracker.WebAPI;
@@ -33,6 +34,7 @@ public partial class Program
     builder.Services.AddReceiptRepositories();
     builder.Services.AddTenantServices();
     builder.Services.AddTenantRepositories();
+    builder.Services.AddUserModuleServices();
 
     builder.Services.AddOpenApi();
 
