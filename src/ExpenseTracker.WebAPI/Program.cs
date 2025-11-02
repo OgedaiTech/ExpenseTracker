@@ -5,6 +5,8 @@ using ExpenseTracker.Receipts;
 using ExpenseTracker.Receipts.Data;
 using ExpenseTracker.Tenants;
 using ExpenseTracker.Tenants.Data;
+using ExpenseTracker.Users;
+using ExpenseTracker.Users.Data;
 using FastEndpoints;
 
 namespace ExpenseTracker.WebAPI;
@@ -24,6 +26,7 @@ public partial class Program
     builder.AddNpgsqlDbContext<ExpenseDbContext>("ExT");
     builder.AddNpgsqlDbContext<ReceiptDbContext>("ExT");
     builder.AddNpgsqlDbContext<TenantDbContext>("ExT");
+    builder.AddNpgsqlDbContext<UsersDbContext>("ExT");
 
     // Add Module Services and Repositories
     List<Assembly> mediatRAssemblies = [typeof(Program).Assembly];
@@ -33,6 +36,7 @@ public partial class Program
     builder.Services.AddReceiptRepositories();
     builder.Services.AddTenantServices();
     builder.Services.AddTenantRepositories();
+    builder.Services.AddUserModuleServices();
 
     builder.Services.AddOpenApi();
 
