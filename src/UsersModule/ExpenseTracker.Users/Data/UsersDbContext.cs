@@ -6,6 +6,7 @@ namespace ExpenseTracker.Users.Data;
 
 public class UsersDbContext : IdentityDbContext
 {
+  public UsersDbContext() { }
   public UsersDbContext(DbContextOptions<UsersDbContext> options)
       : base(options)
   {
