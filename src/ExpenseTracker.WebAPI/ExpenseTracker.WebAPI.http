@@ -22,3 +22,13 @@ Content-Type: application/json
   "vendor": "Restaurant"
 }
 ###
+
+POST {{ExpenseTracker.WebAPI_HostAddress}}/users/
+Accept: application/json
+Content-Type: application/json
+
+{
+  "email": "aaa@fff.com",
+  "password": "P@ssw0rd!"
+}
+###
