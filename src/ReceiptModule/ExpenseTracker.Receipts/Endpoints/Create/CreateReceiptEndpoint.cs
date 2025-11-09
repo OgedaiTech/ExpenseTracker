@@ -9,7 +9,7 @@ internal class CreateReceiptEndpoint(
   public override void Configure()
   {
     Post("/receipts");
-    AllowAnonymous();
+    Claims("EmailAddress");
   }
 
   public override async Task HandleAsync(CreateReceiptRequest request, CancellationToken ct)
