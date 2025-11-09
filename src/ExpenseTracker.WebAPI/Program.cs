@@ -8,6 +8,7 @@ using ExpenseTracker.Tenants.Data;
 using ExpenseTracker.Users;
 using ExpenseTracker.Users.Data;
 using FastEndpoints;
+using FastEndpoints.Security;
 
 namespace ExpenseTracker.WebAPI;
 
@@ -19,7 +20,12 @@ public partial class Program
 
     builder.AddServiceDefaults();
 
-    builder.Services.AddFastEndpoints();
+    builder.Services.AddFastEndpoints()
+      .AddAuthenticationJwtBearer(options =>
+      {
+        options.SigningKey = builder.Configuration["Auth:JwtSecret"];
+      })
+      .AddAuthorization();
 
     builder.Services.AddHealthChecks();
 
@@ -55,6 +61,9 @@ public partial class Program
     }
 
     app.UseHttpsRedirection();
+
+    app.UseAuthentication()
+       .UseAuthorization();
 
     app.UseFastEndpoints();
 

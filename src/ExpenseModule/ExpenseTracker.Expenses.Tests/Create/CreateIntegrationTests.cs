@@ -1,18 +1,11 @@
 using System.Net.Http.Json;
 using ExpenseTracker.Expenses.Endpoints.Create;
 using ExpenseTracker.Expenses.Tests.Abstractions;
-using Microsoft.EntityFrameworkCore;
 
 namespace ExpenseTracker.Expenses.Tests.Create;
 
-public class CreateIntegrationTests : BaseIntegrationTest
+public class CreateIntegrationTests(IntegrationTestWebAppFactory factory) : BaseIntegrationTest(factory)
 {
-  public CreateIntegrationTests(IntegrationTestWebAppFactory factory)
-    : base(factory)
-  {
-
-  }
-
   [Fact]
   public async Task CreateExpenseShouldReturnCreatedExpenseAsync()
   {

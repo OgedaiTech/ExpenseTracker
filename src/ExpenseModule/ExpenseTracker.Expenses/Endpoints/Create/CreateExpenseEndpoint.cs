@@ -6,10 +6,10 @@ namespace ExpenseTracker.Expenses.Endpoints.Create;
 internal class CreateExpenseEndpoint
   (ICreateExpenseService createExpenseService) : Endpoint<CreateExpenseRequest>
 {
-  override public void Configure()
+  public override void Configure()
   {
     Post("/expenses");
-    AllowAnonymous();
+    Claims("EmailAddress");
   }
 
   public override async Task HandleAsync(CreateExpenseRequest request, CancellationToken ct)
