@@ -21,7 +21,6 @@
 
   <ItemGroup>
     <ProjectReference Include="../../ExpenseTracker.Core/ExpenseTracker.Core.csproj" />
-    <ProjectReference Include="../../ExpenseTracker.ServiceDefaults/ExpenseTracker.ServiceDefaults.csproj" />
   </ItemGroup>
 
 </Project>
