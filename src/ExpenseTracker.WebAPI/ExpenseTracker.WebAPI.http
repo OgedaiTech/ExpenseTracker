@@ -14,6 +14,7 @@ Authorization: Bearer {{login.response.body.$.token}}
 POST {{ExpenseTracker.WebAPI_HostAddress}}/receipts/
 Accept: application/json
 Content-Type: application/json
+Authorization: Bearer {{login.response.body.$.token}}
 
 {
   "expenseId": "0199ab41-b472-7b24-b543-b596286b5ec0",
