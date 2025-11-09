@@ -1,6 +1,7 @@
 using ExpenseTracker.Receipts.Data;
 using ExpenseTracker.WebAPI;
 using MediatR;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
@@ -29,6 +30,12 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
       {
         options.UseNpgsql(_dbContainer.GetConnectionString());
       });
+      services.AddAuthentication(options =>
+            {
+              options.DefaultAuthenticateScheme = TestAuthHandler.SchemeName;
+              options.DefaultChallengeScheme = TestAuthHandler.SchemeName;
+            }).AddScheme<AuthenticationSchemeOptions, TestAuthHandler>(
+                TestAuthHandler.SchemeName, _ => { });
 
       // Mock MediatR
       services.AddSingleton<IMediator, TestMediator>();
