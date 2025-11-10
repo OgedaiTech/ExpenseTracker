@@ -33,6 +33,7 @@ internal class Login(UserManager<ApplicationUser> userManager) : Endpoint<UserLo
     {
       options.SigningKey = jwtSecret;
       options.User["EmailAddress"] = user.Email!;
+      options.User["UserId"] = user.Id;
     });
 
     await Send.OkAsync(new { Token = token }, ct);

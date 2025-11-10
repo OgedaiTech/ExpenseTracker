@@ -15,7 +15,11 @@ public class TestAuthHandler(
 
   protected override Task<AuthenticateResult> HandleAuthenticateAsync()
   {
-    var claims = new[] { new Claim("EmailAddress", "test@example.com") };
+    var claims = new[]
+    {
+      new Claim("EmailAddress", "test@example.com"),
+      new Claim("UserId", Guid.Empty.ToString())
+    };
     var identity = new ClaimsIdentity(claims, SchemeName);
     var principal = new ClaimsPrincipal(identity);
     var ticket = new AuthenticationTicket(principal, SchemeName);

@@ -10,11 +10,12 @@ public class CreateExpenseRepository : ICreateExpenseRepository
   {
     _dbContext = dbContext;
   }
-  public Task CreateExpenseAsync(string name, CancellationToken cancellationToken)
+  public Task CreateExpenseAsync(string name, string userId, CancellationToken cancellationToken)
   {
     _dbContext.Expenses.Add(new Expense
     {
       Name = name,
+      CreatedByUserId = Guid.Parse(userId),
       CreatedAt = DateTime.UtcNow
     });
     return _dbContext.SaveChangesAsync();
