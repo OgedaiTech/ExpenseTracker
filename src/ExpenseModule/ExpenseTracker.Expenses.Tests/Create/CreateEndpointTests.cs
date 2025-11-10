@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using ExpenseTracker.Core;
 using ExpenseTracker.Expenses.Endpoints.Create;
 using FastEndpoints;
@@ -11,6 +12,7 @@ public class CreateEndpointTests
 {
   private readonly Mock<ICreateExpenseService> _createExpenseService = new();
   private readonly CreateExpenseEndpoint _endpoint;
+  private readonly string _userId = "test-user-id";
   public CreateEndpointTests()
   {
 
@@ -22,6 +24,9 @@ public class CreateEndpointTests
       services.AddSingleton(_createExpenseService.Object);
     });
 
+    var claims = new[] { new Claim("UserId", _userId) };
+    var identity = new ClaimsIdentity(claims, "test");
+    httpContext.User = new ClaimsPrincipal(identity);
     _endpoint = Factory.Create<CreateExpenseEndpoint>(httpContext);
   }
 
@@ -32,7 +37,7 @@ public class CreateEndpointTests
     var request = new CreateExpenseRequest { Name = "Test Expense" };
     var ct = CancellationToken.None;
     _createExpenseService
-        .Setup(s => s.CreateExpenseAsync("Test Expense", ct))
+        .Setup(s => s.CreateExpenseAsync("Test Expense", _userId, ct))
         .ReturnsAsync(new ServiceResult());
 
     // Act
@@ -40,7 +45,7 @@ public class CreateEndpointTests
 
     // Assert
     _createExpenseService.Verify(
-        s => s.CreateExpenseAsync("Test Expense", ct),
+        s => s.CreateExpenseAsync("Test Expense", _userId, ct),
         Times.Once);
   }
 
@@ -51,7 +56,7 @@ public class CreateEndpointTests
     var request = new CreateExpenseRequest { Name = "" };
     var ct = CancellationToken.None;
     _createExpenseService
-        .Setup(s => s.CreateExpenseAsync("", ct))
+        .Setup(s => s.CreateExpenseAsync("", _userId, ct))
         .ReturnsAsync(new ServiceResult("Expense name cannot be empty."));
 
     // Act
@@ -59,7 +64,7 @@ public class CreateEndpointTests
 
     // Assert
     _createExpenseService.Verify(
-        s => s.CreateExpenseAsync("", ct),
+        s => s.CreateExpenseAsync("", _userId, ct),
         Times.Once);
     Assert.Equal(400, _endpoint.HttpContext.Response.StatusCode);
   }

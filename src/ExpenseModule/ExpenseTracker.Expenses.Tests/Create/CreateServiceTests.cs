@@ -7,6 +7,7 @@ public class CreateServiceTests
 {
   private ICreateExpenseRepository _repository { get; set; }
   private CreateExpenseService _service { get; set; }
+  private readonly string _userId = "test-user-id";
   public CreateServiceTests()
   {
     _repository = Mock.Of<ICreateExpenseRepository>();
@@ -19,15 +20,15 @@ public class CreateServiceTests
     // Arrange
     var expenseName = "Sample Expense";
     Mock.Get(_repository)
-      .Setup(r => r.CreateExpenseAsync(expenseName, It.IsAny<CancellationToken>()))
+      .Setup(r => r.CreateExpenseAsync(expenseName, _userId, It.IsAny<CancellationToken>()))
       .Returns(Task.CompletedTask);
 
     // Act
-    await _service.CreateExpenseAsync(expenseName, CancellationToken.None);
+    await _service.CreateExpenseAsync(expenseName, _userId, CancellationToken.None);
 
     // Assert
     Mock.Get(_repository)
-      .Verify(r => r.CreateExpenseAsync(expenseName, It.IsAny<CancellationToken>()), Times.Once);
+      .Verify(r => r.CreateExpenseAsync(expenseName, _userId, It.IsAny<CancellationToken>()), Times.Once);
   }
 
   [Fact]
@@ -37,7 +38,7 @@ public class CreateServiceTests
     var emptyName = "   ";  // String with only whitespace
 
     // Act
-    var result = await _service.CreateExpenseAsync(emptyName, CancellationToken.None);
+    var result = await _service.CreateExpenseAsync(emptyName, _userId, CancellationToken.None);
 
     // Assert
     Assert.Multiple(() =>
@@ -54,7 +55,7 @@ public class CreateServiceTests
     var longName = new string('a', 129);  // String with 129 characters
 
     // Act
-    var result = await _service.CreateExpenseAsync(longName, CancellationToken.None);
+    var result = await _service.CreateExpenseAsync(longName, _userId, CancellationToken.None);
 
     // Assert
     Assert.Multiple(() =>
