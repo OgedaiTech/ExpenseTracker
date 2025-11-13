@@ -24,6 +24,12 @@ Authorization: Bearer {{login.response.body.$.token}}
   "vendor": "Restaurant"
 }
 ###
+@ExpenseId = 0199ab41-b472-7b24-b543-b596286b5ec0
+GET {{ExpenseTracker.WebAPI_HostAddress}}/expenses/{{ExpenseId}}/receipts
+Accept: application/json
+Authorization: Bearer {{login.response.body.$.token}}
+
+###
 
 POST {{ExpenseTracker.WebAPI_HostAddress}}/users/
 Accept: application/json
