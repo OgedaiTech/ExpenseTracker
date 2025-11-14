@@ -27,7 +27,7 @@ public class ListExpenseReceiptIntegrationTests(
   public async Task ReturnsUnauthorizedIfUserNotAuthenticatedAsync()
   {
     // Arrange
-    Client.DefaultRequestHeaders.Add("No-Auth", "true");
+    SetNoAuthentication();
     var expenseId = Guid.NewGuid();
     var request = new HttpRequestMessage(
       HttpMethod.Get,

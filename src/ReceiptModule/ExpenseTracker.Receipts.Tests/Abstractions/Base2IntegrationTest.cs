@@ -50,4 +50,9 @@ public class Base2IntegrationTest : IClassFixture<CustomWebApplicationFactory>, 
   {
     Dispose(false);
   }
+
+  protected void SetNoAuthentication()
+  {
+    Client.DefaultRequestHeaders.Add("No-Auth", "true");
+  }
 }
