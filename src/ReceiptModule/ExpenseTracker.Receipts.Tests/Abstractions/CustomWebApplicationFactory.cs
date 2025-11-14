@@ -1,4 +1,5 @@
 using ExpenseTracker.Receipts.Data;
+using ExpenseTracker.WebAPI;
 using MediatR;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Hosting;
@@ -11,9 +12,8 @@ using Testcontainers.PostgreSql;
 
 namespace ExpenseTracker.Receipts.Tests.Abstractions;
 
-public class CustomWebApplicationFactory<TProgram>
-  : WebApplicationFactory<TProgram>, IAsyncLifetime
-  where TProgram : class
+public class CustomWebApplicationFactory
+  : WebApplicationFactory<Program>, IAsyncLifetime
 {
   private readonly PostgreSqlContainer _dbContainer = new PostgreSqlBuilder()
     .WithImage("postgres:latest")

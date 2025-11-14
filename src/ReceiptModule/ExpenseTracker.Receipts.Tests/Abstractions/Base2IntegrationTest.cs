@@ -1,18 +1,17 @@
 using ExpenseTracker.Receipts.Data;
-using ExpenseTracker.WebAPI;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace ExpenseTracker.Receipts.Tests.Abstractions;
 
-public class Base2IntegrationTest : IClassFixture<CustomWebApplicationFactory<Program>>, IDisposable
+public class Base2IntegrationTest : IClassFixture<CustomWebApplicationFactory>, IDisposable
 {
   private readonly IServiceScope _scope;
   protected ReceiptDbContext DbContext;
   protected HttpClient Client;
   private bool _disposed = false;
 
-  protected Base2IntegrationTest(CustomWebApplicationFactory<Program> factory)
+  protected Base2IntegrationTest(CustomWebApplicationFactory factory)
   {
     _scope = factory.Services.CreateScope();
     Client = factory.CreateClient();

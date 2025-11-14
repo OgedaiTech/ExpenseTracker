@@ -1,12 +1,11 @@
 using System.Net;
 using ExpenseTracker.Receipts.Tests.Abstractions;
-using ExpenseTracker.WebAPI;
 
 namespace ExpenseTracker.Receipts.Tests.ListExpenseReceipts;
 
 public class ListExpenseReceiptIntegrationTests(
-  CustomWebApplicationFactory<Program> factory)
-    : Base2IntegrationTest(factory), IClassFixture<CustomWebApplicationFactory<Program>>
+  CustomWebApplicationFactory factory)
+    : Base2IntegrationTest(factory), IClassFixture<CustomWebApplicationFactory>
 {
   [Fact]
   public async Task ReturnsOkWithReceiptsWhenUserAuthenticatedAsync()
