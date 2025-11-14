@@ -12,7 +12,8 @@ using Testcontainers.PostgreSql;
 
 namespace ExpenseTracker.Receipts.Tests.Abstractions;
 
-public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsyncLifetime
+public class IntegrationTestWebAppFactory
+  : WebApplicationFactory<Program>, IAsyncLifetime
 {
   private readonly PostgreSqlContainer _dbContainer = new PostgreSqlBuilder()
     .WithImage("postgres:latest")
@@ -21,34 +22,37 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
     .WithPassword("postgres")
     .Build();
 
-  protected override void ConfigureWebHost(IWebHostBuilder builder)
+  protected override void ConfigureWebHost(
+    IWebHostBuilder builder)
   {
     builder.ConfigureTestServices(services =>
     {
-      services.RemoveAll(typeof(DbContextOptions<ReceiptDbContext>));
+      services.RemoveAll<DbContextOptions<ReceiptDbContext>>();
       services.AddDbContextPool<ReceiptDbContext>(options =>
       {
         options.UseNpgsql(_dbContainer.GetConnectionString());
       });
+
       services.AddAuthentication(options =>
-            {
-              options.DefaultAuthenticateScheme = TestAuthHandler.SchemeName;
-              options.DefaultChallengeScheme = TestAuthHandler.SchemeName;
-            }).AddScheme<AuthenticationSchemeOptions, TestAuthHandler>(
-                TestAuthHandler.SchemeName, _ => { });
+      {
+        options.DefaultAuthenticateScheme = TestAuthHandler.SchemeName;
+        options.DefaultChallengeScheme = TestAuthHandler.SchemeName;
+      }).AddScheme<AuthenticationSchemeOptions, TestAuthHandler>(
+          TestAuthHandler.SchemeName, _ => { });
+
 
       // Mock MediatR
       services.AddSingleton<IMediator, TestMediator>();
     });
   }
 
-  public async Task InitializeAsync()
+  public Task InitializeAsync()
   {
-    await _dbContainer.StartAsync();
+    return _dbContainer.StartAsync();
   }
 
-  async Task IAsyncLifetime.DisposeAsync()
+  Task IAsyncLifetime.DisposeAsync()
   {
-    await _dbContainer.StopAsync();
+    return _dbContainer.StopAsync();
   }
 }

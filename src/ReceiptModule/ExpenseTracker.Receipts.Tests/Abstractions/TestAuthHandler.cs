@@ -20,6 +20,9 @@ public class TestAuthHandler(
     var principal = new ClaimsPrincipal(identity);
     var ticket = new AuthenticationTicket(principal, SchemeName);
 
+    if (Request.Headers.ContainsKey("No-Auth"))
+      return Task.FromResult(AuthenticateResult.Fail("No header"));
+
     return Task.FromResult(AuthenticateResult.Success(ticket));
   }
 }
