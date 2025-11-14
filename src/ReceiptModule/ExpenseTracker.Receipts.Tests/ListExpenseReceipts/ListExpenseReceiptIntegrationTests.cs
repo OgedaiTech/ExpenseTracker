@@ -4,20 +4,28 @@ using ExpenseTracker.Receipts.Tests.Abstractions;
 namespace ExpenseTracker.Receipts.Tests.ListExpenseReceipts;
 
 public class ListExpenseReceiptIntegrationTests(
-  CustomWebApplicationFactory factory)
-    : Base2IntegrationTest(factory), IClassFixture<CustomWebApplicationFactory>
+  IntegrationTestWebAppFactory factory)
+    : BaseIntegrationTest(factory), IClassFixture<IntegrationTestWebAppFactory>
 {
   [Fact]
-  public async Task ReturnsOkWithReceiptsWhenUserAuthenticatedAsync()
+  public async Task ReturnsOkWithReceiptsAsync()
   {
     // Arrange
+    await ResetDatabaseAsync();
     var expenseId = Guid.NewGuid();
-    var request = new HttpRequestMessage(
-      HttpMethod.Get,
-      $"/expenses/{expenseId}/receipts");
+    DbContext.Receipts.Add(new()
+    {
+      Id = Guid.NewGuid(),
+      ExpenseId = expenseId,
+      Amount = 50,
+      ReceiptNo = "R-50",
+      Vendor = "Vendor A",
+      Date = DateTime.UtcNow
+    });
+    await DbContext.SaveChangesAsync();
 
     // Act
-    var response = await Client.SendAsync(request);
+    var response = await Client.GetAsync($"/expenses/{expenseId}/receipts");
 
     // Assert
     Assert.Equal(HttpStatusCode.OK, response.StatusCode);
@@ -29,12 +37,9 @@ public class ListExpenseReceiptIntegrationTests(
     // Arrange
     SetNoAuthentication();
     var expenseId = Guid.NewGuid();
-    var request = new HttpRequestMessage(
-      HttpMethod.Get,
-      $"/expenses/{expenseId}/receipts");
 
     // Act
-    var response = await Client.SendAsync(request);
+    var response = await Client.GetAsync($"/expenses/{expenseId}/receipts");
 
     // Assert
     Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);

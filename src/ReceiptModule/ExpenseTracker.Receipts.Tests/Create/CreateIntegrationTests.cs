@@ -5,14 +5,9 @@ using ExpenseTracker.Receipts.Tests.Abstractions;
 
 namespace ExpenseTracker.Receipts.Tests.Create;
 
-public class CreateIntegrationTests : BaseIntegrationTest
+public class CreateIntegrationTests(
+  IntegrationTestWebAppFactory factory) : BaseIntegrationTest(factory), IClassFixture<IntegrationTestWebAppFactory>
 {
-  public CreateIntegrationTests(IntegrationTestWebAppFactory factory)
-    : base(factory)
-  {
-
-  }
-
   [Fact]
   public async Task CreateReceiptShouldReturnCreatedReceiptAsync()
   {
