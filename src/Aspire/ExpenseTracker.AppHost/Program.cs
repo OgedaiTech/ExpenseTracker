@@ -10,8 +10,8 @@ var postgresDbServer = builder
   .WithUserName(userName)
   .WithPassword(password)
   .WithHostPort(53096)
-  .WithDataVolume()
-  .WithPgAdmin(configureContainer: p => p.WithImageTag("9.9"));
+  .WithDataVolume(name: "pgdata-expensetracker")
+  .WithPgAdmin(configureContainer: p => p.WithImageTag("9.10"));
 var postgresDb = postgresDbServer.AddDatabase("ExT");
 
 var migrations = builder.AddProject<ExpenseTracker_MigrationService>("migration")

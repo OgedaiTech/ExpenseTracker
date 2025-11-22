@@ -17,14 +17,14 @@ Content-Type: application/json
 Authorization: Bearer {{login.response.body.$.token}}
 
 {
-  "expenseId": "0199ab41-b472-7b24-b543-b596286b5ec0",
+  "expenseId": "019aa7b8-d04a-73ca-9b95-707dffb5a0a6",
   "amount": 20,
   "date": "2024-06-20T12:00:00Z",
   "receiptNo": "R123456",
   "vendor": "Restaurant"
 }
 ###
-@ExpenseId = 0199ab41-b472-7b24-b543-b596286b5ec0
+@ExpenseId = 019aa7b8-d04a-73ca-9b95-707dffb5a0a6
 GET {{ExpenseTracker.WebAPI_HostAddress}}/expenses/{{ExpenseId}}/receipts
 Accept: application/json
 Authorization: Bearer {{login.response.body.$.token}}
@@ -36,7 +36,7 @@ Accept: application/json
 Content-Type: application/json
 
 {
-  "email": "aaa@fff.com",
+  "email": "test@test.com",
   "password": "P@ssw0rd!"
 }
 ###
@@ -47,7 +47,7 @@ Accept: application/json
 Content-Type: application/json
 
 {
-  "email": "aaa@fff.com",
+  "email": "test@test.com",
   "password": "P@ssw0rd!"
 }
 ###
