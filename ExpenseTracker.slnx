@@ -1,9 +1,7 @@
 <Solution>
-  <Folder Name="/src/">
-    <Project Path="src/ExpenseTracker.AppHost/ExpenseTracker.AppHost.csproj" />
+  <Folder Name="/src/">    
     <Project Path="src/ExpenseTracker.Core/ExpenseTracker.Core.csproj" />
-    <Project Path="src/ExpenseTracker.MigrationService/ExpenseTracker.MigrationService.csproj" />
-    <Project Path="src/ExpenseTracker.ServiceDefaults/ExpenseTracker.ServiceDefaults.csproj" />
+    <Project Path="src/ExpenseTracker.MigrationService/ExpenseTracker.MigrationService.csproj" />   
     <Project Path="src/ExpenseTracker.WebAPI/ExpenseTracker.WebAPI.csproj" />
   </Folder>
   <Folder Name="/src/ExpenseModule/">
@@ -22,5 +20,9 @@
   <Folder Name="/src/UsersModule/">
     <Project Path="src/UsersModule/ExpenseTracker.Users.Tests/ExpenseTracker.Users.Tests.csproj" />
     <Project Path="src/UsersModule/ExpenseTracker.Users/ExpenseTracker.Users.csproj" />
+  </Folder>
+  <Folder Name="/src/Aspire/">
+    <Project Path="src/Aspire/ExpenseTracker.AppHost/ExpenseTracker.AppHost.csproj" />
+    <Project Path="src/Aspire/ExpenseTracker.ServiceDefaults/ExpenseTracker.ServiceDefaults.csproj" />
   </Folder>
 </Solution>
