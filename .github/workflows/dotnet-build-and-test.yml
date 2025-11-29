@@ -13,6 +13,7 @@ jobs:
     name: dotnet-build
     env:
       MediatR__LicenseKey: ${{ secrets.MEDIATR_LICENSE_KEY }}
+      AdminUser__Password: ${{ secrets.ADMINUSER_PASSWORD }}
     runs-on: ubuntu-latest
 
     steps:
