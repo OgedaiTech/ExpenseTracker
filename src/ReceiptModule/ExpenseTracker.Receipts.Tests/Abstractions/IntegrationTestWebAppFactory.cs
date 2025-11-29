@@ -25,6 +25,7 @@ public class IntegrationTestWebAppFactory
   protected override void ConfigureWebHost(
     IWebHostBuilder builder)
   {
+    builder.UseEnvironment("Test");
     builder.ConfigureTestServices(services =>
     {
       services.RemoveAll<DbContextOptions<ReceiptDbContext>>();

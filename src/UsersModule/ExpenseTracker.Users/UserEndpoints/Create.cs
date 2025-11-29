@@ -8,7 +8,7 @@ internal class Create(UserManager<ApplicationUser> userManager) : Endpoint<Creat
   public override void Configure()
   {
     Post("/users");
-    AllowAnonymous();
+    Roles("SystemAdmin", "TenantAdmin");
   }
 
   public override async Task HandleAsync(CreateUserRequest req, CancellationToken ct)

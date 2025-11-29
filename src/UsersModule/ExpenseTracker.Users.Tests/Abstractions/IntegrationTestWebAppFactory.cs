@@ -1,5 +1,6 @@
 using ExpenseTracker.Users.Data;
 using ExpenseTracker.WebAPI;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
@@ -21,13 +22,21 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
 
   protected override void ConfigureWebHost(IWebHostBuilder builder)
   {
+    builder.UseEnvironment("Test");
     builder.ConfigureTestServices(services =>
     {
-      services.RemoveAll(typeof(DbContextOptions<UsersDbContext>));
+      services.RemoveAll<DbContextOptions<UsersDbContext>>();
       services.AddDbContextPool<UsersDbContext>(options =>
       {
         options.UseNpgsql(_dbContainer.GetConnectionString());
       });
+
+      services.AddAuthentication(options =>
+      {
+        options.DefaultAuthenticateScheme = TestAuthHandler.SchemeName;
+        options.DefaultChallengeScheme = TestAuthHandler.SchemeName;
+      }).AddScheme<AuthenticationSchemeOptions, TestAuthHandler>(
+          TestAuthHandler.SchemeName, _ => { });
     });
   }
 

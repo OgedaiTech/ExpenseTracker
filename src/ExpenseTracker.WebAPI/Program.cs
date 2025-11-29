@@ -14,7 +14,7 @@ namespace ExpenseTracker.WebAPI;
 
 public partial class Program
 {
-  private static void Main(string[] args)
+  private static async Task Main(string[] args)
   {
     var builder = WebApplication.CreateBuilder(args);
 
@@ -49,7 +49,7 @@ public partial class Program
     // Set Mediatr
     builder.Services.AddMediatR(cfg =>
     {
-      cfg.RegisterServicesFromAssemblies(mediatRAssemblies.ToArray());
+      cfg.RegisterServicesFromAssemblies([.. mediatRAssemblies]);
       cfg.LicenseKey = builder.Configuration["MediatR:LicenseKey"];
     });
 
@@ -67,9 +67,16 @@ public partial class Program
 
     app.UseFastEndpoints();
 
+    // Seed Data
+    if (!app.Environment.IsEnvironment("Test"))
+    {
+      using var scope = app.Services.CreateScope();
+      await SeedData.InitiliazeAsync(scope.ServiceProvider, builder.Configuration);
+    }
+
     app.MapHealthChecks("/health");
 
-    app.Run();
+    await app.RunAsync();
   }
 }
 public partial class Program { }

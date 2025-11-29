@@ -21,6 +21,7 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
 
   protected override void ConfigureWebHost(IWebHostBuilder builder)
   {
+    builder.UseEnvironment("Test");
     builder.ConfigureTestServices(services =>
     {
       services.RemoveAll(typeof(DbContextOptions<TenantDbContext>));
