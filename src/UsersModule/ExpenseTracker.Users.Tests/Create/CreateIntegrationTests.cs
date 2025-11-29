@@ -12,7 +12,7 @@ public class CreateIntegrationTests(IntegrationTestWebAppFactory factory) : Base
   {
     // Arrange
     await ResetDatabaseAsync();
-    var request = new CreateUserRequest("test@email.com", "Password123!");
+    var request = new CreateUserRequest("test@email.com", "Password123!", null);
 
     // Act
     var response = await Client.PostAsJsonAsync("/users", request);

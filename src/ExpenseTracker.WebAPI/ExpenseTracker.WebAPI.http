@@ -36,8 +36,9 @@ Accept: application/json
 Content-Type: application/json
 
 {
-  "email": "test@test.com",
-  "password": "P@ssw0rd!"
+  "email": "test1+tt@test.com",
+  "password": "P@ssw0rd!",
+  "tenantId": "b3e1f5c2-8c4d-4e2a-9f3b-1a2b3c4d5e6f"
 }
 ###
 
@@ -47,7 +48,7 @@ Accept: application/json
 Content-Type: application/json
 
 {
-  "email": "test@test.com",
+  "email": "test1+tt@test.com",
   "password": "P@ssw0rd!"
 }
 ###
