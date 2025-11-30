@@ -1,5 +1,3 @@
-using System;
-
 namespace ExpenseTracker.Tenants.Endpoints.Create;
 
 public class CreateTenantRequest

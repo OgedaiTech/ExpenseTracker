@@ -26,7 +26,7 @@ public class CreateServiceTests
     };
     Mock.Get(_repository)
       .Setup(r => r.CreateTenantAsync(request, It.IsAny<CancellationToken>()))
-      .Returns(Task.CompletedTask);
+      .Returns(Task.FromResult(Guid.Empty));
 
     // Act
     await _service.CreateTenantAsync(request, CancellationToken.None);

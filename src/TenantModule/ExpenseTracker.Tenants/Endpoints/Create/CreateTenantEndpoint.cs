@@ -8,7 +8,7 @@ internal class CreateTenantEndpoint(
   public override void Configure()
   {
     Post("/tenants");
-    AllowAnonymous();
+    Roles("SystemAdmin");
   }
 
   public override async Task HandleAsync(CreateTenantRequest request, CancellationToken ct)
