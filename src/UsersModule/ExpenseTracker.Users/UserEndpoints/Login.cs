@@ -29,11 +29,13 @@ internal class Login(UserManager<ApplicationUser> userManager) : Endpoint<UserLo
     }
 
     var jwtSecret = Config["Auth:JwtSecret"]!;
+    var roles = await userManager.GetRolesAsync(user);
     var token = JwtBearer.CreateToken(options =>
     {
       options.SigningKey = jwtSecret;
       options.User["EmailAddress"] = user.Email!;
       options.User["UserId"] = user.Id;
+      options.User.Roles.AddRange(roles);
     });
 
     await Send.OkAsync(new { Token = token }, ct);

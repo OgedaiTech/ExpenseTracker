@@ -1,10 +1,11 @@
 using ExpenseTracker.Tenants.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace ExpenseTracker.Tenants.Endpoints.Create;
 
 public class CreateTenantRepository(TenantDbContext tenantDbContext) : ICreateTenantRepository
 {
-  public Task CreateTenantAsync(CreateTenantRequest createTenantRequest, CancellationToken ct)
+  public async Task<Guid> CreateTenantAsync(CreateTenantRequest createTenantRequest, CancellationToken ct)
   {
     tenantDbContext.Tenants.Add(new Tenant
     {
@@ -13,6 +14,13 @@ public class CreateTenantRepository(TenantDbContext tenantDbContext) : ICreateTe
       Description = createTenantRequest.Description,
       Domain = createTenantRequest.Domain
     });
-    return tenantDbContext.SaveChangesAsync(ct);
+    await tenantDbContext.SaveChangesAsync(ct);
+    var tenant = await tenantDbContext.Tenants.FirstOrDefaultAsync(t => t.Code == createTenantRequest.Code, ct);
+    return tenant!.Id;
+  }
+
+  public Task<bool> TenantExistsAsync(string code)
+  {
+    return tenantDbContext.Tenants.AnyAsync(t => t.Code == code);
   }
 }

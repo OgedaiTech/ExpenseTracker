@@ -30,7 +30,7 @@ public class CreateEndpointTests
     // Arrange
     _createTenantService
         .Setup(s => s.CreateTenantAsync(It.IsAny<CreateTenantRequest>(), It.IsAny<CancellationToken>()))
-        .ReturnsAsync(new ServiceResult());
+        .ReturnsAsync(new ServiceResult<Guid>(Guid.Empty));
 
     // Act
     await _endpoint.HandleAsync(It.IsAny<CreateTenantRequest>(), It.IsAny<CancellationToken>());

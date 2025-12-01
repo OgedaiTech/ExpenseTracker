@@ -40,9 +40,9 @@ public partial class Program
     builder.Services.AddExpenseRepositories();
     builder.Services.AddReceiptServices(mediatRAssemblies);
     builder.Services.AddReceiptRepositories();
-    builder.Services.AddTenantServices();
+    builder.Services.AddTenantServices(mediatRAssemblies);
     builder.Services.AddTenantRepositories();
-    builder.Services.AddUserModuleServices();
+    builder.Services.AddUserModuleServices(mediatRAssemblies);
 
     builder.Services.AddOpenApi();
 

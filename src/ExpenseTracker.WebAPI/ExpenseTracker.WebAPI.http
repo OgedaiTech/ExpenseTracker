@@ -52,3 +52,28 @@ Content-Type: application/json
   "password": "P@ssw0rd!"
 }
 ###
+
+# @name adminlogin
+POST {{ExpenseTracker.WebAPI_HostAddress}}/users/login
+Accept: application/json
+Content-Type: application/json
+
+{
+  "email": "admin@expensetracker.com",
+  "password": "Password1!"
+}
+###
+
+POST {{ExpenseTracker.WebAPI_HostAddress}}/tenants
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer {{adminlogin.response.body.$.token}}
+
+{
+  "name": "TT2",
+  "code": "TTCode7",
+  "description": "Tenant for TT",
+  "domain": "tt.com"
+
+}
+###
