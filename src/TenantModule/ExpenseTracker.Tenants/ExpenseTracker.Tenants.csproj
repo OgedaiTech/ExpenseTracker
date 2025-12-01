@@ -21,6 +21,7 @@
 
   <ItemGroup>
     <ProjectReference Include="../../ExpenseTracker.Core/ExpenseTracker.Core.csproj" />
+    <ProjectReference Include="../../UsersModule/ExpenseTracker.Users.Contracts/ExpenseTracker.Users.Contracts.csproj" />
   </ItemGroup>
 
 </Project>

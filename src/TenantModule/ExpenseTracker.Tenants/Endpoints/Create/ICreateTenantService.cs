@@ -4,6 +4,6 @@ namespace ExpenseTracker.Tenants.Endpoints.Create;
 
 public interface ICreateTenantService
 {
-  Task<ServiceResult<Guid>> CreateTenantAsync
-    (CreateTenantRequest createReceiptRequest, CancellationToken ct);
+  Task<ServiceResult> CreateTenantAsync
+    (CreateTenantRequest createTenantRequest, CancellationToken ct);
 }

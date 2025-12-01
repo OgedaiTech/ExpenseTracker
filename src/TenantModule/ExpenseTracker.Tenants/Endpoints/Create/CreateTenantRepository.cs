@@ -18,4 +18,9 @@ public class CreateTenantRepository(TenantDbContext tenantDbContext) : ICreateTe
     var tenant = await tenantDbContext.Tenants.FirstOrDefaultAsync(t => t.Code == createTenantRequest.Code, ct);
     return tenant!.Id;
   }
+
+  public Task<bool> TenantExistsAsync(string code)
+  {
+    return tenantDbContext.Tenants.AnyAsync(t => t.Code == code);
+  }
 }

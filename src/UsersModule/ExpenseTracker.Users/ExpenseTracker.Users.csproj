@@ -6,12 +6,17 @@
   <ItemGroup>
     <PackageReference Include="FastEndpoints" Version="7.0.1" />
     <PackageReference Include="FastEndpoints.Security" Version="7.0.1" />
+    <PackageReference Include="MediatR" Version="13.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.9" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
   </ItemGroup>
 
   <ItemGroup>
     <InternalsVisibleTo Include="ExpenseTracker.Users.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../ExpenseTracker.Users.Contracts/ExpenseTracker.Users.Contracts.csproj" />
   </ItemGroup>
 
 </Project>
