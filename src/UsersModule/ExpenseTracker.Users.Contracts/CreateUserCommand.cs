@@ -3,4 +3,4 @@ using MediatR;
 
 namespace ExpenseTracker.Users.Contracts;
 
-public record CreateUserCommand(Guid TenantId, string Email) : IRequest<ServiceResult>;
+public record CreateUserCommand(Guid TenantId, string Email, string Password) : IRequest<ServiceResult>;

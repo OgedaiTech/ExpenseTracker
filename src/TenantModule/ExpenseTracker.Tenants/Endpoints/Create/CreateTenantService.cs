@@ -6,17 +6,18 @@ namespace ExpenseTracker.Tenants.Endpoints.Create;
 public class CreateTenantService(ICreateTenantRepository repository,
   IMediator mediator) : ICreateTenantService
 {
-  public async Task<ServiceResult> CreateTenantAsync(CreateTenantRequest createTenantRequest, CancellationToken ct)
+  public async Task<ServiceResult> CreateTenantAsync(CreateTenantRequest request, CancellationToken ct)
   {
-    var validationResult = await ValidateTenantAsync(createTenantRequest.Code!);
+    var validationResult = await ValidateTenantAsync(request.Code!);
     if (!validationResult.Success)
     {
       return new ServiceResult(validationResult.Message!);
     }
-    var tenantId = await repository.CreateTenantAsync(createTenantRequest, ct);
 
-    // TODO: Remove hardcoded email
-    var command = new CreateTenantAdminUserCommand(tenantId, "admin@ttt.com");
+    // TODO: rollback tenant creation if user creation fails, unitofwork pattern maybe
+    var tenantId = await repository.CreateTenantAsync(request, ct);
+
+    var command = new CreateTenantAdminUserCommand(tenantId, request.Email, request.Password);
     var createTenantAdminResult = await mediator.Send(command, ct);
     if (!createTenantAdminResult.Success)
     {

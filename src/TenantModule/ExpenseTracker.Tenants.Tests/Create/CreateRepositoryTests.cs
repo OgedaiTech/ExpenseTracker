@@ -26,6 +26,8 @@ public class CreateRepositoryTests
       Code = "TT001",
       Description = "This is a test tenant",
       Domain = "testtenant.com",
+      Email = "admin@testtenant.com",
+      Password = "Password1!"
     };
 
     // Act

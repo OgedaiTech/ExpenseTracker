@@ -8,7 +8,7 @@ public class CreateTenantAdminUserCommandHandler(IMediator mediator) : IRequestH
 {
   public Task<ServiceResult> Handle(CreateTenantAdminUserCommand request, CancellationToken cancellationToken)
   {
-    var command = new CreateUserCommand(request.TenantId, request.AdminEmail);
+    var command = new CreateUserCommand(request.TenantId, request.AdminEmail, request.Password);
     return mediator.Send(command, cancellationToken);
   }
 }
