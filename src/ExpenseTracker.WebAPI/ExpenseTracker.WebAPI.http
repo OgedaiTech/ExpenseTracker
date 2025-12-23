@@ -70,10 +70,12 @@ Content-Type: application/json
 Authorization: Bearer {{adminlogin.response.body.$.token}}
 
 {
-  "name": "TT2",
-  "code": "TTCode7",
+  "name": "TT6",
+  "code": "TTCode9",
   "description": "Tenant for TT",
-  "domain": "tt.com"
+  "domain": "tt.com",
+  "email": "admin2@tt.com",
+  "password": "Password1!"
 
 }
 ###

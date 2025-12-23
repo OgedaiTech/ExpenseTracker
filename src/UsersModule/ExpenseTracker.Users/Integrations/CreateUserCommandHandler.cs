@@ -11,8 +11,8 @@ public class CreateUserCommandHandler(UserManager<ApplicationUser> userManager) 
   {
 
     var newUser = new ApplicationUser { UserName = request.Email, Email = request.Email, TenantId = request.TenantId };
-    // TODO: Remove hardcoded password
-    var result = await userManager.CreateAsync(newUser, "Password1!");
+
+    var result = await userManager.CreateAsync(newUser, request.Password);
     return result.Succeeded
       ? new ServiceResult()
       : new ServiceResult("CANT_CREATE_USER");

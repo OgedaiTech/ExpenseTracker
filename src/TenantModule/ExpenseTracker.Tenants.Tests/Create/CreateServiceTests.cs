@@ -26,6 +26,8 @@ public class CreateServiceTests
       Code = "TT001",
       Description = "This is a test tenant",
       Domain = "testtenant.com",
+      Email = "admin@testtenant.com",
+      Password = "Password1!"
     };
     Mock.Get(_repository)
       .Setup(r => r.CreateTenantAsync(request, It.IsAny<CancellationToken>()))
