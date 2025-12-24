@@ -14,13 +14,13 @@ public class CreateTenantService(ICreateTenantRepository repository,
       return new ServiceResult(validationResult.Message!);
     }
 
-    // TODO: rollback tenant creation if user creation fails, unitofwork pattern maybe
     var tenantId = await repository.CreateTenantAsync(request, ct);
 
     var command = new CreateTenantAdminUserCommand(tenantId, request.Email, request.Password);
     var createTenantAdminResult = await mediator.Send(command, ct);
     if (!createTenantAdminResult.Success)
     {
+      await repository.DeleteTenantAsync(tenantId);
       return new ServiceResult("CANT_CREATE_TENANT_ADMIN_USER");
     }
     return new ServiceResult();
