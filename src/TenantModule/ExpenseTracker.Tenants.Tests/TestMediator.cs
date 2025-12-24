@@ -6,6 +6,8 @@ namespace ExpenseTracker.Tenants.Tests;
 
 public class TestMediator : IMediator
 {
+  public bool ShouldReturnError { get; set; }
+
   public IAsyncEnumerable<TResponse> CreateStream<TResponse>(IStreamRequest<TResponse> request, CancellationToken cancellationToken = default)
   {
     throw new NotImplementedException();
@@ -30,7 +32,8 @@ public class TestMediator : IMediator
   {
     if (request is CreateTenantAdminUserCommand)
     {
-      return Task.FromResult((TResponse)(object)new ServiceResult());
+      var result = ShouldReturnError ? new ServiceResult("ERROR") : new ServiceResult();
+      return Task.FromResult((TResponse)(object)result);
     }
 
     throw new NotImplementedException("Unhandled request in test mediator");

@@ -23,6 +23,7 @@ internal class CreateTenantEndpoint(
         var statusCode = serviceResult.Message switch
         {
           "TENANT_CODE_IS_REQUIRED" => StatusCodes.Status400BadRequest,
+          "CANT_CREATE_TENANT_ADMIN_USER" => StatusCodes.Status500InternalServerError,
           "TENANT_CODE_ALREADY_EXISTS" => StatusCodes.Status409Conflict,
           _ => StatusCodes.Status500InternalServerError
         };

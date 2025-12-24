@@ -1,4 +1,5 @@
 using ExpenseTracker.Tenants.Data;
+using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -9,6 +10,7 @@ public class BaseIntegrationTest : IClassFixture<IntegrationTestWebAppFactory>, 
   private readonly IServiceScope _scope;
   protected TenantDbContext DbContext;
   protected HttpClient Client;
+  protected TestMediator Mediator;
   private bool _disposed = false;
 
   protected BaseIntegrationTest(IntegrationTestWebAppFactory factory)
@@ -16,6 +18,7 @@ public class BaseIntegrationTest : IClassFixture<IntegrationTestWebAppFactory>, 
     _scope = factory.Services.CreateScope();
     Client = factory.CreateClient();
     DbContext = _scope.ServiceProvider.GetRequiredService<TenantDbContext>();
+    Mediator = (TestMediator)_scope.ServiceProvider.GetRequiredService<IMediator>();
   }
 
   protected virtual void Dispose(bool disposing)

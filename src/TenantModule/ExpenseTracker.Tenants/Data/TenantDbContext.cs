@@ -2,13 +2,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ExpenseTracker.Tenants.Data;
 
-public class TenantDbContext : DbContext
+public class TenantDbContext(DbContextOptions<TenantDbContext> options) : DbContext(options)
 {
   public DbSet<Tenant> Tenants { get; set; }
-
-  public TenantDbContext(DbContextOptions<TenantDbContext> options) : base(options)
-  {
-  }
 
   protected override void OnModelCreating(ModelBuilder modelBuilder)
   {

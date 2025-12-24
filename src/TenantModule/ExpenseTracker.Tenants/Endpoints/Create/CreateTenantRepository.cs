@@ -19,6 +19,16 @@ public class CreateTenantRepository(TenantDbContext tenantDbContext) : ICreateTe
     return tenant!.Id;
   }
 
+  public Task DeleteTenantAsync(Guid tenantId)
+  {
+    var tenant = tenantDbContext.Tenants.SingleOrDefault(t => t.Id == tenantId);
+    if (tenant != null)
+    {
+      tenantDbContext.Tenants.Remove(tenant);
+    }
+    return tenantDbContext.SaveChangesAsync();
+  }
+
   public Task<bool> TenantExistsAsync(string code)
   {
     return tenantDbContext.Tenants.AnyAsync(t => t.Code == code);
