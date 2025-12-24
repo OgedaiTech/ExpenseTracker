@@ -12,7 +12,7 @@ public class LoginIntegrationTests(IntegrationTestWebAppFactory factory) : BaseI
   {
     // Arrange
     await ResetDatabaseAsync();
-    var createUserRequest = new CreateUserRequest("test@email.com", "Password123!", null);
+    var createUserRequest = new CreateUserRequest("test@email.com", "Password123!", Guid.NewGuid());
 
     await Client.PostAsJsonAsync("/users", createUserRequest);
     var userLoginRequest = new UserLoginRequest("test@email.com", "Password123!");
@@ -29,7 +29,7 @@ public class LoginIntegrationTests(IntegrationTestWebAppFactory factory) : BaseI
   {
     // Arrange
     await ResetDatabaseAsync();
-    var createUserRequest = new CreateUserRequest("test@email.com", "Password123!", null);
+    var createUserRequest = new CreateUserRequest("test@email.com", "Password123!", Guid.Empty);
 
     await Client.PostAsJsonAsync("/users", createUserRequest);
     var userLoginRequest = new UserLoginRequest("test@email.com", "Password123567!");
