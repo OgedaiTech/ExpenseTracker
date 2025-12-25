@@ -34,11 +34,11 @@ Authorization: Bearer {{login.response.body.$.token}}
 POST {{ExpenseTracker.WebAPI_HostAddress}}/users/
 Accept: application/json
 Content-Type: application/json
+Authorization: Bearer {{login.response.body.$.token}}
 
 {
   "email": "test1+tt@test.com",
-  "password": "P@ssw0rd!",
-  "tenantId": "b3e1f5c2-8c4d-4e2a-9f3b-1a2b3c4d5e6f"
+  "password": "P@ssw0rd!"
 }
 ###
 
@@ -48,7 +48,7 @@ Accept: application/json
 Content-Type: application/json
 
 {
-  "email": "test1+tt@test.com",
+  "email": "test1+ttt@test.com",
   "password": "P@ssw0rd!"
 }
 ###

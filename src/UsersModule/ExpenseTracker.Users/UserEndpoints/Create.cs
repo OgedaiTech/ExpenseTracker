@@ -13,12 +13,13 @@ internal class Create(UserManager<ApplicationUser> userManager) : Endpoint<Creat
 
   public override async Task HandleAsync(CreateUserRequest req, CancellationToken ct)
   {
-    if (string.IsNullOrEmpty(req.Email) || string.IsNullOrEmpty(req.Password) || req.TenantId == Guid.Empty)
+    var tenantId = User.Claims.First(x => x.Type == "TenantId").Value;
+    if (string.IsNullOrEmpty(req.Email) || string.IsNullOrEmpty(req.Password))
     {
-      AddError("EMAIL_AND_PASSWORD_TENANTID_ARE_REQUIRED");
+      AddError("EMAIL_AND_PASSWORD_ARE_REQUIRED");
       ThrowIfAnyErrors();
     }
-    var newUser = new ApplicationUser { UserName = req.Email, Email = req.Email, TenantId = req.TenantId };
+    var newUser = new ApplicationUser { UserName = req.Email, Email = req.Email, TenantId = Guid.Parse(tenantId) };
 
     var result = await userManager.CreateAsync(newUser, req.Password);
 

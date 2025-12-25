@@ -17,7 +17,8 @@ public class TestAuthHandler(
   {
     var claims = new[]
     {
-      new Claim(ClaimTypes.Role, "SystemAdmin")
+      new Claim(ClaimTypes.Role, "SystemAdmin"),
+      new Claim("TenantId", Guid.NewGuid().ToString()),
     };
     var identity = new ClaimsIdentity(claims, SchemeName);
     var principal = new ClaimsPrincipal(identity);
