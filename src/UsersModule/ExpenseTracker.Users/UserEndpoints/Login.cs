@@ -35,6 +35,7 @@ internal class Login(UserManager<ApplicationUser> userManager) : Endpoint<UserLo
       options.SigningKey = jwtSecret;
       options.User["EmailAddress"] = user.Email!;
       options.User["UserId"] = user.Id;
+      options.User["TenantId"] = user.TenantId.ToString();
       options.User.Roles.AddRange(roles);
     });
 
