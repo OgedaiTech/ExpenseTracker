@@ -23,7 +23,7 @@ internal class ListUsersExpenses(IListUsersExpensesService service) : EndpointWi
         var response = new ListUsersExpensesResponse
         {
           Items = [.. serviceResult.Data!.Select(e => new ExpenseDto(e.Id, e.Name, e.Amount, e.CreatedAt))],
-          TotalCount = serviceResult.Data!.Count
+          TotalCount = serviceResult.Data!.Length
         };
         await Send.OkAsync(response, ct);
         return;
