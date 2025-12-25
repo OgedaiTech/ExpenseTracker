@@ -1,15 +1,16 @@
 using ExpenseTrackerUI.Components;
-using Microsoft.AspNetCore.Authorization;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.AddServiceDefaults();
 
 // Add services to the container.
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddHttpClient();
 builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddAuthentication().AddCookie(options =>
 {
-    options.LoginPath = "/login";
+  options.LoginPath = "/login";
 });
 builder.Services.AddAuthorization();
 builder.Services.AddRazorComponents()
