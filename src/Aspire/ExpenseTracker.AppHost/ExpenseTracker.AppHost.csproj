@@ -12,6 +12,7 @@
   <ItemGroup>
     <ProjectReference Include="../../ExpenseTracker.MigrationService/ExpenseTracker.MigrationService.csproj" />
     <ProjectReference Include="../../ExpenseTracker.WebAPI/ExpenseTracker.WebAPI.csproj" />
+    <ProjectReference Include="../../UI/ExpenseTrackerUI/ExpenseTrackerUI.csproj" />
   </ItemGroup>
 
 </Project>

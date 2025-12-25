@@ -18,12 +18,17 @@ var migrations = builder.AddProject<ExpenseTracker_MigrationService>("migration"
   .WithReference(postgresDb)
   .WaitFor(postgresDb);
 
-builder
+var apiService = builder
   .AddProject<ExpenseTracker_WebAPI>("webapi")
   .WithHttpHealthCheck("/health")
   .WithReference(postgresDb)
   .WithReference(migrations)
   .WaitForCompletion(migrations);
 
+builder
+  .AddProject<ExpenseTrackerUI>("webfrontend")
+  .WithExternalHttpEndpoints()
+  .WithReference(apiService)
+  .WaitFor(apiService);
 
 await builder.Build().RunAsync();
