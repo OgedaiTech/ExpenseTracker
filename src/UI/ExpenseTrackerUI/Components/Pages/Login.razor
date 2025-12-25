@@ -1,0 +1,35 @@
+@page "/login"
+@layout EmptyLayout
+@rendermode InteractiveServer
+
+<div class="d-flex justify-content-center align-items-center" style="min-height: 100vh;">
+    <div style="width: 100%; max-width: 400px;">
+        <h3 class="text-center mb-4">Login</h3>
+        <EditForm Model="@loginModel" OnValidSubmit="@HandleLogin">
+            <div class="mb-3">
+                <label for="email" class="form-label">Email</label>
+                <InputText id="email" class="form-control" @bind-Value="loginModel.Email" />
+            </div>
+            <div class="mb-3">
+                <label for="password" class="form-label">Password</label>
+                <InputText id="password" type="password" class="form-control" @bind-Value="loginModel.Password" />
+            </div>
+            <button type="submit" class="btn btn-primary w-100">Login</button>
+        </EditForm>
+    </div>
+</div>
+
+@code {
+    private LoginModel loginModel = new();
+
+    private void HandleLogin()
+    {
+        // Add your login logic here
+    }
+
+    private class LoginModel
+    {
+        public string Email { get; set; } = string.Empty;
+        public string Password { get; set; } = string.Empty;
+    }
+}
