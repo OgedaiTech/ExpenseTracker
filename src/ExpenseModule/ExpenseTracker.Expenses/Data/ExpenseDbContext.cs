@@ -3,14 +3,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ExpenseTracker.Expenses.Data;
 
-public class ExpenseDbContext : DbContext
+public class ExpenseDbContext(DbContextOptions<ExpenseDbContext> options) : DbContext(options)
 {
   public DbSet<Expense> Expenses { get; set; }
-
-
-  public ExpenseDbContext(DbContextOptions<ExpenseDbContext> options) : base(options)
-  {
-  }
 
   protected override void OnModelCreating(ModelBuilder modelBuilder)
   {
