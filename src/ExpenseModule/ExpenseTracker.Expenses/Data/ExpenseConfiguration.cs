@@ -14,6 +14,7 @@ internal class ExpenseConfiguration : IEntityTypeConfiguration<Expense>
     builder.Property(e => e.Id).IsRequired().ValueGeneratedOnAdd();
     builder.Property(e => e.Name).IsRequired().HasMaxLength(128);
     builder.Property(e => e.CreatedByUserId).IsRequired();
+    builder.Property(e => e.TenantId).IsRequired();
     builder.Property(e => e.UpdatedAt).IsRequired(false);
     builder.Property(e => e.DeletedAt).IsRequired(false);
   }
