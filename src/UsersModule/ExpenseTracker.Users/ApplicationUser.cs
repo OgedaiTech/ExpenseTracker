@@ -4,5 +4,5 @@ namespace ExpenseTracker.Users;
 
 public class ApplicationUser : IdentityUser
 {
-  public Guid? TenantId { get; set; }
+  public Guid TenantId { get; set; }
 }
