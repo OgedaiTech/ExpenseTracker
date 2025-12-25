@@ -18,7 +18,8 @@ public class TestAuthHandler(
     var claims = new[]
     {
       new Claim("EmailAddress", "test@example.com"),
-      new Claim("UserId", Guid.Empty.ToString())
+      new Claim("UserId", Guid.Empty.ToString()),
+      new Claim("TenantId", Guid.Empty.ToString())
     };
     var identity = new ClaimsIdentity(claims, SchemeName);
     var principal = new ClaimsPrincipal(identity);

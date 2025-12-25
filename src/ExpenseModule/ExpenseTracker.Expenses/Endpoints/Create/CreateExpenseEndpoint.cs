@@ -15,7 +15,8 @@ internal class CreateExpenseEndpoint
   public override async Task HandleAsync(CreateExpenseRequest request, CancellationToken ct)
   {
     var userId = User.Claims.First(x => x.Type == "UserId").Value;
-    var serviceResult = await createExpenseService.CreateExpenseAsync(request.Name, userId, ct);
+    var tenantId = User.Claims.First(x => x.Type == "TenantId").Value;
+    var serviceResult = await createExpenseService.CreateExpenseAsync(request.Name, userId, tenantId, ct);
     if (!serviceResult.Success)
     {
       var problem = Results.Problem(

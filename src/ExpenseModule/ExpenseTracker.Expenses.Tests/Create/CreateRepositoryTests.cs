@@ -9,6 +9,7 @@ public class CreateRepositoryTests
   private readonly ExpenseDbContext _dbContext;
   private readonly CreateExpenseRepository _repository;
   private readonly string _userId = Guid.Empty.ToString();
+  private readonly string _tenantId = Guid.Empty.ToString();
 
   public CreateRepositoryTests()
   {
@@ -23,7 +24,7 @@ public class CreateRepositoryTests
     string expenseName = "Sample Expense";
 
     // Act
-    await _repository.CreateExpenseAsync(expenseName, _userId, CancellationToken.None);
+    await _repository.CreateExpenseAsync(expenseName, _userId, _tenantId, CancellationToken.None);
 
     // Assert
     Assert.Multiple(async () =>

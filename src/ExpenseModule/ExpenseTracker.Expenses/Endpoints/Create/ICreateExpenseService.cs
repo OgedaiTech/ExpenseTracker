@@ -4,5 +4,5 @@ namespace ExpenseTracker.Expenses.Endpoints.Create;
 
 public interface ICreateExpenseService
 {
-  Task<ServiceResult> CreateExpenseAsync(string name, string userId, CancellationToken cancellationToken);
+  Task<ServiceResult> CreateExpenseAsync(string name, string userId, string tenantId, CancellationToken cancellationToken);
 }
