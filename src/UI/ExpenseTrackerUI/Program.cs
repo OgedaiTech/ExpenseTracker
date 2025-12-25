@@ -1,5 +1,3 @@
-using ExpenseTrackerUI.Components;
-
 var builder = WebApplication.CreateBuilder(args);
 
 builder.AddServiceDefaults();
