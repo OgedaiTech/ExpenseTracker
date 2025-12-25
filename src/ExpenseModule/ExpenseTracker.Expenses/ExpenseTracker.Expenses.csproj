@@ -23,4 +23,8 @@
     <ProjectReference Include="../ExpenseTracker.Expenses.Contracts/ExpenseTracker.Expenses.Contracts.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Endpoints/ListUsersExpenses/" />
+  </ItemGroup>
+
 </Project>
