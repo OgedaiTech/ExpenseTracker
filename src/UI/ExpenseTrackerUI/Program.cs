@@ -14,6 +14,8 @@ builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddAuthentication().AddCookie(options =>
 {
   options.LoginPath = "/login";
+  options.ExpireTimeSpan = TimeSpan.FromMinutes(30);
+  options.SlidingExpiration = true;
 });
 builder.Services.AddAuthorization();
 builder.Services.AddRazorComponents()
