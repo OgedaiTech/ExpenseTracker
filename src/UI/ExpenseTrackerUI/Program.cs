@@ -1,10 +1,15 @@
+using ExpenseTrackerUI.Components;
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.AddServiceDefaults();
 
 // Add services to the container.
 builder.Services.AddHttpContextAccessor();
-builder.Services.AddHttpClient();
+builder.Services.AddHttpClient(string.Empty, client =>
+{
+    client.Timeout = TimeSpan.FromMinutes(5);
+});
 builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddAuthentication().AddCookie(options =>
 {
