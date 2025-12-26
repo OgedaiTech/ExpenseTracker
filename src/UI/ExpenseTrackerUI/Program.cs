@@ -8,12 +8,14 @@ builder.AddServiceDefaults();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddHttpClient(string.Empty, client =>
 {
-    client.Timeout = TimeSpan.FromMinutes(5);
+  client.Timeout = TimeSpan.FromMinutes(5);
 });
 builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddAuthentication().AddCookie(options =>
 {
   options.LoginPath = "/login";
+  options.ExpireTimeSpan = TimeSpan.FromSeconds(15);
+  options.SlidingExpiration = false;
 });
 builder.Services.AddAuthorization();
 builder.Services.AddRazorComponents()
