@@ -24,6 +24,12 @@ public partial class Program
       .AddAuthenticationJwtBearer(options =>
       {
         options.SigningKey = builder.Configuration["Auth:JwtSecret"];
+      },
+      options =>
+      {
+        options.TokenValidationParameters.ClockSkew = TimeSpan.Zero;
+        options.TokenValidationParameters.ValidIssuer = builder.Configuration["Auth:JwtIssuer"];
+        options.TokenValidationParameters.ValidAudience = builder.Configuration["Auth:JwtAudience"];
       })
       .AddAuthorization();
 
