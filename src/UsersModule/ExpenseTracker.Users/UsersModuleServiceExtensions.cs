@@ -1,5 +1,6 @@
 using System.Reflection;
 using ExpenseTracker.Users.Data;
+using ExpenseTracker.Users.TokenService;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -15,6 +16,7 @@ public static class UsersModuleServiceExtensions
     services.AddIdentityCore<ApplicationUser>()
       .AddRoles<IdentityRole>()
       .AddEntityFrameworkStores<UsersDbContext>();
+    services.AddScoped<ITokenService, JwtTokenService>();
     mediatRAssemblies.Add(typeof(UsersModuleServiceExtensions).Assembly);
     return services;
   }

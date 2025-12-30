@@ -1,10 +1,12 @@
+using ExpenseTracker.Users.TokenService;
 using FastEndpoints;
-using FastEndpoints.Security;
 using Microsoft.AspNetCore.Identity;
 
 namespace ExpenseTracker.Users.UserEndpoints;
 
-internal class Login(UserManager<ApplicationUser> userManager) : Endpoint<UserLoginRequest>
+internal class Login(
+  UserManager<ApplicationUser> userManager,
+  ITokenService tokenService) : Endpoint<UserLoginRequest>
 {
   public override void Configure()
   {
@@ -28,17 +30,8 @@ internal class Login(UserManager<ApplicationUser> userManager) : Endpoint<UserLo
       return;
     }
 
-    var jwtSecret = Config["Auth:JwtSecret"]!;
-    var roles = await userManager.GetRolesAsync(user);
-    var token = JwtBearer.CreateToken(options =>
-    {
-      options.SigningKey = jwtSecret;
-      options.User["EmailAddress"] = user.Email!;
-      options.User["UserId"] = user.Id;
-      options.User["TenantId"] = user.TenantId.ToString();
-      options.User.Roles.AddRange(roles);
-    });
+    var tokenResponse = await tokenService.GenerateTokensAsync(user);
 
-    await Send.OkAsync(new { Token = token }, ct);
+    await Send.OkAsync(tokenResponse, ct);
   }
 }
