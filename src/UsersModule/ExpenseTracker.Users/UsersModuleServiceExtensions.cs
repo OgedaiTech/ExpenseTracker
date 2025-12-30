@@ -16,7 +16,6 @@ public static class UsersModuleServiceExtensions
     services.AddIdentityCore<ApplicationUser>()
       .AddRoles<IdentityRole>()
       .AddEntityFrameworkStores<UsersDbContext>();
-    // Program.cs
     services.AddScoped<ITokenService, JwtTokenService>();
     mediatRAssemblies.Add(typeof(UsersModuleServiceExtensions).Assembly);
     return services;
