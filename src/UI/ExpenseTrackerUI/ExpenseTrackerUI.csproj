@@ -8,4 +8,12 @@
     <ProjectReference Include="../../Aspire/ExpenseTracker.ServiceDefaults/ExpenseTracker.ServiceDefaults.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Services/" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.15.0" />
+  </ItemGroup>
+
 </Project>

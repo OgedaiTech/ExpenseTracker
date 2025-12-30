@@ -2,12 +2,17 @@
 @layout EmptyLayout
 @rendermode InteractiveServer
 @attribute [AllowAnonymous]
-@inject HttpClient Http
+@inject IHttpClientFactory HttpClientFactory
 @inject NavigationManager Navigation
 @inject IHttpContextAccessor HttpContextAccessor
+@inject ITokenStorageService TokenStorage
+@inject IHttpContextAccessor HttpContextAccessor
+@inject IConfiguration Configuration
 @using System.Security.Claims
+@using ExpenseTrackerUI.Services
 @using Microsoft.AspNetCore.Authentication
 @using Microsoft.AspNetCore.Authentication.Cookies
+@using System.IdentityModel.Tokens.Jwt
 
 <div class="d-flex justify-content-center align-items-center" style="min-height: 100vh;">
     <div style="width: 100%; max-width: 400px;">
@@ -49,32 +54,71 @@
 
         try
         {
+            var httpClient = HttpClientFactory.CreateClient();
             var request = new { Email = loginModel!.Email, Password = loginModel.Password };
-            var response = await Http.PostAsJsonAsync("http://webapi/users/login", request);
+            var response = await httpClient.PostAsJsonAsync($"{Configuration["ApiBaseUrl"]}/users/login", request);
 
             if (response.IsSuccessStatusCode)
             {
-                var result = await response.Content.ReadFromJsonAsync<LoginResponse>();
-                var claims = new List<Claim> { new Claim(ClaimTypes.Name, loginModel!.Email) };
-                var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-                var principal = new ClaimsPrincipal(identity);
+                var result = await response.Content.ReadFromJsonAsync<TokenResponse>();
 
-                var authProperties = new AuthenticationProperties
+                if (result is not null)
                 {
-                    IsPersistent = false
-                };
+                    // Store tokens
+                    await TokenStorage.StoreTokensAsync(result.AccessToken, result.RefreshToken);
 
-                await HttpContextAccessor.HttpContext!.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal, authProperties);
-                Navigation.NavigateTo("/", true);
+                    // Parse JWT to get claims
+                    var handler = new JwtSecurityTokenHandler();
+                    var jwtToken = handler.ReadJwtToken(result.AccessToken);
+
+                    var claims = new List<Claim>
+{
+new Claim(ClaimTypes.Name, loginModel!.Email),
+new Claim(ClaimTypes.Email, loginModel!.Email)
+};
+
+                    // Add claims from JWT
+                    var userId = jwtToken.Claims.FirstOrDefault(c => c.Type == "UserId")?.Value;
+                    if (userId is not null)
+                    {
+                        claims.Add(new Claim(ClaimTypes.NameIdentifier, userId));
+                    }
+
+                    var tenantId = jwtToken.Claims.FirstOrDefault(c => c.Type == "TenantId")?.Value;
+                    if (tenantId is not null)
+                    {
+                        claims.Add(new Claim("TenantId", tenantId));
+                    }
+
+                    // Add roles
+                    var roles = jwtToken.Claims.Where(c => c.Type == ClaimTypes.Role);
+                    claims.AddRange(roles);
+
+                    var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+                    var principal = new ClaimsPrincipal(identity);
+
+                    var authProperties = new AuthenticationProperties
+                    {
+                        IsPersistent = false,
+                        ExpiresUtc = DateTimeOffset.UtcNow.AddSeconds(result.ExpiresIn)
+                    };
+
+                    await HttpContextAccessor.HttpContext!.SignInAsync(
+                    CookieAuthenticationDefaults.AuthenticationScheme,
+                    principal,
+                    authProperties);
+
+                    Navigation.NavigateTo("/", true);
+                }
             }
             else
             {
                 errorMessage = "Invalid email or password";
             }
         }
-        catch
+        catch (Exception ex)
         {
-            errorMessage = "An error occurred. Please try again.";
+            errorMessage = $"An error occurred: {ex.Message}";
         }
         finally
         {
@@ -86,10 +130,5 @@
     {
         public string Email { get; set; } = string.Empty;
         public string Password { get; set; } = string.Empty;
-    }
-
-    private class LoginResponse
-    {
-        public string Token { get; set; } = string.Empty;
     }
 }

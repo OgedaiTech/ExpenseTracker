@@ -1,14 +1,43 @@
 @page "/logout"
 
+@inject IConfiguration Configuration
+@inject ITokenStorageService TokenStorage
 @inject IHttpContextAccessor HttpContextAccessor
 @inject NavigationManager Navigation
+@inject IHttpClientFactory HttpClientFactory
+@using ExpenseTrackerUI.Services
 @using Microsoft.AspNetCore.Authentication
 @using Microsoft.AspNetCore.Authentication.Cookies
 
 @code {
     protected override async Task OnInitializedAsync()
     {
-        await HttpContextAccessor.HttpContext!.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-        Navigation.NavigateTo("/login", true);
+        try
+        {
+            var refreshToken = await TokenStorage.GetRefreshTokenAsync();
+
+            if (!string.IsNullOrEmpty(refreshToken))
+            {
+                // Call logout endpoint
+                var httpClient = HttpClientFactory.CreateClient();
+                await httpClient.PostAsJsonAsync($"{Configuration["ApiBaseUrl"]}/users/logout",
+                new { RefreshToken = refreshToken });
+            }
+        }
+        catch
+        {
+            // Ignore errors during logout
+        }
+        finally
+        {
+            // Clear tokens
+            await TokenStorage.ClearTokensAsync();
+
+            // Sign out from cookie authentication
+            await HttpContextAccessor.HttpContext!.SignOutAsync(
+            CookieAuthenticationDefaults.AuthenticationScheme);
+
+            Navigation.NavigateTo("/login", true);
+        }
     }
 }
