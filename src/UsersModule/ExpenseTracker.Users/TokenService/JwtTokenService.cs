@@ -3,7 +3,7 @@ using FastEndpoints.Security;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 
-namespace ExpenseTracker.Users;
+namespace ExpenseTracker.Users.TokenService;
 
 public class JwtTokenService(UserManager<ApplicationUser> userManager,
     IConfiguration configuration) : ITokenService

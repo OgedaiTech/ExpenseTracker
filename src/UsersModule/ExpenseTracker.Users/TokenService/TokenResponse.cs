@@ -1,13 +1,4 @@
-using System;
-
-namespace ExpenseTracker.Users;
-
-public interface ITokenService
-{
-  Task<TokenResponse> GenerateTokensAsync(ApplicationUser user);
-  Task<TokenResponse?> RefreshTokenAsync(string refreshToken);
-  Task RevokeTokenAsync(string refreshToken);
-}
+namespace ExpenseTracker.Users.TokenService;
 
 public class TokenResponse
 {

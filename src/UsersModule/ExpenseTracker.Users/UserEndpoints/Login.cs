@@ -1,5 +1,5 @@
+using ExpenseTracker.Users.TokenService;
 using FastEndpoints;
-using FastEndpoints.Security;
 using Microsoft.AspNetCore.Identity;
 
 namespace ExpenseTracker.Users.UserEndpoints;

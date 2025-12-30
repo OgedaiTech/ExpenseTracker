@@ -1,3 +1,4 @@
+using ExpenseTracker.Users.TokenService;
 using FastEndpoints;
 
 namespace ExpenseTracker.Users.UserEndpoints;

@@ -1,5 +1,6 @@
 using System.Reflection;
 using ExpenseTracker.Users.Data;
+using ExpenseTracker.Users.TokenService;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 
