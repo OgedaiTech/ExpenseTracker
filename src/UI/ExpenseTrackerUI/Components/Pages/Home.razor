@@ -3,6 +3,12 @@
 <PageTitle>Home</PageTitle>
 
 @inject AuthenticationStateProvider AuthenticationStateProvider
+@inject ITokenStorageService TokenStorage
+@inject NavigationManager Navigation
+@inject IHttpContextAccessor HttpContextAccessor
+@using Microsoft.AspNetCore.Authentication
+@using Microsoft.AspNetCore.Authentication.Cookies
+@using ExpenseTrackerUI.Services
 
 <AuthorizeView>
     <Authorized>
@@ -13,6 +19,20 @@
                 var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
                 var user = authState.User;
                 userName = user.Identity?.Name;
+                
+                // Check if tokens exist when user appears authenticated
+                if (user.Identity?.IsAuthenticated == true)
+                {
+                    var accessToken = await TokenStorage.GetAccessTokenAsync();
+                    if (string.IsNullOrEmpty(accessToken))
+                    {
+                        // User appears logged in but no tokens - sign them out
+                        await TokenStorage.ClearTokensAsync();
+                        await HttpContextAccessor.HttpContext!.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                        Navigation.NavigateTo("/login", true);
+                        return;
+                    }
+                }
             }
         }
         <h1>Welcome, @userName!</h1>
