@@ -1,8 +1,9 @@
 @page "/expenses"
+@rendermode InteractiveServer
 @using ExpenseTrackerUI.Services
 @inject ExpenseService ExpenseService
 @inject ITokenStorageService TokenStorage
-@attribute [Authorize]
+
 
 <h3>My Expenses</h3>
 
