@@ -1,0 +1,59 @@
+@page "/expenses"
+@using ExpenseTrackerUI.Services
+@inject ExpenseService ExpenseService
+@inject ITokenStorageService TokenStorage
+@attribute [Authorize]
+
+<h3>My Expenses</h3>
+
+@if (expenses == null)
+{
+    <p>Loading...</p>
+}
+else if (!expenses.Any())
+{
+    <p>No expenses found.</p>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Amount</th>
+                <th>Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var expense in expenses)
+            {
+                <tr>
+                    <td>@expense.Name</td>
+                    <td>@expense.Amount.ToString("C")</td>
+                    <td>@expense.CreatedAt.ToString("MM/dd/yyyy")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<ExpenseDto>? expenses;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var token = await TokenStorage.GetAccessTokenAsync();
+            if (!string.IsNullOrEmpty(token))
+            {
+                var response = await ExpenseService.GetUserExpensesAsync(token);
+                expenses = response?.Items ?? new List<ExpenseDto>();
+            }
+        }
+        catch
+        {
+            expenses = new List<ExpenseDto>();
+        }
+    }
+}

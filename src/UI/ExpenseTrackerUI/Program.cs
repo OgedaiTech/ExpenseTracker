@@ -18,6 +18,7 @@ builder.Services.AddSession(options =>
 builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddScoped<ITokenStorageService, TokenStorageService>();
+builder.Services.AddScoped<ExpenseService>();
 builder.Services.AddTransient<AuthenticatedHttpClientHandler>();
 
 // Configure HttpClient with handler
