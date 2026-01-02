@@ -1,13 +1,10 @@
-using System.Net.Http.Headers;
-
 namespace ExpenseTrackerUI.Services;
 
 public class ExpenseService(IHttpClientFactory httpClientFactory)
 {
-  public async Task<ExpenseListResponse?> GetUserExpensesAsync(string token)
+  public async Task<ExpenseListResponse?> GetUserExpensesAsync()
   {
     var client = httpClientFactory.CreateClient("AuthenticatedClient");
-    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
     var response = await client.GetAsync("/expenses/users");
     response.EnsureSuccessStatusCode();
     if (response.IsSuccessStatusCode)

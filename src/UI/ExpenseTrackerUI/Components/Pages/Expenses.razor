@@ -45,12 +45,8 @@ else
     {
         try
         {
-            var token = await TokenStorage.GetAccessTokenAsync();
-            if (!string.IsNullOrEmpty(token))
-            {
-                var response = await ExpenseService.GetUserExpensesAsync(token);
-                expenses = response?.Items ?? new List<ExpenseDto>();
-            }
+            var response = await ExpenseService.GetUserExpensesAsync();
+            expenses = response?.Items ?? new List<ExpenseDto>();
         }
         catch
         {
