@@ -1,6 +1,5 @@
 using ExpenseTrackerUI.Components;
 using ExpenseTrackerUI.Services;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Components.Authorization;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -16,15 +15,11 @@ builder.Services.AddScoped<ExpenseService>();
 builder.Services.AddScoped<CustomAuthStateProvider>();
 builder.Services.AddScoped<AuthenticationStateProvider>(sp => sp.GetRequiredService<CustomAuthStateProvider>());
 
-builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-    .AddCookie(options =>
-    {
-      options.Cookie.Name = "auth_token";
-      options.LoginPath = "/login";
-      options.Cookie.MaxAge = TimeSpan.FromHours(1);
-      options.AccessDeniedPath = "/access-denied";
-      options.SlidingExpiration = true;
-    });
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultScheme = "Blazor";
+}).AddScheme<Microsoft.AspNetCore.Authentication.AuthenticationSchemeOptions, BlazorAuthenticationHandler>("Blazor", null);
+
 builder.Services.AddAuthorization();
 builder.Services.AddCascadingAuthenticationState();
 
