@@ -8,11 +8,11 @@
             <div class="card-body">
                 <AuthorizeView>
                     <Authorized>
-                        <h3>Welcome back, @context.User.Identity!.Name</h3>
+                        <h3>Welcome back, @context.User.FindFirst("EmailAddress")?.Value</h3>
                         <p>You are logged in and can access protected resources.</p>
                     </Authorized>
                     <NotAuthorized>
-                        <h3>Welcome to BlazorAuthenticate!</h3>
+                        <h3>Welcome to Expense Tracker!</h3>
                         <p>Please <a href="/login">log in</a> to access more features.</p>
                     </NotAuthorized>
                 </AuthorizeView>

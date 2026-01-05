@@ -1,15 +1,13 @@
 @page "/login"
 @layout EmptyLayout
 @attribute [AllowAnonymous]
+@rendermode InteractiveServer
 
-@using System.Security.Claims
 @using ExpenseTrackerUI.Services
-@using System.Net
-@using Microsoft.AspNetCore.Authentication
-@using Microsoft.AspNetCore.Authentication.Cookies
-@using System.IdentityModel.Tokens.Jwt
+@using Microsoft.AspNetCore.Components.Web
 @inject NavigationManager Navigation
 @inject AuthService AuthService
+@inject CustomAuthStateProvider AuthStateProvider
 
 <div class="d-flex justify-content-center align-items-center" style="min-height: 100vh;">
     <div style="width: 100%; max-width: 400px;">
@@ -34,9 +32,6 @@
 </div>
 
 @code {
-    [CascadingParameter]
-    public HttpContext? HttpContext { get; set; }
-
     [SupplyParameterFromForm]
     private LoginModel? loginModel { get; set; }
     private string errorMessage = string.Empty;
@@ -58,34 +53,8 @@
 
             if (token is not null)
             {
-                var handler = new JwtSecurityTokenHandler();
-                var jwtToken = handler.ReadJwtToken(token);
-                var claims = jwtToken.Claims.ToList();
-
-                if (token is not null)
-                {
-                    var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-                    var principal = new ClaimsPrincipal(identity);
-                    if (HttpContext != null)
-                    {
-                        await HttpContext.SignInAsync(principal);
-
-                        // Store the JWT token in a separate cookie for API requests
-                        HttpContext.Response.Cookies.Append("jwt_token", token, new CookieOptions
-                        {
-                            HttpOnly = true,
-                            Secure = true,
-                            SameSite = SameSiteMode.Strict,
-                            MaxAge = TimeSpan.FromHours(1)
-                        });
-
-                        Navigation.NavigateTo("/", forceLoad: true);
-                    }
-                    else
-                    {
-                        errorMessage = "Authentication context is not available.";
-                    }
-                }
+                await AuthStateProvider.MarkUserAsAuthenticatedAsync(token);
+                Navigation.NavigateTo("/", forceLoad: true);
             }
             else
             {

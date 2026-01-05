@@ -40,16 +40,13 @@ else
 }
 
 @code {
-    [CascadingParameter]
-    public HttpContext? HttpContext { get; set; }
     private List<ExpenseDto>? expenses;
-
 
     protected override async Task OnInitializedAsync()
     {
         try
         {
-            var response = await ExpenseService.GetUserExpensesAsync(HttpContext!);
+            var response = await ExpenseService.GetUserExpensesAsync();
             expenses = response?.Items ?? new List<ExpenseDto>();
         }
         catch

@@ -1,7 +1,10 @@
 @page "/logout"
-@using Microsoft.AspNetCore.Authentication
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
 
+@using ExpenseTrackerUI.Services
+@using Microsoft.AspNetCore.Components.Web
 @inject NavigationManager NavigationManager
+@inject CustomAuthStateProvider AuthStateProvider
 
 <div class="row">
     <div class="col-12">
@@ -21,20 +24,9 @@
 </div>
 
 @code {
-    [CascadingParameter]
-    public HttpContext? HttpContext { get; set; }
-
     override protected async Task OnInitializedAsync()
     {
-        await base.OnInitializedAsync();
-        if (HttpContext!.User.Identity!.IsAuthenticated)
-        {
-            await HttpContext.SignOutAsync();
-
-            // Remove the JWT token cookie
-            HttpContext.Response.Cookies.Delete("jwt_token");
-
-            NavigationManager.NavigateTo("/login", true);
-        }
+        await AuthStateProvider.MarkUserAsLoggedOutAsync();
+        NavigationManager.NavigateTo("/login", true);
     }
 }

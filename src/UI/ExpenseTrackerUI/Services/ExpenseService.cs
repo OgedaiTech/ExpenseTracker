@@ -1,18 +1,19 @@
 using System.Net.Http.Headers;
+using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 
 namespace ExpenseTrackerUI.Services;
 
-public class ExpenseService(IHttpClientFactory httpClientFactory)
+public class ExpenseService(IHttpClientFactory httpClientFactory, ProtectedLocalStorage localStorage)
 {
-  public async Task<ExpenseListResponse?> GetUserExpensesAsync(HttpContext httpContext)
+  public async Task<ExpenseListResponse?> GetUserExpensesAsync()
   {
     var client = httpClientFactory.CreateClient("AuthenticatedClient");
 
-    // Get the JWT token from the cookie
-    var token = httpContext.Request.Cookies["jwt_token"];
-    if (!string.IsNullOrEmpty(token))
+    // Get the JWT token from browser storage
+    var tokenResult = await localStorage.GetAsync<string>("jwt_token");
+    if (tokenResult.Success && !string.IsNullOrEmpty(tokenResult.Value))
     {
-      client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+      client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", tokenResult.Value);
     }
 
     var response = await client.GetAsync("/expenses/users");
