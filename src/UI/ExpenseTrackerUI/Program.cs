@@ -1,32 +1,37 @@
 using ExpenseTrackerUI.Components;
 using ExpenseTrackerUI.Services;
+using Microsoft.AspNetCore.Components.Authorization;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.AddServiceDefaults();
 
-// Add Session
-builder.Services.AddDistributedMemoryCache();
-builder.Services.AddSession(options =>
+builder.Services.AddRazorComponents()
+    .AddInteractiveServerComponents();
+
+builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<ExpenseService>();
+builder.Services.AddScoped<TokenRefreshService>();
+builder.Services.AddScoped<ActivityTrackingHandler>();
+
+builder.Services.AddScoped<CustomAuthStateProvider>();
+builder.Services.AddScoped<AuthenticationStateProvider>(sp => sp.GetRequiredService<CustomAuthStateProvider>());
+
+builder.Services.AddAuthentication(options =>
 {
-  options.IdleTimeout = TimeSpan.FromMinutes(30);
-  options.Cookie.HttpOnly = true;
-  options.Cookie.IsEssential = true;
-});
+    options.DefaultScheme = "Blazor";
+}).AddScheme<Microsoft.AspNetCore.Authentication.AuthenticationSchemeOptions, BlazorAuthenticationHandler>("Blazor", null);
 
-// Add services to the container.
-builder.Services.AddHttpContextAccessor();
+builder.Services.AddAuthorization();
+builder.Services.AddCascadingAuthenticationState();
 
-builder.Services.AddScoped<ITokenStorageService, TokenStorageService>();
-builder.Services.AddTransient<AuthenticatedHttpClientHandler>();
-
-// Configure HttpClient with handler
+// Configure HttpClient with activity tracking handler
 builder.Services.AddHttpClient("AuthenticatedClient", client =>
 {
   client.BaseAddress = new Uri(builder.Configuration["ApiBaseUrl"]!);
   client.Timeout = TimeSpan.FromMinutes(5);
 })
-.AddHttpMessageHandler<AuthenticatedHttpClientHandler>();
+.AddHttpMessageHandler<ActivityTrackingHandler>();
 
 // Default HttpClient (for login/public endpoints)
 builder.Services.AddHttpClient(string.Empty, client =>
@@ -34,17 +39,6 @@ builder.Services.AddHttpClient(string.Empty, client =>
   client.BaseAddress = new Uri(builder.Configuration["ApiBaseUrl"]!);
   client.Timeout = TimeSpan.FromMinutes(5);
 });
-
-builder.Services.AddCascadingAuthenticationState();
-builder.Services.AddAuthentication().AddCookie(options =>
-{
-  options.LoginPath = "/login";
-  options.ExpireTimeSpan = TimeSpan.FromMinutes(30);
-  options.SlidingExpiration = true;
-});
-builder.Services.AddAuthorization();
-builder.Services.AddRazorComponents()
-    .AddInteractiveServerComponents();
 
 var app = builder.Build();
 
@@ -58,16 +52,14 @@ if (!app.Environment.IsDevelopment())
 app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
 app.UseHttpsRedirection();
 
-app.MapStaticAssets();
+app.UseAntiforgery();
 
-app.UseSession();
+app.MapStaticAssets();
 
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.UseAntiforgery();
 app.MapRazorComponents<App>()
-    .AddInteractiveServerRenderMode()
-    .RequireAuthorization();
+    .AddInteractiveServerRenderMode();
 
 await app.RunAsync();

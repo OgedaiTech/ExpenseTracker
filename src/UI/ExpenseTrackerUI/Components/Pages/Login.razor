@@ -1,18 +1,13 @@
 @page "/login"
 @layout EmptyLayout
-@rendermode InteractiveServer
 @attribute [AllowAnonymous]
-@inject IHttpClientFactory HttpClientFactory
-@inject NavigationManager Navigation
-@inject IHttpContextAccessor HttpContextAccessor
-@inject ITokenStorageService TokenStorage
-@inject IHttpContextAccessor HttpContextAccessor
-@inject IConfiguration Configuration
-@using System.Security.Claims
+@rendermode InteractiveServer
+
 @using ExpenseTrackerUI.Services
-@using Microsoft.AspNetCore.Authentication
-@using Microsoft.AspNetCore.Authentication.Cookies
-@using System.IdentityModel.Tokens.Jwt
+@using Microsoft.AspNetCore.Components.Web
+@inject NavigationManager Navigation
+@inject AuthService AuthService
+@inject CustomAuthStateProvider AuthStateProvider
 
 <div class="d-flex justify-content-center align-items-center" style="min-height: 100vh;">
     <div style="width: 100%; max-width: 400px;">
@@ -54,62 +49,12 @@
 
         try
         {
-            var httpClient = HttpClientFactory.CreateClient();
-            var request = new { Email = loginModel!.Email, Password = loginModel.Password };
-            var response = await httpClient.PostAsJsonAsync($"{Configuration["ApiBaseUrl"]}/users/login", request);
+            var tokenResponse = await AuthService.GetTokenAsync(loginModel!.Email, loginModel!.Password);
 
-            if (response.IsSuccessStatusCode)
+            if (tokenResponse is not null)
             {
-                var result = await response.Content.ReadFromJsonAsync<TokenResponse>();
-
-                if (result is not null)
-                {
-                    // Store tokens
-                    await TokenStorage.StoreTokensAsync(result.AccessToken, result.RefreshToken);
-
-                    // Parse JWT to get claims
-                    var handler = new JwtSecurityTokenHandler();
-                    var jwtToken = handler.ReadJwtToken(result.AccessToken);
-
-                    var claims = new List<Claim>
-{
-new Claim(ClaimTypes.Name, loginModel!.Email),
-new Claim(ClaimTypes.Email, loginModel!.Email)
-};
-
-                    // Add claims from JWT
-                    var userId = jwtToken.Claims.FirstOrDefault(c => c.Type == "UserId")?.Value;
-                    if (userId is not null)
-                    {
-                        claims.Add(new Claim(ClaimTypes.NameIdentifier, userId));
-                    }
-
-                    var tenantId = jwtToken.Claims.FirstOrDefault(c => c.Type == "TenantId")?.Value;
-                    if (tenantId is not null)
-                    {
-                        claims.Add(new Claim("TenantId", tenantId));
-                    }
-
-                    // Add roles
-                    var roles = jwtToken.Claims.Where(c => c.Type == ClaimTypes.Role);
-                    claims.AddRange(roles);
-
-                    var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-                    var principal = new ClaimsPrincipal(identity);
-
-                    var authProperties = new AuthenticationProperties
-                    {
-                        IsPersistent = false,
-                        ExpiresUtc = DateTimeOffset.UtcNow.AddSeconds(result.ExpiresIn)
-                    };
-
-                    await HttpContextAccessor.HttpContext!.SignInAsync(
-                    CookieAuthenticationDefaults.AuthenticationScheme,
-                    principal,
-                    authProperties);
-
-                    Navigation.NavigateTo("/", true);
-                }
+                await AuthStateProvider.MarkUserAsAuthenticatedAsync(tokenResponse.AccessToken, tokenResponse.RefreshToken);
+                Navigation.NavigateTo("/");
             }
             else
             {

@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using System.Security.Cryptography;
 using FastEndpoints.Security;
 using Microsoft.AspNetCore.Identity;
@@ -16,15 +17,19 @@ public class JwtTokenService(UserManager<ApplicationUser> userManager,
   public async Task<TokenResponse> GenerateTokensAsync(ApplicationUser user)
   {
     var jwtSecret = configuration["Auth:JwtSecret"]!;
+    var jwtIssuer = configuration["Auth:JwtIssuer"]!;
+    var jwtAudience = configuration["Auth:JwtAudience"]!;
     var roles = await userManager.GetRolesAsync(user);
 
     var accessToken = JwtBearer.CreateToken(options =>
     {
       options.SigningKey = jwtSecret;
       options.ExpireAt = DateTime.UtcNow.AddMinutes(AccessTokenExpirationMinutes);
-      options.User["EmailAddress"] = user.Email!;
-      options.User["UserId"] = user.Id;
-      options.User["TenantId"] = user.TenantId.ToString();
+      options.Issuer = jwtIssuer;
+      options.Audience = jwtAudience;
+      options.User.Claims.Add(new Claim("EmailAddress", user.Email!));
+      options.User.Claims.Add(new Claim("UserId", user.Id));
+      options.User.Claims.Add(new Claim("TenantId", user.TenantId.ToString()));
       options.User.Roles.AddRange(roles);
     });
 

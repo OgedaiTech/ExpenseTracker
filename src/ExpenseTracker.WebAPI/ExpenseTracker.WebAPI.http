@@ -3,7 +3,7 @@
 POST {{ExpenseTracker.WebAPI_HostAddress}}/expenses/
 Content-Type: application/json
 Accept: application/json
-Authorization: Bearer {{login.response.body.$.token}}
+Authorization: Bearer {{login.response.body.$.accessToken}}
 
 {
   "name": "Lunch"
@@ -13,7 +13,7 @@ Authorization: Bearer {{login.response.body.$.token}}
 
 GET {{ExpenseTracker.WebAPI_HostAddress}}/expenses/users
 Accept: application/json
-Authorization: Bearer {{login.response.body.$.token}}
+Authorization: Bearer {{login.response.body.$.accessToken}}
 
 ###
 
@@ -54,8 +54,8 @@ Accept: application/json
 Content-Type: application/json
 
 {
-  "email": "test1+ttt@test.com",
-  "password": "P@ssw0rd!"
+  "email": "admin@ttt.com",
+  "password": "Password1!"
 }
 ###
 
