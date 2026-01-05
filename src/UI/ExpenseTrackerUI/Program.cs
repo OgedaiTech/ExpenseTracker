@@ -1,33 +1,35 @@
 using ExpenseTrackerUI.Components;
 using ExpenseTrackerUI.Services;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.AddServiceDefaults();
 
-// Add Session
-builder.Services.AddDistributedMemoryCache();
-builder.Services.AddSession(options =>
-{
-  options.IdleTimeout = TimeSpan.FromMinutes(30);
-  options.Cookie.HttpOnly = true;
-  options.Cookie.IsEssential = true;
-});
+builder.Services.AddRazorComponents()
+    .AddInteractiveServerComponents();
 
-// Add services to the container.
-builder.Services.AddHttpContextAccessor();
-
-builder.Services.AddScoped<ITokenStorageService, TokenStorageService>();
+builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<ExpenseService>();
-builder.Services.AddTransient<AuthenticatedHttpClientHandler>();
+
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+      options.Cookie.Name = "auth_token";
+      options.LoginPath = "/login";
+      options.Cookie.MaxAge = TimeSpan.FromHours(1);
+      options.AccessDeniedPath = "/access-denied";
+      options.SlidingExpiration = true;
+    });
+builder.Services.AddAuthorization();
+builder.Services.AddCascadingAuthenticationState();
 
 // Configure HttpClient with handler
 builder.Services.AddHttpClient("AuthenticatedClient", client =>
 {
   client.BaseAddress = new Uri(builder.Configuration["ApiBaseUrl"]!);
   client.Timeout = TimeSpan.FromMinutes(5);
-})
-.AddHttpMessageHandler<AuthenticatedHttpClientHandler>();
+});
 
 // Default HttpClient (for login/public endpoints)
 builder.Services.AddHttpClient(string.Empty, client =>
@@ -35,17 +37,6 @@ builder.Services.AddHttpClient(string.Empty, client =>
   client.BaseAddress = new Uri(builder.Configuration["ApiBaseUrl"]!);
   client.Timeout = TimeSpan.FromMinutes(5);
 });
-
-builder.Services.AddCascadingAuthenticationState();
-builder.Services.AddAuthentication().AddCookie(options =>
-{
-  options.LoginPath = "/login";
-  options.ExpireTimeSpan = TimeSpan.FromMinutes(30);
-  options.SlidingExpiration = true;
-});
-builder.Services.AddAuthorization();
-builder.Services.AddRazorComponents()
-    .AddInteractiveServerComponents();
 
 var app = builder.Build();
 
@@ -59,16 +50,14 @@ if (!app.Environment.IsDevelopment())
 app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
 app.UseHttpsRedirection();
 
-app.MapStaticAssets();
+app.UseAntiforgery();
 
-app.UseSession();
+app.MapStaticAssets();
 
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.UseAntiforgery();
 app.MapRazorComponents<App>()
-    .AddInteractiveServerRenderMode()
-    .RequireAuthorization();
+    .AddInteractiveServerRenderMode();
 
 await app.RunAsync();

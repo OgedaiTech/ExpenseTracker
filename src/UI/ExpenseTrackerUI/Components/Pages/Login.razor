@@ -1,18 +1,15 @@
 @page "/login"
 @layout EmptyLayout
-@rendermode InteractiveServer
 @attribute [AllowAnonymous]
-@inject IHttpClientFactory HttpClientFactory
-@inject NavigationManager Navigation
-@inject IHttpContextAccessor HttpContextAccessor
-@inject ITokenStorageService TokenStorage
-@inject IHttpContextAccessor HttpContextAccessor
-@inject IConfiguration Configuration
+
 @using System.Security.Claims
 @using ExpenseTrackerUI.Services
+@using System.Net
 @using Microsoft.AspNetCore.Authentication
 @using Microsoft.AspNetCore.Authentication.Cookies
 @using System.IdentityModel.Tokens.Jwt
+@inject NavigationManager Navigation
+@inject AuthService AuthService
 
 <div class="d-flex justify-content-center align-items-center" style="min-height: 100vh;">
     <div style="width: 100%; max-width: 400px;">
@@ -37,6 +34,9 @@
 </div>
 
 @code {
+    [CascadingParameter]
+    public HttpContext? HttpContext { get; set; }
+
     [SupplyParameterFromForm]
     private LoginModel? loginModel { get; set; }
     private string errorMessage = string.Empty;
@@ -54,61 +54,37 @@
 
         try
         {
-            var httpClient = HttpClientFactory.CreateClient();
-            var request = new { Email = loginModel!.Email, Password = loginModel.Password };
-            var response = await httpClient.PostAsJsonAsync($"{Configuration["ApiBaseUrl"]}/users/login", request);
+            var token = await AuthService.GetTokenAsync(loginModel!.Email, loginModel!.Password);
 
-            if (response.IsSuccessStatusCode)
+            if (token is not null)
             {
-                var result = await response.Content.ReadFromJsonAsync<TokenResponse>();
+                var handler = new JwtSecurityTokenHandler();
+                var jwtToken = handler.ReadJwtToken(token);
+                var claims = jwtToken.Claims.ToList();
 
-                if (result is not null)
+                if (token is not null)
                 {
-                    // Store tokens
-                    await TokenStorage.StoreTokensAsync(result.AccessToken, result.RefreshToken);
-
-                    // Parse JWT to get claims
-                    var handler = new JwtSecurityTokenHandler();
-                    var jwtToken = handler.ReadJwtToken(result.AccessToken);
-
-                    var claims = new List<Claim>
-{
-new Claim(ClaimTypes.Name, loginModel!.Email),
-new Claim(ClaimTypes.Email, loginModel!.Email)
-};
-
-                    // Add claims from JWT
-                    var userId = jwtToken.Claims.FirstOrDefault(c => c.Type == "UserId")?.Value;
-                    if (userId is not null)
-                    {
-                        claims.Add(new Claim(ClaimTypes.NameIdentifier, userId));
-                    }
-
-                    var tenantId = jwtToken.Claims.FirstOrDefault(c => c.Type == "TenantId")?.Value;
-                    if (tenantId is not null)
-                    {
-                        claims.Add(new Claim("TenantId", tenantId));
-                    }
-
-                    // Add roles
-                    var roles = jwtToken.Claims.Where(c => c.Type == ClaimTypes.Role);
-                    claims.AddRange(roles);
-
                     var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
                     var principal = new ClaimsPrincipal(identity);
-
-                    var authProperties = new AuthenticationProperties
+                    if (HttpContext != null)
                     {
-                        IsPersistent = false,
-                        ExpiresUtc = DateTimeOffset.UtcNow.AddSeconds(result.ExpiresIn)
-                    };
+                        await HttpContext.SignInAsync(principal);
 
-                    await HttpContextAccessor.HttpContext!.SignInAsync(
-                    CookieAuthenticationDefaults.AuthenticationScheme,
-                    principal,
-                    authProperties);
+                        // Store the JWT token in a separate cookie for API requests
+                        HttpContext.Response.Cookies.Append("jwt_token", token, new CookieOptions
+                        {
+                            HttpOnly = true,
+                            Secure = true,
+                            SameSite = SameSiteMode.Strict,
+                            MaxAge = TimeSpan.FromHours(1)
+                        });
 
-                    Navigation.NavigateTo("/", true);
+                        Navigation.NavigateTo("/", forceLoad: true);
+                    }
+                    else
+                    {
+                        errorMessage = "Authentication context is not available.";
+                    }
                 }
             }
             else

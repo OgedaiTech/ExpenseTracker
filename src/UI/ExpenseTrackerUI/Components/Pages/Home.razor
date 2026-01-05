@@ -2,42 +2,21 @@
 
 <PageTitle>Home</PageTitle>
 
-@inject AuthenticationStateProvider AuthenticationStateProvider
-@inject ITokenStorageService TokenStorage
-@inject NavigationManager Navigation
-@inject IHttpContextAccessor HttpContextAccessor
-@using Microsoft.AspNetCore.Authentication
-@using Microsoft.AspNetCore.Authentication.Cookies
-@using ExpenseTrackerUI.Services
-
-<AuthorizeView>
-    <Authorized>
-        @code {
-            private string? userName;
-            protected override async Task OnInitializedAsync()
-            {
-                var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-                var user = authState.User;
-                userName = user.Identity?.Name;
-                
-                // Check if tokens exist when user appears authenticated
-                if (user.Identity?.IsAuthenticated == true)
-                {
-                    var accessToken = await TokenStorage.GetAccessTokenAsync();
-                    if (string.IsNullOrEmpty(accessToken))
-                    {
-                        // User appears logged in but no tokens - sign them out
-                        await TokenStorage.ClearTokensAsync();
-                        await HttpContextAccessor.HttpContext!.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-                        Navigation.NavigateTo("/login", true);
-                        return;
-                    }
-                }
-            }
-        }
-        <h1>Welcome, @userName!</h1>
-    </Authorized>
-    <NotAuthorized>
-        <h1>You are not logged in.</h1>
-    </NotAuthorized>
-</AuthorizeView>
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <AuthorizeView>
+                    <Authorized>
+                        <h3>Welcome back, @context.User.Identity!.Name</h3>
+                        <p>You are logged in and can access protected resources.</p>
+                    </Authorized>
+                    <NotAuthorized>
+                        <h3>Welcome to BlazorAuthenticate!</h3>
+                        <p>Please <a href="/login">log in</a> to access more features.</p>
+                    </NotAuthorized>
+                </AuthorizeView>
+            </div>
+        </div>
+    </div>
+</div>

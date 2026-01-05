@@ -1,43 +1,40 @@
 @page "/logout"
-
-@inject IConfiguration Configuration
-@inject ITokenStorageService TokenStorage
-@inject IHttpContextAccessor HttpContextAccessor
-@inject NavigationManager Navigation
-@inject IHttpClientFactory HttpClientFactory
-@using ExpenseTrackerUI.Services
 @using Microsoft.AspNetCore.Authentication
-@using Microsoft.AspNetCore.Authentication.Cookies
+
+@inject NavigationManager NavigationManager
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body flex-column">
+                <div class="text-center mt-2">
+                    <h1 class="display-1 fw-bold">403</h1>
+                    <p class="fs-3"> <span class="text-danger">Logged out</span></p>
+                    <p class="lead">
+                        You've been logged out.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
 
 @code {
-    protected override async Task OnInitializedAsync()
+    [CascadingParameter]
+    public HttpContext? HttpContext { get; set; }
+
+    override protected async Task OnInitializedAsync()
     {
-        try
+        await base.OnInitializedAsync();
+        if (HttpContext!.User.Identity!.IsAuthenticated)
         {
-            var refreshToken = await TokenStorage.GetRefreshTokenAsync();
+            await HttpContext.SignOutAsync();
 
-            if (!string.IsNullOrEmpty(refreshToken))
-            {
-                // Call logout endpoint
-                var httpClient = HttpClientFactory.CreateClient();
-                await httpClient.PostAsJsonAsync($"{Configuration["ApiBaseUrl"]}/users/logout",
-                new { RefreshToken = refreshToken });
-            }
-        }
-        catch
-        {
-            // Ignore errors during logout
-        }
-        finally
-        {
-            // Clear tokens
-            await TokenStorage.ClearTokensAsync();
+            // Remove the JWT token cookie
+            HttpContext.Response.Cookies.Delete("jwt_token");
 
-            // Sign out from cookie authentication
-            await HttpContextAccessor.HttpContext!.SignOutAsync(
-            CookieAuthenticationDefaults.AuthenticationScheme);
-
-            Navigation.NavigateTo("/login", true);
+            NavigationManager.NavigateTo("/login", true);
         }
     }
 }

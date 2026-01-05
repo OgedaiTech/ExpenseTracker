@@ -1,8 +1,9 @@
 @page "/expenses"
+@attribute [Authorize]
+@rendermode InteractiveServer
 
 @using ExpenseTrackerUI.Services
 @inject ExpenseService ExpenseService
-@inject ITokenStorageService TokenStorage
 
 
 <h3>My Expenses</h3>
@@ -39,13 +40,16 @@ else
 }
 
 @code {
+    [CascadingParameter]
+    public HttpContext? HttpContext { get; set; }
     private List<ExpenseDto>? expenses;
+
 
     protected override async Task OnInitializedAsync()
     {
         try
         {
-            var response = await ExpenseService.GetUserExpensesAsync();
+            var response = await ExpenseService.GetUserExpensesAsync(HttpContext!);
             expenses = response?.Items ?? new List<ExpenseDto>();
         }
         catch
