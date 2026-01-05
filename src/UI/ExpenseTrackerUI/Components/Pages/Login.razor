@@ -49,11 +49,11 @@
 
         try
         {
-            var token = await AuthService.GetTokenAsync(loginModel!.Email, loginModel!.Password);
+            var tokenResponse = await AuthService.GetTokenAsync(loginModel!.Email, loginModel!.Password);
 
-            if (token is not null)
+            if (tokenResponse is not null)
             {
-                await AuthStateProvider.MarkUserAsAuthenticatedAsync(token);
+                await AuthStateProvider.MarkUserAsAuthenticatedAsync(tokenResponse.AccessToken, tokenResponse.RefreshToken);
                 Navigation.NavigateTo("/");
             }
             else

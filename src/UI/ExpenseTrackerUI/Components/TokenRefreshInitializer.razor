@@ -1,0 +1,26 @@
+@using ExpenseTrackerUI.Services
+@inject TokenRefreshService TokenRefreshService
+@inject NavigationManager NavigationManager
+@implements IDisposable
+
+@code {
+    protected override void OnInitialized()
+    {
+        // Record activity on navigation
+        NavigationManager.LocationChanged += OnLocationChanged;
+
+        // Record initial activity
+        TokenRefreshService.RecordActivity();
+    }
+
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        TokenRefreshService.RecordActivity();
+    }
+
+    public void Dispose()
+    {
+        NavigationManager.LocationChanged -= OnLocationChanged;
+        (TokenRefreshService as IDisposable)?.Dispose();
+    }
+}

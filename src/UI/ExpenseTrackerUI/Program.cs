@@ -11,6 +11,8 @@ builder.Services.AddRazorComponents()
 
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<ExpenseService>();
+builder.Services.AddScoped<TokenRefreshService>();
+builder.Services.AddScoped<ActivityTrackingHandler>();
 
 builder.Services.AddScoped<CustomAuthStateProvider>();
 builder.Services.AddScoped<AuthenticationStateProvider>(sp => sp.GetRequiredService<CustomAuthStateProvider>());
@@ -23,12 +25,13 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddAuthorization();
 builder.Services.AddCascadingAuthenticationState();
 
-// Configure HttpClient with handler
+// Configure HttpClient with activity tracking handler
 builder.Services.AddHttpClient("AuthenticatedClient", client =>
 {
   client.BaseAddress = new Uri(builder.Configuration["ApiBaseUrl"]!);
   client.Timeout = TimeSpan.FromMinutes(5);
-});
+})
+.AddHttpMessageHandler<ActivityTrackingHandler>();
 
 // Default HttpClient (for login/public endpoints)
 builder.Services.AddHttpClient(string.Empty, client =>

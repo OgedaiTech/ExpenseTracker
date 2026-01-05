@@ -8,6 +8,7 @@ namespace ExpenseTrackerUI.Services;
 public class CustomAuthStateProvider(ProtectedLocalStorage localStorage) : AuthenticationStateProvider
 {
   private const string TokenKey = "jwt_token";
+  private const string RefreshTokenKey = "refresh_token";
   private readonly ClaimsPrincipal _anonymous = new(new ClaimsIdentity());
 
   public override async Task<AuthenticationState> GetAuthenticationStateAsync()
@@ -29,6 +30,7 @@ public class CustomAuthStateProvider(ProtectedLocalStorage localStorage) : Authe
       if (jwtToken.ValidTo < DateTime.UtcNow)
       {
         await localStorage.DeleteAsync(TokenKey);
+        await localStorage.DeleteAsync(RefreshTokenKey);
         return new AuthenticationState(_anonymous);
       }
 
@@ -44,12 +46,13 @@ public class CustomAuthStateProvider(ProtectedLocalStorage localStorage) : Authe
     }
   }
 
-  public async Task MarkUserAsAuthenticatedAsync(string token)
+  public async Task MarkUserAsAuthenticatedAsync(string accessToken, string refreshToken)
   {
-    await localStorage.SetAsync(TokenKey, token);
+    await localStorage.SetAsync(TokenKey, accessToken);
+    await localStorage.SetAsync(RefreshTokenKey, refreshToken);
 
     var handler = new JwtSecurityTokenHandler();
-    var jwtToken = handler.ReadJwtToken(token);
+    var jwtToken = handler.ReadJwtToken(accessToken);
     var claims = jwtToken.Claims.ToList();
     var identity = new ClaimsIdentity(claims, "jwt");
     var user = new ClaimsPrincipal(identity);
@@ -60,6 +63,19 @@ public class CustomAuthStateProvider(ProtectedLocalStorage localStorage) : Authe
   public async Task MarkUserAsLoggedOutAsync()
   {
     await localStorage.DeleteAsync(TokenKey);
+    await localStorage.DeleteAsync(RefreshTokenKey);
     NotifyAuthenticationStateChanged(Task.FromResult(new AuthenticationState(_anonymous)));
+  }
+
+  public async Task<string?> GetTokenAsync()
+  {
+    var tokenResult = await localStorage.GetAsync<string>(TokenKey);
+    return tokenResult.Success ? tokenResult.Value : null;
+  }
+
+  public async Task<string?> GetRefreshTokenAsync()
+  {
+    var tokenResult = await localStorage.GetAsync<string>(RefreshTokenKey);
+    return tokenResult.Success ? tokenResult.Value : null;
   }
 }
