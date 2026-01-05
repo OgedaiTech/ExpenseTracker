@@ -6,27 +6,10 @@
 @inject NavigationManager NavigationManager
 @inject CustomAuthStateProvider AuthStateProvider
 
-<div class="row">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-body flex-column">
-                <div class="text-center mt-2">
-                    <h1 class="display-1 fw-bold">403</h1>
-                    <p class="fs-3"> <span class="text-danger">Logged out</span></p>
-                    <p class="lead">
-                        You've been logged out.
-                    </p>
-                </div>
-            </div>
-        </div>
-
-    </div>
-</div>
-
 @code {
-    override protected async Task OnInitializedAsync()
+    protected override async Task OnInitializedAsync()
     {
         await AuthStateProvider.MarkUserAsLoggedOutAsync();
-        NavigationManager.NavigateTo("/login", true);
+        NavigationManager.NavigateTo("/login", replace: true);
     }
 }

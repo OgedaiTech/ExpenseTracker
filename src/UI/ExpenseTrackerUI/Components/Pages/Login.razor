@@ -54,7 +54,7 @@
             if (token is not null)
             {
                 await AuthStateProvider.MarkUserAsAuthenticatedAsync(token);
-                Navigation.NavigateTo("/", forceLoad: true);
+                Navigation.NavigateTo("/");
             }
             else
             {
