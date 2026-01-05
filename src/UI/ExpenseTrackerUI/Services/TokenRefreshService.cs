@@ -5,7 +5,7 @@ namespace ExpenseTrackerUI.Services;
 public class TokenRefreshService(
     CustomAuthStateProvider authStateProvider,
     AuthService authService,
-    ILogger<TokenRefreshService> logger) : IDisposable
+    ILogger<TokenRefreshService> logger)
 {
   private DateTime _lastActivity = DateTime.UtcNow;
   private const int RefreshBeforeExpiryMinutes = 2; // Refresh 2 minutes before expiry
@@ -62,10 +62,5 @@ public class TokenRefreshService(
     {
       logger.LogError(ex, "Error during token refresh");
     }
-  }
-
-  public void Dispose()
-  {
-    // Nothing to dispose
   }
 }
