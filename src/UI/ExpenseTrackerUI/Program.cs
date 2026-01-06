@@ -1,5 +1,6 @@
 using ExpenseTrackerUI.Components;
 using ExpenseTrackerUI.Services;
+using ExpenseTrackerUI.Services.Expense;
 using Microsoft.AspNetCore.Components.Authorization;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -19,7 +20,7 @@ builder.Services.AddScoped<AuthenticationStateProvider>(sp => sp.GetRequiredServ
 
 builder.Services.AddAuthentication(options =>
 {
-    options.DefaultScheme = "Blazor";
+  options.DefaultScheme = "Blazor";
 }).AddScheme<Microsoft.AspNetCore.Authentication.AuthenticationSchemeOptions, BlazorAuthenticationHandler>("Blazor", null);
 
 builder.Services.AddAuthorization();
