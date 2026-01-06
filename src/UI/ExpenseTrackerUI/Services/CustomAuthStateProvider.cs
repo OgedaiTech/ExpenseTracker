@@ -69,13 +69,29 @@ public class CustomAuthStateProvider(ProtectedLocalStorage localStorage) : Authe
 
   public async Task<string?> GetTokenAsync()
   {
-    var tokenResult = await localStorage.GetAsync<string>(TokenKey);
-    return tokenResult.Success ? tokenResult.Value : null;
+    try
+    {
+      var tokenResult = await localStorage.GetAsync<string>(TokenKey);
+      return tokenResult.Success ? tokenResult.Value : null;
+    }
+    catch
+    {
+      // Return null if we can't access storage (e.g., during prerendering)
+      return null;
+    }
   }
 
   public async Task<string?> GetRefreshTokenAsync()
   {
-    var tokenResult = await localStorage.GetAsync<string>(RefreshTokenKey);
-    return tokenResult.Success ? tokenResult.Value : null;
+    try
+    {
+      var tokenResult = await localStorage.GetAsync<string>(RefreshTokenKey);
+      return tokenResult.Success ? tokenResult.Value : null;
+    }
+    catch
+    {
+      // Return null if we can't access storage (e.g., during prerendering)
+      return null;
+    }
   }
 }

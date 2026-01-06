@@ -41,17 +41,23 @@ else
 
 @code {
     private List<ExpenseDto>? expenses;
+    private bool hasRendered;
 
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        try
+        if (firstRender && !hasRendered)
         {
-            var response = await ExpenseService.GetUserExpensesAsync();
-            expenses = response?.Items ?? new List<ExpenseDto>();
-        }
-        catch
-        {
-            expenses = new List<ExpenseDto>();
+            hasRendered = true;
+            try
+            {
+                var response = await ExpenseService.GetUserExpensesAsync();
+                expenses = response?.Items ?? new List<ExpenseDto>();
+            }
+            catch
+            {
+                expenses = new List<ExpenseDto>();
+            }
+            StateHasChanged();
         }
     }
 }
