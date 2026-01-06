@@ -3,7 +3,7 @@ using System.Text.Encodings.Web;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Options;
 
-namespace ExpenseTrackerUI.Services;
+namespace ExpenseTrackerUI.Services.Authentication;
 
 public class BlazorAuthenticationHandler(
     IOptionsMonitor<AuthenticationSchemeOptions> options,

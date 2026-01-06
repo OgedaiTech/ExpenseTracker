@@ -3,7 +3,7 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 
-namespace ExpenseTrackerUI.Services;
+namespace ExpenseTrackerUI.Services.Authentication;
 
 public class CustomAuthStateProvider(ProtectedLocalStorage localStorage) : AuthenticationStateProvider
 {

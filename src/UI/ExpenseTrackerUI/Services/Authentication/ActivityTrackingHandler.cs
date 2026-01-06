@@ -1,4 +1,4 @@
-namespace ExpenseTrackerUI.Services;
+namespace ExpenseTrackerUI.Services.Authentication;
 
 public class ActivityTrackingHandler(TokenRefreshService tokenRefreshService) : DelegatingHandler
 {

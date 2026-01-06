@@ -1,5 +1,5 @@
 using ExpenseTrackerUI.Components;
-using ExpenseTrackerUI.Services;
+using ExpenseTrackerUI.Services.Authentication;
 using ExpenseTrackerUI.Services.Expense;
 using Microsoft.AspNetCore.Components.Authorization;
 
