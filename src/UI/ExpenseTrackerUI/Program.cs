@@ -1,45 +1,14 @@
 using ExpenseTrackerUI.Components;
-using ExpenseTrackerUI.Services.Authentication;
-using ExpenseTrackerUI.Services.Expense;
-using Microsoft.AspNetCore.Components.Authorization;
+using ExpenseTrackerUI.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.AddServiceDefaults();
 
-builder.Services.AddRazorComponents()
-    .AddInteractiveServerComponents();
-
-builder.Services.AddScoped<AuthService>();
-builder.Services.AddScoped<ExpenseService>();
-builder.Services.AddScoped<TokenRefreshService>();
-builder.Services.AddScoped<ActivityTrackingHandler>();
-
-builder.Services.AddScoped<CustomAuthStateProvider>();
-builder.Services.AddScoped<AuthenticationStateProvider>(sp => sp.GetRequiredService<CustomAuthStateProvider>());
-
-builder.Services.AddAuthentication(options =>
-{
-  options.DefaultScheme = "Blazor";
-}).AddScheme<Microsoft.AspNetCore.Authentication.AuthenticationSchemeOptions, BlazorAuthenticationHandler>("Blazor", null);
-
-builder.Services.AddAuthorization();
-builder.Services.AddCascadingAuthenticationState();
-
-// Configure HttpClient with activity tracking handler
-builder.Services.AddHttpClient("AuthenticatedClient", client =>
-{
-  client.BaseAddress = new Uri(builder.Configuration["ApiBaseUrl"]!);
-  client.Timeout = TimeSpan.FromMinutes(5);
-})
-.AddHttpMessageHandler<ActivityTrackingHandler>();
-
-// Default HttpClient (for login/public endpoints)
-builder.Services.AddHttpClient(string.Empty, client =>
-{
-  client.BaseAddress = new Uri(builder.Configuration["ApiBaseUrl"]!);
-  client.Timeout = TimeSpan.FromMinutes(5);
-});
+builder.Services.AddRazorComponentsConfiguration();
+builder.Services.AddAuthenticationConfiguration();
+builder.Services.AddHttpClientConfiguration(builder.Configuration);
+builder.Services.AddApplicationServices();
 
 var app = builder.Build();
 
