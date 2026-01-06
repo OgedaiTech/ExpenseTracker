@@ -1,3 +1,5 @@
+using ExpenseTrackerUI.Services.Authentication;
+
 namespace ExpenseTrackerUI.Services.Expense;
 
 public class ExpenseService(IHttpClientFactory httpClientFactory, CustomAuthStateProvider authStateProvider)

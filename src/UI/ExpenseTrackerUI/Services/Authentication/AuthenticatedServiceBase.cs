@@ -1,6 +1,6 @@
 using System.Net.Http.Headers;
 
-namespace ExpenseTrackerUI.Services;
+namespace ExpenseTrackerUI.Services.Authentication;
 
 public abstract class AuthenticatedServiceBase(IHttpClientFactory httpClientFactory, CustomAuthStateProvider authStateProvider)
 {

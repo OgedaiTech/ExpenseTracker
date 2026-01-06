@@ -1,7 +1,7 @@
 @page "/logout"
 @rendermode @(new InteractiveServerRenderMode(prerender: false))
 
-@using ExpenseTrackerUI.Services
+@using ExpenseTrackerUI.Services.Authentication
 @using Microsoft.AspNetCore.Components.Web
 @inject NavigationManager NavigationManager
 @inject CustomAuthStateProvider AuthStateProvider

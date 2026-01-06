@@ -1,6 +1,6 @@
 using System.IdentityModel.Tokens.Jwt;
 
-namespace ExpenseTrackerUI.Services;
+namespace ExpenseTrackerUI.Services.Authentication;
 
 public class TokenRefreshService(
     CustomAuthStateProvider authStateProvider,
