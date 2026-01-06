@@ -20,47 +20,54 @@ public class TokenRefreshService(
     try
     {
       var token = await authStateProvider.GetTokenAsync();
-      if (string.IsNullOrEmpty(token))
-      {
-        return;
-      }
+      if (string.IsNullOrEmpty(token)) return;
 
-      var handler = new JwtSecurityTokenHandler();
-      var jwtToken = handler.ReadJwtToken(token);
-      var timeUntilExpiry = jwtToken.ValidTo - DateTime.UtcNow;
+      var timeUntilExpiry = GetTimeUntilExpiry(token);
+      if (timeUntilExpiry.TotalMinutes >= RefreshBeforeExpiryMinutes) return;
 
-      // Only refresh if token expires soon AND user has been active recently
-      if (timeUntilExpiry.TotalMinutes < RefreshBeforeExpiryMinutes)
-      {
-        var timeSinceLastActivity = DateTime.UtcNow - _lastActivity;
-
-        // Only refresh if user was active in the last 5 minutes
-        if (timeSinceLastActivity.TotalMinutes < 5)
-        {
-          var refreshToken = await authStateProvider.GetRefreshTokenAsync();
-          if (!string.IsNullOrEmpty(refreshToken))
-          {
-            var tokenResponse = await authService.RefreshTokenAsync(refreshToken);
-            if (tokenResponse is not null)
-            {
-              await authStateProvider.MarkUserAsAuthenticatedAsync(tokenResponse.AccessToken, tokenResponse.RefreshToken);
-              logger.LogInformation("Token refreshed successfully due to user activity");
-            }
-            else
-            {
-              logger.LogWarning("Failed to refresh token");
-            }
-          }
-        }
-        else
-        {
-          logger.LogInformation("Token not refreshed - user inactive for {Minutes} minutes", timeSinceLastActivity.TotalMinutes);
-        }
-      }
+      await HandleTokenRefreshAsync();
     }
     catch (Exception ex)
     {
       logger.LogError(ex, "Error during token refresh");
+    }
+  }
+
+  private static TimeSpan GetTimeUntilExpiry(string token)
+  {
+    var handler = new JwtSecurityTokenHandler();
+    var jwtToken = handler.ReadJwtToken(token);
+    return jwtToken.ValidTo - DateTime.UtcNow;
+  }
+
+  private async Task HandleTokenRefreshAsync()
+  {
+    var timeSinceLastActivity = DateTime.UtcNow - _lastActivity;
+
+    if (timeSinceLastActivity.TotalMinutes < 5)
+    {
+      await PerformTokenRefreshAsync();
+    }
+    else if (logger.IsEnabled(LogLevel.Information))
+    {
+      logger.LogInformation("Token not refreshed - user inactive for {Minutes} minutes", timeSinceLastActivity.TotalMinutes);
+    }
+  }
+
+  private async Task PerformTokenRefreshAsync()
+  {
+    var refreshToken = await authStateProvider.GetRefreshTokenAsync();
+    if (string.IsNullOrEmpty(refreshToken)) return;
+
+    var tokenResponse = await authService.RefreshTokenAsync(refreshToken);
+    if (tokenResponse is not null)
+    {
+      await authStateProvider.MarkUserAsAuthenticatedAsync(tokenResponse.AccessToken, tokenResponse.RefreshToken);
+      logger.LogInformation("Token refreshed successfully due to user activity");
+    }
+    else
+    {
+      logger.LogWarning("Failed to refresh token");
     }
   }
 }
