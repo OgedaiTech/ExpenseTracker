@@ -1,5 +1,5 @@
 using System.Net;
-using System.Net.Http.Json;
+using System.Text.Json.Serialization;
 using ExpenseTrackerUI.Services.Authentication;
 
 namespace ExpenseTrackerUI.Services.Tenant;
@@ -35,12 +35,26 @@ public class TenantService(IHttpClientFactory httpClientFactory, CustomAuthState
         return ServiceResult<CreateTenantResponse>.Success(result!);
       }
 
-      var errorContent = await response.Content.ReadAsStringAsync();
-      return ServiceResult<CreateTenantResponse>.Failure(
-        response.StatusCode,
-        null,
-        errorContent
-      );
+      // Try to parse ProblemDetails for error information
+      try
+      {
+        var problemDetails = await response.Content.ReadFromJsonAsync<ProblemDetailsResponse>();
+        return ServiceResult<CreateTenantResponse>.Failure(
+          response.StatusCode,
+          problemDetails?.Detail,
+          null
+        );
+      }
+      catch
+      {
+        // Fallback if response is not ProblemDetails
+        var errorContent = await response.Content.ReadAsStringAsync();
+        return ServiceResult<CreateTenantResponse>.Failure(
+          response.StatusCode,
+          null,
+          errorContent
+        );
+      }
     }
     catch (Exception ex)
     {
@@ -50,5 +64,23 @@ public class TenantService(IHttpClientFactory httpClientFactory, CustomAuthState
         ex.Message
       );
     }
+  }
+
+  private sealed class ProblemDetailsResponse
+  {
+    [JsonPropertyName("type")]
+    public string? Type { get; set; }
+
+    [JsonPropertyName("title")]
+    public string? Title { get; set; }
+
+    [JsonPropertyName("status")]
+    public int? Status { get; set; }
+
+    [JsonPropertyName("detail")]
+    public string? Detail { get; set; }
+
+    [JsonPropertyName("instance")]
+    public string? Instance { get; set; }
   }
 }
