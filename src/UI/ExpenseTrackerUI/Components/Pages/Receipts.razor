@@ -1,0 +1,125 @@
+@page "/expenses/{ExpenseId:guid}/receipts"
+@attribute [Authorize]
+@rendermode InteractiveServer
+
+@using ExpenseTrackerUI.Services.Receipt
+@using ExpenseTrackerUI.Services.Expense
+@inject ReceiptService ReceiptService
+@inject ExpenseService ExpenseService
+@inject NavigationManager Navigation
+
+<div class="mb-3">
+    <button class="btn btn-secondary" @onclick="NavigateBack">
+        <span class="bi bi-arrow-left"></span> Back to Expenses
+    </button>
+</div>
+
+@if (expense == null || receipts == null)
+{
+    <p>Loading...</p>
+}
+else
+{
+    <!-- Expense Details Section -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <h4 class="card-title">@expense.Name</h4>
+            <div class="row">
+                <div class="col-md-6">
+                    <p class="mb-1"><strong>Amount:</strong> @expense.Amount.ToString("C")</p>
+                </div>
+                <div class="col-md-6">
+                    <p class="mb-1"><strong>Date:</strong> @expense.CreatedAt.ToString("MM/dd/yyyy")</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Receipts Table Section -->
+    <h5>Receipts</h5>
+
+    @if (!receipts.Any())
+    {
+        <p class="text-muted">No receipts found for this expense.</p>
+    }
+    else
+    {
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Receipt No</th>
+                    <th>Vendor</th>
+                    <th>Date</th>
+                    <th>Amount</th>
+                    <th>Created</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var receipt in receipts)
+                {
+                    <tr>
+                        <td>@receipt.ReceiptNo</td>
+                        <td>@receipt.Vendor</td>
+                        <td>@receipt.Date.ToString("MM/dd/yyyy")</td>
+                        <td>@receipt.Amount.ToString("C")</td>
+                        <td>@receipt.CreatedAt.ToString("MM/dd/yyyy")</td>
+                        <td>
+                            <button class="btn btn-sm btn-primary me-2" disabled>
+                                View
+                            </button>
+                            <button class="btn btn-sm btn-secondary me-2" disabled>
+                                Edit
+                            </button>
+                            <button class="btn btn-sm btn-danger" disabled>
+                                Delete
+                            </button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+}
+
+@code {
+    [Parameter]
+    public Guid ExpenseId { get; set; }
+
+    private ExpenseDto? expense;
+    private List<ReceiptDto>? receipts;
+    private bool hasRendered;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && !hasRendered)
+        {
+            hasRendered = true;
+            try
+            {
+                // Fetch expense details and receipts in parallel
+                var expenseTask = ExpenseService.GetUserExpensesAsync();
+                var receiptsTask = ReceiptService.GetReceiptsAsync(ExpenseId);
+
+                await Task.WhenAll(expenseTask, receiptsTask);
+
+                var expenseResponse = await expenseTask;
+                expense = expenseResponse?.Items?.FirstOrDefault(e => e.Id == ExpenseId);
+
+                var receiptsResponse = await receiptsTask;
+                receipts = receiptsResponse?.Items ?? new List<ReceiptDto>();
+            }
+            catch
+            {
+                // Handle error - initialize empty list
+                receipts = new List<ReceiptDto>();
+            }
+            StateHasChanged();
+        }
+    }
+
+    private void NavigateBack()
+    {
+        Navigation.NavigateTo("/expenses");
+    }
+}

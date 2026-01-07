@@ -20,10 +20,10 @@ Authorization: Bearer {{login.response.body.$.accessToken}}
 POST {{ExpenseTracker.WebAPI_HostAddress}}/receipts/
 Accept: application/json
 Content-Type: application/json
-Authorization: Bearer {{login.response.body.$.token}}
+Authorization: Bearer {{login.response.body.$.accessToken}}
 
 {
-  "expenseId": "019aa7b8-d04a-73ca-9b95-707dffb5a0a6",
+  "expenseId": "019b8ef4-cfd3-798a-8ba6-59708c5f70c2",
   "amount": 20,
   "date": "2024-06-20T12:00:00Z",
   "receiptNo": "R123456",
