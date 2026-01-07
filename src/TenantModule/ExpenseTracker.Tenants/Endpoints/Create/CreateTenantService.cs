@@ -21,6 +21,10 @@ public class CreateTenantService(ICreateTenantRepository repository,
     if (!createTenantAdminResult.Success)
     {
       await repository.DeleteTenantAsync(tenantId);
+      if (createTenantAdminResult.Message == "TENANT_ADMIN_USER_EMAIL_ALREADY_EXISTS")
+      {
+        return new ServiceResult("TENANT_ADMIN_USER_EMAIL_ALREADY_EXISTS");
+      }
       return new ServiceResult("CANT_CREATE_TENANT_ADMIN_USER");
     }
     return new ServiceResult();

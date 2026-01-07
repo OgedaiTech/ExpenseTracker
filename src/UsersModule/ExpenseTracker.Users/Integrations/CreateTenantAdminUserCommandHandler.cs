@@ -24,6 +24,10 @@ public class CreateTenantAdminUserCommandHandler(UserManager<ApplicationUser> us
       }
       return new ServiceResult();
     }
+    else if (result.Errors.Contains(result.Errors.FirstOrDefault(e => e.Code == "DuplicateUserName")))
+    {
+      return new ServiceResult("TENANT_ADMIN_USER_EMAIL_ALREADY_EXISTS");
+    }
     else
     {
       return new ServiceResult("CANT_CREATE_USER");
