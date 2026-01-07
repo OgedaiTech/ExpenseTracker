@@ -5,7 +5,8 @@
 
 @if (isVisible)
 {
-    <div class="modal fade show" style="display: block;" tabindex="-1" aria-labelledby="createTenantModalLabel" aria-modal="true" role="dialog">
+    <div class="modal fade show" style="display: block;" tabindex="-1" aria-labelledby="createTenantModalLabel"
+        aria-modal="true" role="dialog">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -39,28 +40,34 @@
 
                         <div class="mb-3">
                             <label for="description" class="form-label">Description</label>
-                            <InputTextArea id="description" class="form-control" rows="3" @bind-Value="model!.Description" disabled="@isSubmitting" />
+                            <InputTextArea id="description" class="form-control" rows="3" @bind-Value="model!.Description"
+                                disabled="@isSubmitting" />
                             <ValidationMessage For="() => model!.Description" />
                         </div>
 
                         <div class="mb-3">
                             <label for="domain" class="form-label">Domain</label>
-                            <InputText id="domain" class="form-control" @bind-Value="model!.Domain" disabled="@isSubmitting" />
+                            <InputText id="domain" class="form-control" @bind-Value="model!.Domain"
+                                disabled="@isSubmitting" />
                             <ValidationMessage For="() => model!.Domain" />
                             <small class="form-text text-muted">Optional domain for the tenant</small>
                         </div>
 
                         <div class="mb-3">
                             <label for="email" class="form-label">Admin Email <span class="text-danger">*</span></label>
-                            <InputText id="email" type="email" class="form-control" @bind-Value="model!.Email" disabled="@isSubmitting" />
+                            <InputText id="email" type="email" class="form-control" @bind-Value="model!.Email"
+                                disabled="@isSubmitting" />
                             <ValidationMessage For="() => model!.Email" />
                         </div>
 
                         <div class="mb-3">
-                            <label for="password" class="form-label">Admin Password <span class="text-danger">*</span></label>
-                            <InputText id="password" type="password" class="form-control" @bind-Value="model!.Password" disabled="@isSubmitting" />
+                            <label for="password" class="form-label">Admin Password <span
+                                    class="text-danger">*</span></label>
+                            <InputText id="password" type="password" class="form-control" @bind-Value="model!.Password"
+                                disabled="@isSubmitting" />
                             <ValidationMessage For="() => model!.Password" />
-                            <small class="form-text text-muted">Must contain uppercase, lowercase, number and special character</small>
+                            <small class="form-text text-muted">Must contain uppercase, lowercase, number and special
+                                character</small>
                         </div>
                     </div>
 
@@ -163,6 +170,7 @@
             "TENANT_CODE_IS_REQUIRED" => "Tenant code is required for this operation.",
             "CANT_CREATE_TENANT_ADMIN_USER" => "Failed to create tenant administrator account. Please try again.",
             "TENANT_CODE_ALREADY_EXISTS" => "A tenant with this code already exists. Please choose a different code.",
+            "TENANT_ADMIN_USER_EMAIL_ALREADY_EXISTS" => "The email provided for the tenant administrator is already in use. Please use a different email.",
             _ => defaultMessage ?? "An error occurred while creating the tenant."
         };
     }
