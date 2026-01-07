@@ -1,0 +1,169 @@
+@rendermode InteractiveServer
+@using ExpenseTrackerUI.Services.Tenant
+@using Microsoft.AspNetCore.Components.Forms
+@inject TenantService TenantService
+
+@if (isVisible)
+{
+    <div class="modal fade show" style="display: block;" tabindex="-1" aria-labelledby="createTenantModalLabel" aria-modal="true" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="createTenantModalLabel">Create New Tenant</h5>
+                    <button type="button" class="btn-close" @onclick="HandleCancel" disabled="@isSubmitting"></button>
+                </div>
+
+                <EditForm Model="@model" OnValidSubmit="HandleValidSubmit" FormName="CreateTenantForm">
+                    <DataAnnotationsValidator />
+
+                    <div class="modal-body">
+                        @if (!string.IsNullOrEmpty(errorMessage))
+                        {
+                            <div class="alert alert-danger">
+                                <strong>Error:</strong> @errorMessage
+                            </div>
+                        }
+
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Tenant Name <span class="text-danger">*</span></label>
+                            <InputText id="name" class="form-control" @bind-Value="model!.Name" disabled="@isSubmitting" />
+                            <ValidationMessage For="() => model!.Name" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="code" class="form-label">Tenant Code</label>
+                            <InputText id="code" class="form-control" @bind-Value="model!.Code" disabled="@isSubmitting" />
+                            <ValidationMessage For="() => model!.Code" />
+                            <small class="form-text text-muted">Optional unique identifier for the tenant</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Description</label>
+                            <InputTextArea id="description" class="form-control" rows="3" @bind-Value="model!.Description" disabled="@isSubmitting" />
+                            <ValidationMessage For="() => model!.Description" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="domain" class="form-label">Domain</label>
+                            <InputText id="domain" class="form-control" @bind-Value="model!.Domain" disabled="@isSubmitting" />
+                            <ValidationMessage For="() => model!.Domain" />
+                            <small class="form-text text-muted">Optional domain for the tenant</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Admin Email <span class="text-danger">*</span></label>
+                            <InputText id="email" type="email" class="form-control" @bind-Value="model!.Email" disabled="@isSubmitting" />
+                            <ValidationMessage For="() => model!.Email" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Admin Password <span class="text-danger">*</span></label>
+                            <InputText id="password" type="password" class="form-control" @bind-Value="model!.Password" disabled="@isSubmitting" />
+                            <ValidationMessage For="() => model!.Password" />
+                            <small class="form-text text-muted">Must contain uppercase, lowercase, number and special character</small>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" @onclick="HandleCancel" disabled="@isSubmitting">
+                            Cancel
+                        </button>
+                        <button type="submit" class="btn btn-primary" disabled="@isSubmitting">
+                            @if (isSubmitting)
+                            {
+                                <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                <span>Creating...</span>
+                            }
+                            else
+                            {
+                                <span>Create Tenant</span>
+                            }
+                        </button>
+                    </div>
+                </EditForm>
+            </div>
+        </div>
+    </div>
+    <div class="modal-backdrop fade show"></div>
+}
+
+@code {
+    [Parameter]
+    public EventCallback<CreateTenantResponse> OnTenantCreated { get; set; }
+
+    [SupplyParameterFromForm]
+    private CreateTenantDto? model { get; set; }
+
+    private bool isVisible = false;
+    private bool isSubmitting = false;
+    private string? errorMessage;
+
+    protected override void OnInitialized()
+    {
+        model ??= new();
+    }
+
+    public Task Show()
+    {
+        model = new CreateTenantDto();
+        errorMessage = null;
+        isSubmitting = false;
+        isVisible = true;
+
+        StateHasChanged();
+        return Task.CompletedTask;
+    }
+
+    private void Hide()
+    {
+        isVisible = false;
+        StateHasChanged();
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        if (model == null) return;
+
+        isSubmitting = true;
+        errorMessage = null;
+
+        try
+        {
+            var result = await TenantService.CreateTenantAsync(model);
+
+            if (result.IsSuccess)
+            {
+                Hide();
+                await OnTenantCreated.InvokeAsync(result.Data);
+            }
+            else
+            {
+                errorMessage = MapErrorToUserMessage(result.ErrorCode, result.ErrorMessage);
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"An unexpected error occurred: {ex.Message}";
+        }
+        finally
+        {
+            isSubmitting = false;
+        }
+    }
+
+    private void HandleCancel()
+    {
+        Hide();
+    }
+
+    private string MapErrorToUserMessage(string? errorCode, string? defaultMessage)
+    {
+        return errorCode switch
+        {
+            "TENANT_CODE_IS_REQUIRED" => "Tenant code is required for this operation.",
+            "CANT_CREATE_TENANT_ADMIN_USER" => "Failed to create tenant administrator account. Please try again.",
+            "TENANT_CODE_ALREADY_EXISTS" => "A tenant with this code already exists. Please choose a different code.",
+            _ => defaultMessage ?? "An error occurred while creating the tenant."
+        };
+    }
+}
