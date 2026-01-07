@@ -35,7 +35,13 @@ public class CustomAuthStateProvider(ProtectedLocalStorage localStorage) : Authe
       }
 
       var claims = jwtToken.Claims.ToList();
-      var identity = new ClaimsIdentity(claims, "jwt");
+
+      // Map "role" claim to ClaimTypes.Role for proper authorization
+      var transformedClaims = claims.Select(c =>
+        c.Type == "role" ? new Claim(ClaimTypes.Role, c.Value) : c
+      ).ToList();
+
+      var identity = new ClaimsIdentity(transformedClaims, "jwt");
       var user = new ClaimsPrincipal(identity);
 
       return new AuthenticationState(user);
@@ -54,7 +60,13 @@ public class CustomAuthStateProvider(ProtectedLocalStorage localStorage) : Authe
     var handler = new JwtSecurityTokenHandler();
     var jwtToken = handler.ReadJwtToken(accessToken);
     var claims = jwtToken.Claims.ToList();
-    var identity = new ClaimsIdentity(claims, "jwt");
+
+    // Map "role" claim to ClaimTypes.Role for proper authorization
+    var transformedClaims = claims.Select(c =>
+      c.Type == "role" ? new Claim(ClaimTypes.Role, c.Value) : c
+    ).ToList();
+
+    var identity = new ClaimsIdentity(transformedClaims, "jwt");
     var user = new ClaimsPrincipal(identity);
 
     NotifyAuthenticationStateChanged(Task.FromResult(new AuthenticationState(user)));
