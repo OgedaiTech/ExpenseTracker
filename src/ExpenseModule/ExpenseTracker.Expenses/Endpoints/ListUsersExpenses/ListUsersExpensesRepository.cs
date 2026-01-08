@@ -13,4 +13,12 @@ public class ListUsersExpensesRepository(ExpenseDbContext context) : IListUsersE
       e.TenantId == Guid.Parse(tenantId))
     .ToListAsync(ct);
   }
+
+  public Task<bool> VerifyUserAccessAsync(string requestingUserId, string tenantId, CancellationToken ct)
+  {
+    return context.Expenses
+      .AnyAsync(
+        u => u.CreatedByUserId == Guid.Parse(requestingUserId) &&
+        u.TenantId == Guid.Parse(tenantId), ct);
+  }
 }

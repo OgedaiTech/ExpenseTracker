@@ -28,13 +28,22 @@ internal class ListUsersExpenses(IListUsersExpensesService service) : EndpointWi
         await Send.OkAsync(response, ct);
         return;
       }
-      var problem = Results.Problem(
+      else
+      {
+        var statusCode = serviceResult.Message switch
+        {
+          "User does not have access to the requested expenses." => StatusCodes.Status403Forbidden,
+          _ => StatusCodes.Status400BadRequest
+        };
+        var problem = Results.Problem(
         title: "Invalid request",
         detail: serviceResult.Message,
-        statusCode: StatusCodes.Status400BadRequest,
+        statusCode: statusCode,
         instance: HttpContext.Request.Path);
-      await Send.ResultAsync(problem);
-      return;
+        await Send.ResultAsync(problem);
+        return;
+      }
+
     }
     catch (Exception)
     {
