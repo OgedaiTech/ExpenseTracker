@@ -98,13 +98,18 @@ else
             try
             {
                 // Fetch expense details and receipts in parallel
-                var expenseTask = ExpenseService.GetUserExpensesAsync();
+                var expenseTask = ExpenseService.GetExpenseByIdAsync(ExpenseId);
                 var receiptsTask = ReceiptService.GetReceiptsAsync(ExpenseId);
 
                 await Task.WhenAll(expenseTask, receiptsTask);
 
                 var expenseResponse = await expenseTask;
-                expense = expenseResponse?.Items?.FirstOrDefault(e => e.Id == ExpenseId);
+                if (expenseResponse.StatusCode is HttpStatusCode.NotFound)
+                {
+                    Navigation.NavigateTo("/expenses");
+                    return;
+                }
+                expense = await expenseResponse.Data!;
 
                 var receiptsResponse = await receiptsTask;
                 receipts = receiptsResponse?.Items ?? new List<ReceiptDto>();
