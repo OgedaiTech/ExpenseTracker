@@ -1,4 +1,5 @@
 using ExpenseTracker.Expenses.Endpoints.Create;
+using ExpenseTracker.Expenses.Endpoints.GetExpenseById;
 using ExpenseTracker.Expenses.Endpoints.ListUsersExpenses;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -10,5 +11,6 @@ public static class ExpenseRepositoryExtensions
   {
     services.AddScoped<ICreateExpenseRepository, CreateExpenseRepository>();
     services.AddScoped<IListUsersExpensesRepository, ListUsersExpensesRepository>();
+    services.AddScoped<IGetExpenseByIdRepository, GetExpenseByIdRepository>();
   }
 }

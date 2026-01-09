@@ -1,5 +1,6 @@
 using System.Reflection;
 using ExpenseTracker.Expenses.Endpoints.Create;
+using ExpenseTracker.Expenses.Endpoints.GetExpenseById;
 using ExpenseTracker.Expenses.Endpoints.ListUsersExpenses;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -13,6 +14,7 @@ public static class ExpenseServiceExtensions
   {
     services.AddScoped<ICreateExpenseService, CreateExpenseService>();
     services.AddScoped<IListUsersExpensesService, ListUsersExpensesService>();
+    services.AddScoped<IGetExpenseByIdService, GetExpenseByIdService>();
 
     // if using MediatR in this module, add any assmeblies that contain handlers to the module
     mediatRAssemblies.Add(typeof(ExpenseServiceExtensions).Assembly);
