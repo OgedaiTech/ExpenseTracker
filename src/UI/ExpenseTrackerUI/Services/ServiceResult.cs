@@ -1,6 +1,6 @@
 using System.Net;
 
-namespace ExpenseTrackerUI.Services.Tenant;
+namespace ExpenseTrackerUI.Services;
 
 public class ServiceResult<T>
 {
