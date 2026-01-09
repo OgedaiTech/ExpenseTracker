@@ -11,6 +11,13 @@ Authorization: Bearer {{login.response.body.$.accessToken}}
 
 ###
 
+@ExpenseId2 = 019b8ef4-cfd3-798a-8ba6-59708c5f70c2
+GET {{ExpenseTracker.WebAPI_HostAddress}}/expenses/{{ExpenseId2}}
+Accept: application/json
+Authorization: Bearer {{adminlogin.response.body.$.accessToken}}
+
+###
+
 GET {{ExpenseTracker.WebAPI_HostAddress}}/expenses/users
 Accept: application/json
 Authorization: Bearer {{login.response.body.$.accessToken}}
