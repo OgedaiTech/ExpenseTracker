@@ -112,4 +112,19 @@ Accept: application/json
 Authorization: Bearer {{adminlogin.response.body.$.accessToken}}
 
 
+### ========== BULK USER CREATION ==========
+
+POST {{ExpenseTracker.WebAPI_HostAddress}}/users/bulk
+Authorization: Bearer {{login.response.body.$.accessToken}}
+Content-Type: multipart/form-data; boundary=boundary
+
+--boundary
+Content-Disposition: form-data; name="CsvFile"; filename="users.csv"
+Content-Type: text/csv
+
+Email
+aaaaa@test.com
+bbbbb@test.com
+--boundary--
+
 ###

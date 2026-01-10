@@ -7,6 +7,7 @@ using ExpenseTracker.Users.UserEndpoints.BulkCreate;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
 namespace ExpenseTracker.Users;
 
@@ -15,7 +16,8 @@ public static class UsersModuleServiceExtensions
   public static IServiceCollection AddUserModuleServices(
     this IServiceCollection services,
     List<Assembly> mediatRAssemblies,
-    IConfiguration configuration
+    IConfiguration configuration,
+    IHostEnvironment environment
     )
   {
     services.AddIdentityCore<ApplicationUser>()
@@ -28,7 +30,15 @@ public static class UsersModuleServiceExtensions
     services.Configure<EmailSettings>(configuration.GetSection("Email"));
     services.Configure<BulkUserCreationSettings>(configuration.GetSection("BulkUserCreation"));
 
-    services.AddScoped<IEmailService, SmtpEmailService>();
+    if (environment.IsDevelopment())
+    {
+      services.AddScoped<IEmailService, ConsoleEmailService>();
+    }
+    else
+    {
+      services.AddScoped<IEmailService, SmtpEmailService>();
+    }
+
     services.AddScoped<ICsvParserService, CsvParserService>();
     services.AddScoped<IBulkCreateUsersService, BulkCreateUsersService>();
 
