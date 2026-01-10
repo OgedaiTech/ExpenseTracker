@@ -1,5 +1,7 @@
 @ExpenseTracker.WebAPI_HostAddress = http://localhost:5077
 
+### ======== CREATE EXPENSE ==========
+
 POST {{ExpenseTracker.WebAPI_HostAddress}}/expenses/
 Content-Type: application/json
 Accept: application/json
@@ -9,20 +11,20 @@ Authorization: Bearer {{login.response.body.$.accessToken}}
   "name": "Lunch"
 }
 
-###
+### ======== GET EXPENSE BY ID ==========
 
 @ExpenseId2 = 019b8ef4-cfd3-798a-8ba6-59708c5f70c2
 GET {{ExpenseTracker.WebAPI_HostAddress}}/expenses/{{ExpenseId2}}
 Accept: application/json
 Authorization: Bearer {{adminlogin.response.body.$.accessToken}}
 
-###
+### ======== GET ALL EXPENSES OF A USER ==========
 
 GET {{ExpenseTracker.WebAPI_HostAddress}}/expenses/users
 Accept: application/json
 Authorization: Bearer {{login.response.body.$.accessToken}}
 
-###
+### ======== CREATE RECEIPT ==========
 
 POST {{ExpenseTracker.WebAPI_HostAddress}}/receipts/
 Accept: application/json
@@ -36,13 +38,14 @@ Authorization: Bearer {{login.response.body.$.accessToken}}
   "receiptNo": "R123456",
   "vendor": "Restaurant"
 }
-###
+
+### ======== GET RECEIPTS BY EXPENSE ID ==========
 @ExpenseId = 019aa7b8-d04a-73ca-9b95-707dffb5a0a6
 GET {{ExpenseTracker.WebAPI_HostAddress}}/expenses/{{ExpenseId}}/receipts
 Accept: application/json
 Authorization: Bearer {{login.response.body.$.token}}
 
-###
+### ========== CREATE USERS ==========
 
 POST {{ExpenseTracker.WebAPI_HostAddress}}/users/
 Accept: application/json
@@ -53,7 +56,8 @@ Authorization: Bearer {{login.response.body.$.token}}
   "email": "test1+tt@test.com",
   "password": "P@ssw0rd!"
 }
-###
+
+### ========== LOGIN USERS ==========
 
 # @name login
 POST {{ExpenseTracker.WebAPI_HostAddress}}/users/login
@@ -75,7 +79,8 @@ Content-Type: application/json
   "email": "admin@expensetracker.com",
   "password": "Password1!"
 }
-###
+
+### ========== CREATE TENANT ===========
 
 POST {{ExpenseTracker.WebAPI_HostAddress}}/tenants
 Accept: application/json
@@ -91,7 +96,9 @@ Authorization: Bearer {{adminlogin.response.body.$.token}}
   "password": "Password1!"
 
 }
-###
+
+### ========== APPROVER-ROLE ==========
+
 @userId = 401a7471-172b-45f1-a45c-a36260ab1345
 POST {{ExpenseTracker.WebAPI_HostAddress}}/users/{{userId}}/roles/approver-role
 Accept: application/json
