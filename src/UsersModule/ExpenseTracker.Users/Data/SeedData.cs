@@ -13,9 +13,10 @@ public static class SeedData
 
     var systemAdmin = "SystemAdmin";
     var tenantAdmin = "TenantAdmin";
+    var approverRole = "Approver";
     var userRole = "User";
 
-    string[] roles = [systemAdmin, tenantAdmin, userRole];
+    string[] roles = [systemAdmin, tenantAdmin, approverRole, userRole];
 
     foreach (var role in roles)
     {
