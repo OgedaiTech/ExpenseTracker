@@ -98,3 +98,11 @@ Accept: application/json
 Authorization: Bearer {{adminlogin.response.body.$.accessToken}}
 
 ###
+
+@userId = 401a7471172b-45f1-a45c-a36260ab1345
+DELETE {{ExpenseTracker.WebAPI_HostAddress}}/users/{{userId}}/roles/approver-role
+Accept: application/json
+Authorization: Bearer {{adminlogin.response.body.$.accessToken}}
+
+
+###

@@ -1,9 +1,12 @@
 using FastEndpoints;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Logging;
 
-namespace ExpenseTracker.Users.UserEndpoints;
+namespace ExpenseTracker.Users.UserEndpoints.ApproverRole;
 
-internal class AssignApproverRoleEndpoint(UserManager<ApplicationUser> userManager) : EndpointWithoutRequest<EmptyResponse>
+internal partial class AssignApproverRole(
+  UserManager<ApplicationUser> userManager,
+  ILogger<AssignApproverRole> logger) : EndpointWithoutRequest<EmptyResponse>
 {
   public override void Configure()
   {
@@ -18,6 +21,7 @@ internal class AssignApproverRoleEndpoint(UserManager<ApplicationUser> userManag
     if (user is null)
     {
       await Send.NotFoundAsync(ct);
+      LogUserNotFoundWhenTryingToAssignApproverRole(logger, userId, null);
       return;
     }
 
@@ -25,6 +29,11 @@ internal class AssignApproverRoleEndpoint(UserManager<ApplicationUser> userManag
     if (user.TenantId.ToString() != requestingUsersTenantId && !User.IsInRole("SystemAdmin"))
     {
       await Send.ForbiddenAsync(ct);
+      LogCannotAssignApproverRoleWhenTheyAreNotInSameTenant(
+        logger,
+        Guid.Parse(User.Claims.First(c => c.Type == "UserId").Value),
+        userId,
+        null);
       return;
     }
 
@@ -32,6 +41,7 @@ internal class AssignApproverRoleEndpoint(UserManager<ApplicationUser> userManag
     if (!approverRole.Contains("Approver"))
     {
       await userManager.AddToRoleAsync(user, "Approver");
+      LogAssignedApproverRole(logger, userId, Guid.Parse(User.Claims.First(c => c.Type == "UserId").Value), null);
     }
 
     await Send.OkAsync(ct);
