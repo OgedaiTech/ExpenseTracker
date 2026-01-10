@@ -48,7 +48,7 @@ public partial class Program
     builder.Services.AddReceiptRepositories();
     builder.Services.AddTenantServices(mediatRAssemblies);
     builder.Services.AddTenantRepositories();
-    builder.Services.AddUserModuleServices(mediatRAssemblies);
+    builder.Services.AddUserModuleServices(mediatRAssemblies, builder.Configuration, builder.Environment);
 
     builder.Services.AddOpenApi();
 
