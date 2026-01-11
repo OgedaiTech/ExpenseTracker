@@ -1,0 +1,283 @@
+@rendermode InteractiveServer
+@using ExpenseTrackerUI.Services.User
+@using Microsoft.AspNetCore.Components.Forms
+@inject UserService UserService
+
+@if (isVisible)
+{
+    <div class="modal fade show" style="display: block;" tabindex="-1" aria-labelledby="bulkCreateUsersModalLabel"
+        aria-modal="true" role="dialog">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="bulkCreateUsersModalLabel">Bulk Create Users</h5>
+                    <button type="button" class="btn-close" @onclick="HandleClose" disabled="@isUploading"></button>
+                </div>
+
+                <div class="modal-body">
+                    @if (!showResults)
+                    {
+                        @* File Upload Section *@
+                        @if (!string.IsNullOrEmpty(errorMessage))
+                        {
+                            <div class="alert alert-danger">
+                                <strong>Error:</strong> @errorMessage
+                            </div>
+                        }
+
+                        <div class="mb-3">
+                            <label for="csvFile" class="form-label">CSV File <span class="text-danger">*</span></label>
+                            <InputFile id="csvFile" OnChange="OnFileSelected" accept=".csv" class="form-control" disabled="@isUploading" />
+                            <small class="form-text text-muted">
+                                Select a CSV file with an "Email" column. Maximum file size: 1MB.
+                            </small>
+                        </div>
+
+                        @if (selectedFile != null)
+                        {
+                            <div class="alert alert-info">
+                                <strong>Selected file:</strong> @selectedFile.Name (@FormatFileSize(selectedFile.Size))
+                            </div>
+                        }
+
+                        @if (isUploading)
+                        {
+                            <div class="text-center">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Uploading...</span>
+                                </div>
+                                <p class="mt-2">Uploading and processing users...</p>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        @* Results Section *@
+                        @if (uploadResults != null)
+                        {
+                            <div class="row mb-3">
+                                <div class="col-md-3">
+                                    <div class="card text-white bg-success">
+                                        <div class="card-body text-center">
+                                            <h5 class="card-title">@uploadResults.SuccessCount</h5>
+                                            <p class="card-text">Created</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="card text-white bg-warning">
+                                        <div class="card-body text-center">
+                                            <h5 class="card-title">@uploadResults.AlreadyExistedCount</h5>
+                                            <p class="card-text">Already Existed</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="card text-white bg-danger">
+                                        <div class="card-body text-center">
+                                            <h5 class="card-title">@uploadResults.FailedCount</h5>
+                                            <p class="card-text">Failed</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="card text-white bg-info">
+                                        <div class="card-body text-center">
+                                            <h5 class="card-title">@uploadResults.TotalProcessed</h5>
+                                            <p class="card-text">Total Processed</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="accordion" id="resultsAccordion">
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header">
+                                        <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                                            data-bs-target="#resultsDetails" aria-expanded="true" aria-controls="resultsDetails">
+                                            View Detailed Results
+                                        </button>
+                                    </h2>
+                                    <div id="resultsDetails" class="accordion-collapse collapse show">
+                                        <div class="accordion-body">
+                                            <div class="table-responsive">
+                                                <table class="table table-sm table-hover">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Email</th>
+                                                            <th>Status</th>
+                                                            <th>Details</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @foreach (var result in uploadResults.Results)
+                                                        {
+                                                            <tr>
+                                                                <td>@result.Email</td>
+                                                                <td>
+                                                                    <span class="badge @GetStatusBadgeClass(result.Status)">
+                                                                        @result.Status
+                                                                    </span>
+                                                                </td>
+                                                                <td>@(result.ErrorMessage ?? "-")</td>
+                                                            </tr>
+                                                        }
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    }
+                </div>
+
+                <div class="modal-footer">
+                    @if (!showResults)
+                    {
+                        <button type="button" class="btn btn-secondary" @onclick="HandleClose" disabled="@isUploading">
+                            Cancel
+                        </button>
+                        <button type="button" class="btn btn-primary" @onclick="HandleUpload" disabled="@(selectedFile == null || isUploading)">
+                            @if (isUploading)
+                            {
+                                <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                <span>Uploading...</span>
+                            }
+                            else
+                            {
+                                <span>Upload</span>
+                            }
+                        </button>
+                    }
+                    else
+                    {
+                        <button type="button" class="btn btn-primary" @onclick="HandleClose">
+                            Close
+                        </button>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-backdrop fade show"></div>
+}
+
+@code {
+    [Parameter]
+    public EventCallback<BulkCreateUsersResponse> OnUploadCompleted { get; set; }
+
+    private bool isVisible = false;
+    private bool isUploading = false;
+    private IBrowserFile? selectedFile;
+    private string? errorMessage;
+    private BulkCreateUsersResponse? uploadResults;
+    private bool showResults = false;
+
+    public Task Show()
+    {
+        isVisible = true;
+        isUploading = false;
+        selectedFile = null;
+        errorMessage = null;
+        uploadResults = null;
+        showResults = false;
+
+        StateHasChanged();
+        return Task.CompletedTask;
+    }
+
+    private void Hide()
+    {
+        isVisible = false;
+        StateHasChanged();
+    }
+
+    private void OnFileSelected(InputFileChangeEventArgs e)
+    {
+        selectedFile = e.File;
+        errorMessage = null;
+
+        // Validate file size
+        if (selectedFile.Size > 1024 * 1024) // 1MB
+        {
+            errorMessage = "The selected file exceeds the 1MB size limit.";
+            selectedFile = null;
+        }
+
+        StateHasChanged();
+    }
+
+    private async Task HandleUpload()
+    {
+        if (selectedFile == null) return;
+
+        isUploading = true;
+        errorMessage = null;
+
+        try
+        {
+            var result = await UserService.BulkCreateUsersAsync(selectedFile);
+
+            if (result.IsSuccess && result.Data != null)
+            {
+                uploadResults = result.Data;
+                showResults = true;
+                await OnUploadCompleted.InvokeAsync(result.Data);
+            }
+            else
+            {
+                errorMessage = MapErrorToUserMessage(result.ErrorCode, result.ErrorMessage);
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"An unexpected error occurred: {ex.Message}";
+        }
+        finally
+        {
+            isUploading = false;
+            StateHasChanged();
+        }
+    }
+
+    private void HandleClose()
+    {
+        Hide();
+    }
+
+    private string GetStatusBadgeClass(UserCreationStatus status)
+    {
+        return status switch
+        {
+            UserCreationStatus.Created => "bg-success",
+            UserCreationStatus.AlreadyExists => "bg-warning",
+            UserCreationStatus.Failed => "bg-danger",
+            UserCreationStatus.InvalidEmail => "bg-danger",
+            _ => "bg-secondary"
+        };
+    }
+
+    private string MapErrorToUserMessage(string? errorCode, string? defaultMessage)
+    {
+        return errorCode switch
+        {
+            "CSV_FILE_REQUIRED" => "Please select a CSV file to upload.",
+            "FILE_TOO_LARGE" => "The selected file exceeds the 1MB size limit.",
+            "INVALID_FILE_TYPE" => "Only CSV files are accepted.",
+            "INVALID_CSV_FORMAT" => "The CSV file format is invalid. Expected format: Email column.",
+            _ => defaultMessage ?? "An error occurred during bulk user creation."
+        };
+    }
+
+    private string FormatFileSize(long bytes)
+    {
+        if (bytes < 1024)
+            return $"{bytes} B";
+        else if (bytes < 1024 * 1024)
+            return $"{bytes / 1024.0:F2} KB";
+        else
+            return $"{bytes / (1024.0 * 1024.0):F2} MB";
+    }
+}

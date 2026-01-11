@@ -1,6 +1,7 @@
 using ExpenseTrackerUI.Services.Expense;
 using ExpenseTrackerUI.Services.Receipt;
 using ExpenseTrackerUI.Services.Tenant;
+using ExpenseTrackerUI.Services.User;
 
 namespace ExpenseTrackerUI.Extensions;
 
@@ -11,6 +12,7 @@ public static class ApplicationServicesExtensions
         services.AddScoped<ExpenseService>();
         services.AddScoped<ReceiptService>();
         services.AddScoped<TenantService>();
+        services.AddScoped<UserService>();
 
         return services;
     }
