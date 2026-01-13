@@ -23,32 +23,32 @@ public partial class BulkCreateUsersService(
     {
         var results = new List<UserCreationResult>();
 
-        var emails = await csvParser.ParseEmailsAsync(csvStream, cancellationToken);
+        var userRecords = await csvParser.ParseUserRecordsAsync(csvStream, cancellationToken);
 
-        var uniqueEmails = emails
-            .Select(e => e.Trim().ToLowerInvariant())
-            .Where(e => !string.IsNullOrWhiteSpace(e))
-            .Distinct()
+        var uniqueUsers = userRecords
+            .GroupBy(u => u.Email.Trim().ToLowerInvariant())
+            .Select(g => g.First())
+            .Where(u => !string.IsNullOrWhiteSpace(u.Email))
             .ToList();
 
-        if (uniqueEmails.Count > _settings.MaxUsersPerRequest)
+        if (uniqueUsers.Count > _settings.MaxUsersPerRequest)
         {
             return new BulkCreateUsersResult(
                 Success: false,
                 ErrorCode: "TOO_MANY_USERS",
-                ErrorMessage: $"CSV contains {uniqueEmails.Count} users, which exceeds the maximum of {_settings.MaxUsersPerRequest}");
+                ErrorMessage: $"CSV contains {uniqueUsers.Count} users, which exceeds the maximum of {_settings.MaxUsersPerRequest}");
         }
 
-        LogBulkCreateStarted(logger, tenantId, uniqueEmails.Count);
+        LogBulkCreateStarted(logger, tenantId, uniqueUsers.Count);
 
-        foreach (var email in uniqueEmails)
+        foreach (var userRecord in uniqueUsers)
         {
-            var result = await ProcessSingleEmailAsync(email, tenantId, cancellationToken);
+            var result = await ProcessSingleUserRecordAsync(userRecord, tenantId, cancellationToken);
             results.Add(result);
         }
 
         var response = new BulkCreateUsersResponse(
-            TotalProcessed: uniqueEmails.Count,
+            TotalProcessed: uniqueUsers.Count,
             SuccessCount: results.Count(r => r.Status == UserCreationStatus.Created),
             AlreadyExistedCount: results.Count(r => r.Status == UserCreationStatus.AlreadyExists),
             FailedCount: results.Count(r => r.Status is UserCreationStatus.Failed or UserCreationStatus.InvalidEmail),
@@ -61,11 +61,13 @@ public partial class BulkCreateUsersService(
         return new BulkCreateUsersResult(Success: true, Response: response);
     }
 
-    private async Task<UserCreationResult> ProcessSingleEmailAsync(
-        string email,
+    private async Task<UserCreationResult> ProcessSingleUserRecordAsync(
+        UserCsvRecord userRecord,
         Guid tenantId,
         CancellationToken cancellationToken)
     {
+        var email = userRecord.Email.Trim();
+
         if (!IsValidEmail(email))
         {
             return new UserCreationResult(email, UserCreationStatus.InvalidEmail, "Invalid email format");
@@ -81,7 +83,13 @@ public partial class BulkCreateUsersService(
         {
             UserName = email,
             Email = email,
-            TenantId = tenantId
+            TenantId = tenantId,
+            FirstName = userRecord.FirstName,
+            LastName = userRecord.LastName,
+            NationalIdentityNo = userRecord.NationalIdentityNo,
+            TaxIdNo = userRecord.TaxIdNo,
+            EmployeeId = userRecord.EmployeeId,
+            Title = userRecord.Title
         };
 
         var createResult = await userManager.CreateAsync(newUser);

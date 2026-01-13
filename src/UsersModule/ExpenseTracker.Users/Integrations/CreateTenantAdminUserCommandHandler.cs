@@ -10,7 +10,18 @@ public class CreateTenantAdminUserCommandHandler(UserManager<ApplicationUser> us
   public async Task<ServiceResult> Handle(CreateUserCommand request, CancellationToken cancellationToken)
   {
 
-    var newUser = new ApplicationUser { UserName = request.Email, Email = request.Email, TenantId = request.TenantId };
+    var newUser = new ApplicationUser
+    {
+      UserName = request.Email,
+      Email = request.Email,
+      TenantId = request.TenantId,
+      FirstName = request.FirstName,
+      LastName = request.LastName,
+      NationalIdentityNo = request.NationalIdentityNo,
+      TaxIdNo = request.TaxIdNo,
+      EmployeeId = request.EmployeeId,
+      Title = request.Title
+    };
 
     var result = await userManager.CreateAsync(newUser, request.Password);
 

@@ -19,7 +19,18 @@ internal class Create(UserManager<ApplicationUser> userManager) : Endpoint<Creat
       AddError("EMAIL_AND_PASSWORD_ARE_REQUIRED");
       ThrowIfAnyErrors();
     }
-    var newUser = new ApplicationUser { UserName = req.Email, Email = req.Email, TenantId = Guid.Parse(tenantId) };
+    var newUser = new ApplicationUser
+    {
+      UserName = req.Email,
+      Email = req.Email,
+      TenantId = Guid.Parse(tenantId),
+      FirstName = req.FirstName,
+      LastName = req.LastName,
+      NationalIdentityNo = req.NationalIdentityNo,
+      TaxIdNo = req.TaxIdNo,
+      EmployeeId = req.EmployeeId,
+      Title = req.Title
+    };
 
     var result = await userManager.CreateAsync(newUser, req.Password);
 
