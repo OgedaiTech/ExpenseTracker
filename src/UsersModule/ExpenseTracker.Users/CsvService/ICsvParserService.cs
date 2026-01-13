@@ -1,6 +1,8 @@
+using ExpenseTracker.Users.UserEndpoints.BulkCreate;
+
 namespace ExpenseTracker.Users.CsvService;
 
 public interface ICsvParserService
 {
-    Task<List<string>> ParseEmailsAsync(Stream csvStream, CancellationToken cancellationToken);
+  Task<List<UserCsvRecord>> ParseUserRecordsAsync(Stream csvStream, CancellationToken cancellationToken);
 }
