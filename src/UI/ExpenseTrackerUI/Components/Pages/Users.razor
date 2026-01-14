@@ -10,7 +10,7 @@
 
 <div class="mb-3">
     <button class="btn btn-primary" disabled>
-        <span class="bi bi-person-add"></span> Create User
+        <span class="bi bi-person-add"></span> New User
     </button>
     <button class="btn btn-secondary ms-2" @onclick="ShowBulkCreateModal">
         <span class="bi bi-upload"></span> Bulk Create
@@ -44,8 +44,8 @@
     private void HandleBulkUploadCompleted(BulkCreateUsersResponse result)
     {
         successMessage = $"Bulk upload completed: {result.SuccessCount} created, " +
-                        $"{result.AlreadyExistedCount} already existed, " +
-                        $"{result.FailedCount} failed";
+        $"{result.AlreadyExistedCount} already existed, " +
+        $"{result.FailedCount} failed";
         StateHasChanged();
     }
 }

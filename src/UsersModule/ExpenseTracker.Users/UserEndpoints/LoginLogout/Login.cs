@@ -2,7 +2,7 @@ using ExpenseTracker.Users.TokenService;
 using FastEndpoints;
 using Microsoft.AspNetCore.Identity;
 
-namespace ExpenseTracker.Users.UserEndpoints;
+namespace ExpenseTracker.Users.UserEndpoints.LoginLogout;
 
 internal class Login(
   UserManager<ApplicationUser> userManager,

@@ -1,9 +1,9 @@
 using FastEndpoints;
 using Microsoft.AspNetCore.Identity;
 
-namespace ExpenseTracker.Users.UserEndpoints;
+namespace ExpenseTracker.Users.UserEndpoints.CreateNewUser;
 
-internal class Create(UserManager<ApplicationUser> userManager) : Endpoint<CreateUserRequest, EmptyResponse>
+internal class CreateWithPassword(UserManager<ApplicationUser> userManager) : Endpoint<CreateUserRequest, EmptyResponse>
 {
   public override void Configure()
   {

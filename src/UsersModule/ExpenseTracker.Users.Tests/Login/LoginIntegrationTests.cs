@@ -1,7 +1,8 @@
 using System.Net;
 using System.Net.Http.Json;
 using ExpenseTracker.Users.Tests.Abstractions;
-using ExpenseTracker.Users.UserEndpoints;
+using ExpenseTracker.Users.UserEndpoints.CreateNewUser;
+using ExpenseTracker.Users.UserEndpoints.LoginLogout;
 
 namespace ExpenseTracker.Users.Tests.Login;
 
