@@ -13,4 +13,7 @@ public class ApplicationUser : IdentityUser
   public string? TaxIdNo { get; set; }
   public string? EmployeeId { get; set; }
   public string? Title { get; set; }
+
+  // User Status
+  public bool IsDeactivated { get; set; } = false; // Default to active
 }

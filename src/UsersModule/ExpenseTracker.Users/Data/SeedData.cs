@@ -38,7 +38,8 @@ public static class SeedData
         UserName = adminEmail,
         Email = adminEmail,
         EmailConfirmed = true,
-        TenantId = Guid.Empty
+        TenantId = Guid.Empty,
+        IsDeactivated = false
       };
 
       await userManager.CreateAsync(adminUser, adminPassword!);

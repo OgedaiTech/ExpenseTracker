@@ -29,7 +29,8 @@ internal class Create(UserManager<ApplicationUser> userManager) : Endpoint<Creat
       NationalIdentityNo = req.NationalIdentityNo,
       TaxIdNo = req.TaxIdNo,
       EmployeeId = req.EmployeeId,
-      Title = req.Title
+      Title = req.Title,
+      IsDeactivated = false
     };
 
     var result = await userManager.CreateAsync(newUser, req.Password);

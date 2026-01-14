@@ -20,7 +20,8 @@ public class CreateTenantAdminUserCommandHandler(UserManager<ApplicationUser> us
       NationalIdentityNo = request.NationalIdentityNo,
       TaxIdNo = request.TaxIdNo,
       EmployeeId = request.EmployeeId,
-      Title = request.Title
+      Title = request.Title,
+      IsDeactivated = false
     };
 
     var result = await userManager.CreateAsync(newUser, request.Password);

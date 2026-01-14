@@ -89,7 +89,8 @@ public partial class BulkCreateUsersService(
             NationalIdentityNo = userRecord.NationalIdentityNo,
             TaxIdNo = userRecord.TaxIdNo,
             EmployeeId = userRecord.EmployeeId,
-            Title = userRecord.Title
+            Title = userRecord.Title,
+            IsDeactivated = false
         };
 
         var createResult = await userManager.CreateAsync(newUser);
