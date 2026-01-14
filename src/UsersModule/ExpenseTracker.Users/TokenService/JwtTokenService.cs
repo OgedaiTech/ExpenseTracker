@@ -66,6 +66,11 @@ public class JwtTokenService(UserManager<ApplicationUser> userManager,
       return null;
     }
 
+    if (user.IsDeactivated)
+    {
+      return null;
+    }
+
     var storedToken = await userManager.GetAuthenticationTokenAsync(
         user,
         RefreshTokenProvider,

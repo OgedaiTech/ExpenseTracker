@@ -23,6 +23,12 @@ internal class Login(
       return;
     }
 
+    if (user.IsDeactivated)
+    {
+      await Send.UnauthorizedAsync(ct);
+      return;
+    }
+
     var loginSuccesful = await userManager.CheckPasswordAsync(user, req.Password);
     if (!loginSuccesful)
     {

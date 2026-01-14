@@ -39,6 +39,12 @@ internal partial class SetPasswordEndpoint(
             ThrowIfAnyErrors();
         }
 
+        if (user!.IsDeactivated)
+        {
+            AddError("USER_DEACTIVATED", "User account is deactivated");
+            ThrowIfAnyErrors();
+        }
+
         var result = await userManager.ResetPasswordAsync(user!, req.Token, req.NewPassword);
 
         if (!result.Succeeded)
