@@ -57,6 +57,17 @@ Authorization: Bearer {{login.response.body.$.token}}
   "password": "P@ssw0rd!"
 }
 
+###
+
+POST {{ExpenseTracker.WebAPI_HostAddress}}/users/invite
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer {{login.response.body.$.accessToken}}
+
+{
+  "email": "barbaros.yurttagul@gmail.com"
+}
+
 ### ========== LOGIN USERS ==========
 
 # @name login
