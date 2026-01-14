@@ -24,7 +24,7 @@ dotnet run --project src/Aspire/ExpenseTracker.AppHost/ExpenseTracker.AppHost.cs
 dotnet run --project src/ExpenseTracker.WebAPI/ExpenseTracker.WebAPI.csproj
 
 # Add EF Core migration (run from repository root)
-dotnet ef migrations add MigrationName --project src/ExpenseModule/ExpenseTracker.Expenses --startup-project src/ExpenseTracker.WebAPI
+dotnet ef migrations add MigrationName --project src/ExpenseModule/ExpenseTracker.Expenses --context ExpenseDbContext --startup-project src/ExpenseTracker.WebAPI
 ```
 
 ## Architecture Overview
@@ -48,6 +48,7 @@ Each module follows a consistent pattern with its own DbContext:
 - **UsersModule** (`ExpenseTracker.Users`) - User management with ASP.NET Identity
 
 Each module has:
+
 - Main project with domain logic, endpoints, and data access
 - Contracts project for cross-module communication (MediatR commands/queries)
 - Tests project with unit and integration tests
@@ -55,6 +56,7 @@ Each module has:
 ### Key Patterns
 
 **Endpoint Organization**: Each endpoint has its own folder under `Endpoints/` containing:
+
 - `*Endpoint.cs` - FastEndpoints endpoint class
 - `*Request.cs` / `*Response.cs` - DTOs
 - `I*Service.cs` and `*Service.cs` - Business logic
