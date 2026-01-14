@@ -1,7 +1,7 @@
 using ExpenseTracker.Users.TokenService;
 using FastEndpoints;
 
-namespace ExpenseTracker.Users.UserEndpoints;
+namespace ExpenseTracker.Users.UserEndpoints.LoginLogout;
 
 internal class Logout(ITokenService tokenService)
     : Endpoint<RefreshTokenRequest>

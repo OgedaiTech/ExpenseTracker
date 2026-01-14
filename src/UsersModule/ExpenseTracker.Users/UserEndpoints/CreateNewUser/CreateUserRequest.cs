@@ -1,4 +1,4 @@
-namespace ExpenseTracker.Users.UserEndpoints;
+namespace ExpenseTracker.Users.UserEndpoints.CreateNewUser;
 
 public record CreateUserRequest(
   string Email,
