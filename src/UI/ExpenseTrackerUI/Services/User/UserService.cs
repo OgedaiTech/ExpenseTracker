@@ -72,6 +72,50 @@ public class UserService(IHttpClientFactory httpClientFactory, CustomAuthStatePr
         }
     }
 
+    public async Task<ServiceResult<CreateUserWithInvitationResponse>> CreateUserWithInvitationAsync(CreateUserWithInvitationDto request)
+    {
+        try
+        {
+            var client = await GetAuthenticatedClientAsync();
+            var response = await client.PostAsJsonAsync("/users/invite", request);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var result = await response.Content.ReadFromJsonAsync<CreateUserWithInvitationResponse>();
+                return ServiceResult<CreateUserWithInvitationResponse>.Success(result!);
+            }
+
+            // Try to parse ProblemDetails for error information
+            try
+            {
+                var problemDetails = await response.Content.ReadFromJsonAsync<ProblemDetailsResponse>();
+                return ServiceResult<CreateUserWithInvitationResponse>.Failure(
+                    response.StatusCode,
+                    problemDetails?.Detail,
+                    null
+                );
+            }
+            catch
+            {
+                // Fallback if response is not ProblemDetails
+                var errorContent = await response.Content.ReadAsStringAsync();
+                return ServiceResult<CreateUserWithInvitationResponse>.Failure(
+                    response.StatusCode,
+                    null,
+                    errorContent
+                );
+            }
+        }
+        catch (Exception ex)
+        {
+            return ServiceResult<CreateUserWithInvitationResponse>.Failure(
+                HttpStatusCode.InternalServerError,
+                null,
+                ex.Message
+            );
+        }
+    }
+
     private sealed class ProblemDetailsResponse
     {
         [JsonPropertyName("type")]

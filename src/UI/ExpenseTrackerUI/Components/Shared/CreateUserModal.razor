@@ -1,0 +1,204 @@
+@rendermode InteractiveServer
+@using ExpenseTrackerUI.Services.User
+@using Microsoft.AspNetCore.Components.Forms
+@inject UserService UserService
+
+@if (isVisible)
+{
+    <div class="modal fade show" style="display: block;" tabindex="-1" aria-labelledby="createUserModalLabel"
+        aria-modal="true" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="createUserModalLabel">Create New User</h5>
+                    <button type="button" class="btn-close" @onclick="HandleCancel" disabled="@isSubmitting"></button>
+                </div>
+
+                <EditForm Model="@model" OnValidSubmit="HandleValidSubmit" FormName="CreateUserForm">
+                    <DataAnnotationsValidator />
+
+                    <div class="modal-body">
+                        @if (!string.IsNullOrEmpty(errorMessage))
+                        {
+                            <div class="alert alert-danger">
+                                <strong>Error:</strong> @errorMessage
+                            </div>
+                        }
+
+                        @if (!string.IsNullOrEmpty(warningMessage))
+                        {
+                            <div class="alert alert-warning">
+                                <strong>Warning:</strong> @warningMessage
+                            </div>
+                        }
+
+                        <div class="mb-4">
+                            <h6 class="text-muted mb-3">Required Information</h6>
+                            <div class="mb-3">
+                                <label for="email" class="form-label">Email <span class="text-danger">*</span></label>
+                                <InputText id="email" type="email" class="form-control" @bind-Value="model!.Email"
+                                    disabled="@isSubmitting" />
+                                <ValidationMessage For="() => model!.Email" />
+                                <small class="form-text text-muted">User will receive an invitation email to set their
+                                    password</small>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <h6 class="text-muted mb-3">Personal Information</h6>
+                            <div class="mb-3">
+                                <label for="firstName" class="form-label">First Name</label>
+                                <InputText id="firstName" class="form-control" @bind-Value="model!.FirstName"
+                                    disabled="@isSubmitting" />
+                                <ValidationMessage For="() => model!.FirstName" />
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="lastName" class="form-label">Last Name</label>
+                                <InputText id="lastName" class="form-control" @bind-Value="model!.LastName"
+                                    disabled="@isSubmitting" />
+                                <ValidationMessage For="() => model!.LastName" />
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <h6 class="text-muted mb-3">Employment Details</h6>
+                            <div class="mb-3">
+                                <label for="employeeId" class="form-label">Employee ID</label>
+                                <InputText id="employeeId" class="form-control" @bind-Value="model!.EmployeeId"
+                                    disabled="@isSubmitting" />
+                                <ValidationMessage For="() => model!.EmployeeId" />
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="title" class="form-label">Title</label>
+                                <InputText id="title" class="form-control" @bind-Value="model!.Title"
+                                    disabled="@isSubmitting" />
+                                <ValidationMessage For="() => model!.Title" />
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <h6 class="text-muted mb-3">Tax Information</h6>
+                            <div class="mb-3">
+                                <label for="nationalIdentityNo" class="form-label">National Identity Number</label>
+                                <InputText id="nationalIdentityNo" class="form-control"
+                                    @bind-Value="model!.NationalIdentityNo" disabled="@isSubmitting" />
+                                <ValidationMessage For="() => model!.NationalIdentityNo" />
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="taxIdNo" class="form-label">Tax ID Number</label>
+                                <InputText id="taxIdNo" class="form-control" @bind-Value="model!.TaxIdNo"
+                                    disabled="@isSubmitting" />
+                                <ValidationMessage For="() => model!.TaxIdNo" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" @onclick="HandleCancel" disabled="@isSubmitting">
+                            Cancel
+                        </button>
+                        <button type="submit" class="btn btn-primary" disabled="@isSubmitting">
+                            @if (isSubmitting)
+                            {
+                                <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                <span>Creating...</span>
+                            }
+                            else
+                            {
+                                <span>Create User</span>
+                            }
+                        </button>
+                    </div>
+                </EditForm>
+            </div>
+        </div>
+    </div>
+    <div class="modal-backdrop fade show"></div>
+}
+
+@code {
+    [Parameter]
+    public EventCallback<CreateUserWithInvitationResponse> OnUserCreated { get; set; }
+
+    [SupplyParameterFromForm]
+    private CreateUserWithInvitationDto? model { get; set; }
+
+    private bool isVisible = false;
+    private bool isSubmitting = false;
+    private string? errorMessage;
+    private string? warningMessage;
+
+    protected override void OnInitialized()
+    {
+        model ??= new();
+    }
+
+    public Task Show()
+    {
+        model = new CreateUserWithInvitationDto();
+        errorMessage = null;
+        warningMessage = null;
+        isSubmitting = false;
+        isVisible = true;
+
+        StateHasChanged();
+        return Task.CompletedTask;
+    }
+
+    private void Hide()
+    {
+        isVisible = false;
+        StateHasChanged();
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        if (model == null) return;
+
+        isSubmitting = true;
+        errorMessage = null;
+        warningMessage = null;
+
+        try
+        {
+            var result = await UserService.CreateUserWithInvitationAsync(model);
+
+            if (result.IsSuccess)
+            {
+                Hide();
+                await OnUserCreated.InvokeAsync(result.Data);
+            }
+            else
+            {
+                errorMessage = MapErrorToUserMessage(result.ErrorMessage, result.ErrorMessage);
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"An unexpected error occurred: {ex.Message}";
+        }
+        finally
+        {
+            isSubmitting = false;
+        }
+    }
+
+    private void HandleCancel()
+    {
+        Hide();
+    }
+
+    private string MapErrorToUserMessage(string? errorCode, string? defaultMessage)
+    {
+        return errorCode switch
+        {
+            "EMAIL_IS_REQUIRED" => "Email is required.",
+            "INVALID_EMAIL_FORMAT" => "Invalid email format.",
+            "USER_WITH_THIS_EMAIL_ALREADY_EXISTS" => "A user with this email already exists.",
+            _ => defaultMessage ?? "An error occurred while creating the user."
+        };
+    }
+}
