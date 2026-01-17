@@ -21,4 +21,8 @@
     <ProjectReference Include="../../EmailModule/ExpenseTracker.Email.Contracts/ExpenseTracker.Email.Contracts.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="UserEndpoints/ListUsers/" />
+  </ItemGroup>
+
 </Project>
