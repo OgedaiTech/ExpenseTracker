@@ -85,20 +85,55 @@ public class UserService(IHttpClientFactory httpClientFactory, CustomAuthStatePr
                 return ServiceResult<CreateUserWithInvitationResponse>.Success(result!);
             }
 
-            // Try to parse ProblemDetails for error information
+            // Try to parse error response
+            var errorContent = await response.Content.ReadAsStringAsync();
+
+            // Try FastEndpoints error format first
             try
             {
-                var problemDetails = await response.Content.ReadFromJsonAsync<ProblemDetailsResponse>();
+                var fastEndpointsError = System.Text.Json.JsonSerializer.Deserialize<FastEndpointsErrorResponse>(errorContent);
+                if (fastEndpointsError?.Errors != null && fastEndpointsError.Errors.Count > 0)
+                {
+                    // FastEndpoints returns errors under "GeneralErrors" key
+                    // The actual error code is in the array values
+                    if (fastEndpointsError.Errors.TryGetValue("GeneralErrors", out var generalErrors) && generalErrors.Length > 0)
+                    {
+                        var errorCode = generalErrors[0]; // The error code is the first item in the array
+                        return ServiceResult<CreateUserWithInvitationResponse>.Failure(
+                            response.StatusCode,
+                            errorCode,
+                            null
+                        );
+                    }
+
+                    // Fallback: if not under GeneralErrors, use the first error
+                    var firstError = fastEndpointsError.Errors.First();
+                    var fallbackErrorCode = firstError.Value.FirstOrDefault();
+                    return ServiceResult<CreateUserWithInvitationResponse>.Failure(
+                        response.StatusCode,
+                        fallbackErrorCode,
+                        null
+                    );
+                }
+            }
+            catch
+            {
+                // Not FastEndpoints format, try ProblemDetails
+            }
+
+            // Try ProblemDetails format
+            try
+            {
+                var problemDetails = System.Text.Json.JsonSerializer.Deserialize<ProblemDetailsResponse>(errorContent);
                 return ServiceResult<CreateUserWithInvitationResponse>.Failure(
                     response.StatusCode,
                     problemDetails?.Detail,
-                    null
+                    problemDetails?.Title
                 );
             }
             catch
             {
-                // Fallback if response is not ProblemDetails
-                var errorContent = await response.Content.ReadAsStringAsync();
+                // Fallback to raw error content
                 return ServiceResult<CreateUserWithInvitationResponse>.Failure(
                     response.StatusCode,
                     null,
@@ -114,6 +149,18 @@ public class UserService(IHttpClientFactory httpClientFactory, CustomAuthStatePr
                 ex.Message
             );
         }
+    }
+
+    private sealed class FastEndpointsErrorResponse
+    {
+        [JsonPropertyName("statusCode")]
+        public int? StatusCode { get; set; }
+
+        [JsonPropertyName("message")]
+        public string? Message { get; set; }
+
+        [JsonPropertyName("errors")]
+        public Dictionary<string, string[]>? Errors { get; set; }
     }
 
     private sealed class ProblemDetailsResponse
