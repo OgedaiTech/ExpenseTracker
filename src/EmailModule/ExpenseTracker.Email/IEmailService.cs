@@ -1,4 +1,4 @@
-namespace ExpenseTracker.Users.EmailService;
+namespace ExpenseTracker.Email;
 
 public interface IEmailService
 {

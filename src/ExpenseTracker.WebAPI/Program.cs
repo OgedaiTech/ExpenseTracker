@@ -1,4 +1,5 @@
 using System.Reflection;
+using ExpenseTracker.Email;
 using ExpenseTracker.Expenses;
 using ExpenseTracker.Expenses.Data;
 using ExpenseTracker.Receipts;
@@ -42,6 +43,7 @@ public partial class Program
 
     // Add Module Services and Repositories
     List<Assembly> mediatRAssemblies = [typeof(Program).Assembly];
+    builder.Services.AddEmailServices(mediatRAssemblies, builder.Configuration, builder.Environment);
     builder.Services.AddExpenseServices(mediatRAssemblies);
     builder.Services.AddExpenseRepositories();
     builder.Services.AddReceiptServices(mediatRAssemblies);

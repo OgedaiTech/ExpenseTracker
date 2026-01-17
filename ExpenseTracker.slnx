@@ -17,6 +17,10 @@
     <Project Path="src/TenantModule/ExpenseTracker.Tenants.Tests/ExpenseTracker.Tenants.Tests.csproj" />
     <Project Path="src/TenantModule/ExpenseTracker.Tenants/ExpenseTracker.Tenants.csproj" />
   </Folder>
+  <Folder Name="/src/EmailModule/">
+    <Project Path="src/EmailModule/ExpenseTracker.Email.Contracts/ExpenseTracker.Email.Contracts.csproj" />
+    <Project Path="src/EmailModule/ExpenseTracker.Email/ExpenseTracker.Email.csproj" />
+  </Folder>
   <Folder Name="/src/UI/">
     <Project Path="src/UI/ExpenseTrackerUI/ExpenseTrackerUI.csproj" />
   </Folder>

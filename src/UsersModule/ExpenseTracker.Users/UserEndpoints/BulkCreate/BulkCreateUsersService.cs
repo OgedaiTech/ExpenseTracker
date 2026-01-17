@@ -1,6 +1,8 @@
 using System.ComponentModel.DataAnnotations;
+using ExpenseTracker.Email.Contracts;
 using ExpenseTracker.Users.CsvService;
 using ExpenseTracker.Users.EmailService;
+using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -10,7 +12,7 @@ namespace ExpenseTracker.Users.UserEndpoints.BulkCreate;
 public partial class BulkCreateUsersService(
     UserManager<ApplicationUser> userManager,
     ICsvParserService csvParser,
-    IEmailService emailService,
+    IMediator mediator,
     IOptions<BulkUserCreationSettings> settings,
     ILogger<BulkCreateUsersService> logger) : IBulkCreateUsersService
 {
@@ -103,14 +105,16 @@ public partial class BulkCreateUsersService(
 
         var token = await userManager.GeneratePasswordResetTokenAsync(newUser);
 
-        try
+        var emailCommand = new SendInvitationEmailCommand(email, token);
+        var emailResult = await mediator.Send(emailCommand, cancellationToken);
+
+        if (emailResult.Success)
         {
-            await emailService.SendInvitationEmailAsync(email, token, cancellationToken);
             return new UserCreationResult(email, UserCreationStatus.Created);
         }
-        catch (Exception ex)
+        else
         {
-            LogEmailSendFailed(logger, email, ex.Message, ex);
+            LogEmailSendFailed(logger, email, emailResult.Message ?? "UNKNOWN_ERROR", null);
             return new UserCreationResult(email, UserCreationStatus.Created,
                 "User created but invitation email failed to send");
         }
