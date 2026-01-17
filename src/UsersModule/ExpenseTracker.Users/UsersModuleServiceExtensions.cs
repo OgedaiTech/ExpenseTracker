@@ -1,13 +1,11 @@
 using System.Reflection;
 using ExpenseTracker.Users.CsvService;
 using ExpenseTracker.Users.Data;
-using ExpenseTracker.Users.EmailService;
 using ExpenseTracker.Users.TokenService;
 using ExpenseTracker.Users.UserEndpoints.BulkCreate;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 
 namespace ExpenseTracker.Users;
 
@@ -16,8 +14,7 @@ public static class UsersModuleServiceExtensions
   public static IServiceCollection AddUserModuleServices(
     this IServiceCollection services,
     List<Assembly> mediatRAssemblies,
-    IConfiguration configuration,
-    IHostEnvironment environment
+    IConfiguration configuration
     )
   {
     services.AddIdentityCore<ApplicationUser>()
