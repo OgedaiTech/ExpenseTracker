@@ -3,6 +3,7 @@ using ExpenseTracker.Users.CsvService;
 using ExpenseTracker.Users.Data;
 using ExpenseTracker.Users.TokenService;
 using ExpenseTracker.Users.UserEndpoints.BulkCreate;
+using ExpenseTracker.Users.UserEndpoints.ListUsers;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -28,6 +29,9 @@ public static class UsersModuleServiceExtensions
 
     services.AddScoped<ICsvParserService, CsvParserService>();
     services.AddScoped<IBulkCreateUsersService, BulkCreateUsersService>();
+
+    services.AddScoped<IListUsersService, ListUsersService>();
+    services.AddScoped<IListUsersRepository, ListUsersRepository>();
 
     mediatRAssemblies.Add(typeof(UsersModuleServiceExtensions).Assembly);
     return services;

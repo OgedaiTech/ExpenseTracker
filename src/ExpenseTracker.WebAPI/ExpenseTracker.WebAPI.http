@@ -142,3 +142,28 @@ bbbbb@test.com
 GET {{ExpenseTracker.WebAPI_HostAddress}}/users
 Accept: application/json
 Authorization: Bearer {{login.response.body.$.accessToken}}
+
+###
+### Get first page of users
+# @name getFirstPage
+GET {{ExpenseTracker.WebAPI_HostAddress}}/users?pageSize=2
+Accept: application/json
+Authorization: Bearer {{login.response.body.$.accessToken}}
+
+### Get next page using cursor from previous response
+@nextCursor = {{getFirstPage.response.body.nextCursor}}
+GET {{ExpenseTracker.WebAPI_HostAddress}}/users?pageSize=2&cursor={{nextCursor}}
+Accept: application/json
+Authorization: Bearer {{login.response.body.$.accessToken}}
+
+### Search first page
+# @name searchFirstPage
+GET {{ExpenseTracker.WebAPI_HostAddress}}/users?searchQuery=tt&pageSize=2
+Accept: application/json
+Authorization: Bearer {{login.response.body.$.accessToken}}
+
+### Search next page - automatically uses cursor from previous response
+@searchCursor = {{searchFirstPage.response.body.nextCursor}}
+GET {{ExpenseTracker.WebAPI_HostAddress}}/users?searchQuery=tt&pageSize=2&cursor={{searchCursor}}
+Accept: application/json
+Authorization: Bearer {{login.response.body.$.accessToken}}
