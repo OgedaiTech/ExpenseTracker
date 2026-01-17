@@ -27,17 +27,7 @@ public static class UsersModuleServiceExtensions
 
     services.AddScoped<ITokenService, JwtTokenService>();
 
-    services.Configure<EmailSettings>(configuration.GetSection("Email"));
     services.Configure<BulkUserCreationSettings>(configuration.GetSection("BulkUserCreation"));
-
-    if (environment.IsDevelopment())
-    {
-      services.AddScoped<IEmailService, ConsoleEmailService>();
-    }
-    else
-    {
-      services.AddScoped<IEmailService, SmtpEmailService>();
-    }
 
     services.AddScoped<ICsvParserService, CsvParserService>();
     services.AddScoped<IBulkCreateUsersService, BulkCreateUsersService>();

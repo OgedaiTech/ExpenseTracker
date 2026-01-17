@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
-using ExpenseTracker.Users.EmailService;
+using ExpenseTracker.Email.Contracts;
 using FastEndpoints;
+using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 
@@ -8,7 +9,7 @@ namespace ExpenseTracker.Users.UserEndpoints.CreateNewUser;
 
 internal partial class CreateUserWithInvitation(
     UserManager<ApplicationUser> userManager,
-    IEmailService emailService,
+    IMediator mediator,
     ILogger<CreateUserWithInvitation> logger)
     : Endpoint<CreateUserWithInvitationRequest, CreateUserWithInvitationResponse>
 {
@@ -81,17 +82,19 @@ internal partial class CreateUserWithInvitation(
         bool invitationSent;
         string? warningMessage = null;
 
-        try
+        var emailCommand = new SendInvitationEmailCommand(email, token);
+        var emailResult = await mediator.Send(emailCommand, ct);
+
+        if (emailResult.Success)
         {
-            await emailService.SendInvitationEmailAsync(email, token, ct);
             invitationSent = true;
             LogInvitationSentSuccessfully(logger, email, newUser.Id);
         }
-        catch (Exception ex)
+        else
         {
             invitationSent = false;
             warningMessage = "User created but invitation email failed to send";
-            LogEmailSendFailed(logger, email, ex.Message, ex);
+            LogEmailSendFailed(logger, email, emailResult.Message ?? "UNKNOWN_ERROR", null);
         }
 
         var response = new CreateUserWithInvitationResponse(

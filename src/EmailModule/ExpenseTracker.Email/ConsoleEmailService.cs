@@ -1,13 +1,13 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace ExpenseTracker.Users.EmailService;
+namespace ExpenseTracker.Email;
 
 public partial class ConsoleEmailService(
-    IOptions<BulkUserCreationSettings> bulkUserCreationSettings,
+    IOptions<InvitationEmailSettings> invitationEmailSettings,
     ILogger<ConsoleEmailService> logger) : IEmailService
 {
-    private readonly BulkUserCreationSettings _bulkUserCreationSettings = bulkUserCreationSettings.Value;
+    private readonly InvitationEmailSettings _invitationEmailSettings = invitationEmailSettings.Value;
 
     public Task SendInvitationEmailAsync(
         string recipientEmail,
@@ -43,7 +43,7 @@ public partial class ConsoleEmailService(
     {
         var encodedEmail = System.Web.HttpUtility.UrlEncode(email);
         var encodedToken = System.Web.HttpUtility.UrlEncode(token);
-        return $"{_bulkUserCreationSettings.InvitationLinkBaseUrl}?email={encodedEmail}&token={encodedToken}";
+        return $"{_invitationEmailSettings.InvitationLinkBaseUrl}?email={encodedEmail}&token={encodedToken}";
     }
 
     [LoggerMessage(

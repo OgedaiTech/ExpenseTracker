@@ -14,6 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="../EmailModule/ExpenseTracker.Email/ExpenseTracker.Email.csproj" />
     <ProjectReference Include="../ExpenseModule/ExpenseTracker.Expenses/ExpenseTracker.Expenses.csproj" />
     <ProjectReference Include="../Aspire/ExpenseTracker.ServiceDefaults/ExpenseTracker.ServiceDefaults.csproj" />
     <ProjectReference Include="../ReceiptModule/ExpenseTracker.Receipts/ExpenseTracker.Receipts.csproj" />

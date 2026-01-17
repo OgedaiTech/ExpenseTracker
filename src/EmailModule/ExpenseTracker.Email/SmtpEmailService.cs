@@ -4,15 +4,15 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MimeKit;
 
-namespace ExpenseTracker.Users.EmailService;
+namespace ExpenseTracker.Email;
 
 public partial class SmtpEmailService(
     IOptions<EmailSettings> emailSettings,
-    IOptions<BulkUserCreationSettings> bulkUserCreationSettings,
+    IOptions<InvitationEmailSettings> invitationEmailSettings,
     ILogger<SmtpEmailService> logger) : IEmailService
 {
     private readonly EmailSettings _emailSettings = emailSettings.Value;
-    private readonly BulkUserCreationSettings _bulkUserCreationSettings = bulkUserCreationSettings.Value;
+    private readonly InvitationEmailSettings _invitationEmailSettings = invitationEmailSettings.Value;
 
     public async Task SendInvitationEmailAsync(
         string recipientEmail,
@@ -65,7 +65,7 @@ public partial class SmtpEmailService(
     {
         var encodedEmail = HttpUtility.UrlEncode(email);
         var encodedToken = HttpUtility.UrlEncode(token);
-        return $"{_bulkUserCreationSettings.InvitationLinkBaseUrl}?email={encodedEmail}&token={encodedToken}";
+        return $"{_invitationEmailSettings.InvitationLinkBaseUrl}?email={encodedEmail}&token={encodedToken}";
     }
 
     [LoggerMessage(
