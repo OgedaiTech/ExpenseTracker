@@ -74,3 +74,5 @@ Each module has:
 - Async methods must have `Async` suffix (enforced as error)
 - Private fields use underscore prefix (`_fieldName`)
 - Warnings are treated as errors (`TreatWarningsAsErrors`)
+
+**Pagination**: Cursor-based pagination is used
