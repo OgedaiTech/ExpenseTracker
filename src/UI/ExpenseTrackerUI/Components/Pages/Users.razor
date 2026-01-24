@@ -1,6 +1,7 @@
 @page "/users"
 @attribute [Authorize(Roles = "SystemAdmin,TenantAdmin")]
 @rendermode InteractiveServer
+@implements IDisposable
 
 @using ExpenseTrackerUI.Services.User
 @using ExpenseTrackerUI.Components.Shared
@@ -25,7 +26,93 @@
     </div>
 }
 
-<p class="text-muted">User listing coming soon...</p>
+@if (errorMessage != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        @errorMessage
+        <button type="button" class="btn-close" @onclick="() => errorMessage = null"></button>
+    </div>
+}
+
+<div class="mb-3">
+    <div class="input-group" style="max-width: 400px;">
+        <span class="input-group-text">
+            <span class="bi bi-search"></span>
+        </span>
+        <input type="text" class="form-control" placeholder="Search users..." @bind="searchInput"
+            @bind:event="oninput" />
+        @if (!string.IsNullOrEmpty(searchInput))
+        {
+            <button class="btn btn-outline-secondary" type="button" @onclick="ClearSearch">
+                <span class="bi bi-x-lg"></span>
+            </button>
+        }
+    </div>
+</div>
+
+@if (isLoading)
+{
+    <p>Loading users...</p>
+}
+else if (users == null || !users.Any())
+{
+    <p>No users found.</p>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Email</th>
+                <th>First Name</th>
+                <th>Last Name</th>
+                <th>Employee ID</th>
+                <th>Title</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var user in users)
+            {
+                <tr>
+                    <td>@user.Email</td>
+                    <td>@user.FirstName</td>
+                    <td>@user.LastName</td>
+                    <td>@user.EmployeeId</td>
+                    <td>@user.Title</td>
+                    <td>
+                        <button class="btn btn-sm btn-primary me-2" disabled>
+                            View
+                        </button>
+                        <button class="btn btn-sm btn-secondary me-2" disabled>
+                            Edit
+                        </button>
+                        <button class="btn btn-sm btn-danger" disabled>
+                            Deactivate
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    @if (hasMore)
+    {
+        <div class="text-center mb-3">
+            <button class="btn btn-primary" @onclick="LoadMoreUsers" disabled="@isLoadingMore">
+                @if (isLoadingMore)
+                {
+                    <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                    <span>Loading...</span>
+                }
+                else
+                {
+                    <span>Show More</span>
+                }
+            </button>
+        </div>
+    }
+}
 
 <CreateUserModal @ref="createUserModal" OnUserCreated="HandleUserCreated" />
 <BulkCreateUsersModal @ref="bulkCreateModal" OnUploadCompleted="HandleBulkUploadCompleted" />
@@ -34,6 +121,123 @@
     private CreateUserModal? createUserModal;
     private BulkCreateUsersModal? bulkCreateModal;
     private string? successMessage;
+    private string? errorMessage;
+
+    // User list state
+    private List<UserDto> users = new();
+    private string? nextCursor;
+    private bool hasMore;
+    private string _searchInput = string.Empty;
+    private string searchInput
+    {
+        get => _searchInput;
+        set
+        {
+            _searchInput = value;
+            OnSearchInputChanged();
+        }
+    }
+    private string? currentSearchQuery;
+    private int pageSize = 2;
+    private bool isLoading = true;
+    private bool isLoadingMore = false;
+    private bool hasRendered = false;
+    private System.Threading.Timer? searchDebounceTimer;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && !hasRendered)
+        {
+            hasRendered = true;
+            await LoadUsersAsync(resetList: true);
+        }
+    }
+
+    private async Task LoadUsersAsync(bool resetList = false)
+    {
+        try
+        {
+            if (resetList)
+            {
+                isLoading = true;
+                users.Clear();
+                nextCursor = null;
+            }
+            else
+            {
+                isLoadingMore = true;
+            }
+
+            StateHasChanged();
+
+            var result = await UserService.GetUsersAsync(
+            cursor: resetList ? null : nextCursor,
+            pageSize: pageSize,
+            searchQuery: currentSearchQuery,
+            isDeactivated: false // Only show activated users
+            );
+
+            if (result.IsSuccess && result.Data != null)
+            {
+                if (resetList)
+                {
+                    users = result.Data.Users;
+                }
+                else
+                {
+                    users.AddRange(result.Data.Users);
+                }
+
+                nextCursor = result.Data.NextCursor;
+                hasMore = result.Data.HasMore;
+                errorMessage = null;
+            }
+            else
+            {
+                errorMessage = result.ErrorMessage ?? "Failed to load users.";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error loading users: {ex.Message}";
+            users = new List<UserDto>();
+        }
+        finally
+        {
+            isLoading = false;
+            isLoadingMore = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task LoadMoreUsers()
+    {
+        if (!isLoadingMore && hasMore)
+        {
+            await LoadUsersAsync(resetList: false);
+        }
+    }
+
+    private void OnSearchInputChanged()
+    {
+        // Cancel existing timer
+        searchDebounceTimer?.Dispose();
+
+        // Create new timer with 500ms delay
+        searchDebounceTimer = new System.Threading.Timer(async _ =>
+        {
+            currentSearchQuery = string.IsNullOrWhiteSpace(_searchInput) ? null : _searchInput;
+            await InvokeAsync(async () => await LoadUsersAsync(resetList: true));
+        }, null, 500, Timeout.Infinite);
+    }
+
+    private async Task ClearSearch()
+    {
+        searchInput = string.Empty;
+        currentSearchQuery = null;
+        searchDebounceTimer?.Dispose();
+        await LoadUsersAsync(resetList: true);
+    }
 
     private async Task ShowCreateUserModal()
     {
@@ -51,7 +255,7 @@
         }
     }
 
-    private void HandleUserCreated(CreateUserWithInvitationResponse result)
+    private async Task HandleUserCreated(CreateUserWithInvitationResponse result)
     {
         if (result.InvitationSent)
         {
@@ -61,14 +265,23 @@
         {
             successMessage = $"User {result.Email} created successfully. Warning: Invitation email failed to send.";
         }
-        StateHasChanged();
+
+        // Reload the user list to include the new user
+        await LoadUsersAsync(resetList: true);
     }
 
-    private void HandleBulkUploadCompleted(BulkCreateUsersResponse result)
+    private async Task HandleBulkUploadCompleted(BulkCreateUsersResponse result)
     {
         successMessage = $"Bulk upload completed: {result.SuccessCount} created, " +
         $"{result.AlreadyExistedCount} already existed, " +
         $"{result.FailedCount} failed";
-        StateHasChanged();
+
+        // Reload the user list to include the new users
+        await LoadUsersAsync(resetList: true);
+    }
+
+    public void Dispose()
+    {
+        searchDebounceTimer?.Dispose();
     }
 }
