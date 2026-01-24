@@ -1,4 +1,4 @@
-using FastEndpoints;
+﻿using FastEndpoints;
 
 namespace ExpenseTracker.Users.UserEndpoints.ListUsers;
 
@@ -53,33 +53,4 @@ internal class ListUsersEndpoint(
     await Send.OkAsync(response, ct);
   }
 
-}
-
-public class ListUsersRequest
-{
-  public string? Cursor { get; set; }
-  public int PageSize { get; set; } = 2;
-  public string? SearchQuery { get; set; }
-  public bool? IsDeactivated { get; set; }
-}
-
-public class ListUsersResponse
-{
-  public List<UserDto> Users { get; set; } = [];
-  public string? NextCursor { get; set; }
-  public bool HasMore { get; set; }
-  public int PageSize { get; set; }
-}
-
-public class UserDto
-{
-  public Guid Id { get; set; }
-  public string? Email { get; set; } = string.Empty;
-  public string? FirstName { get; set; } = string.Empty;
-  public string? LastName { get; set; } = string.Empty;
-  public string? NationalIdentityNo { get; set; } = string.Empty;
-  public string? TaxIdNo { get; set; } = string.Empty;
-  public string? EmployeeId { get; set; } = string.Empty;
-  public string? Title { get; set; } = string.Empty;
-  public bool IsDeactivated { get; set; }
 }
