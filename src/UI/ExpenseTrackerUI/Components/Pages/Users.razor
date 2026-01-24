@@ -84,7 +84,7 @@ else
                         <button class="btn btn-sm btn-primary me-2" disabled>
                             View
                         </button>
-                        <button class="btn btn-sm btn-secondary me-2" disabled>
+                        <button class="btn btn-sm btn-secondary me-2" @onclick="() => ShowEditUserModal(user)">
                             Edit
                         </button>
                         <button class="btn btn-sm btn-danger" disabled>
@@ -116,10 +116,12 @@ else
 
 <CreateUserModal @ref="createUserModal" OnUserCreated="HandleUserCreated" />
 <BulkCreateUsersModal @ref="bulkCreateModal" OnUploadCompleted="HandleBulkUploadCompleted" />
+<EditUserModal @ref="editUserModal" OnUserUpdated="HandleUserUpdated" />
 
 @code {
     private CreateUserModal? createUserModal;
     private BulkCreateUsersModal? bulkCreateModal;
+    private EditUserModal? editUserModal;
     private string? successMessage;
     private string? errorMessage;
 
@@ -142,7 +144,7 @@ else
     private bool isLoading = true;
     private bool isLoadingMore = false;
     private bool hasRendered = false;
-    private System.Threading.Timer? searchDebounceTimer;
+    private Timer? searchDebounceTimer;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -224,7 +226,7 @@ else
         searchDebounceTimer?.Dispose();
 
         // Create new timer with 500ms delay
-        searchDebounceTimer = new System.Threading.Timer(async _ =>
+        searchDebounceTimer = new Timer(async _ =>
         {
             currentSearchQuery = string.IsNullOrWhiteSpace(_searchInput) ? null : _searchInput;
             await InvokeAsync(async () => await LoadUsersAsync(resetList: true));
@@ -277,6 +279,22 @@ else
         $"{result.FailedCount} failed";
 
         // Reload the user list to include the new users
+        await LoadUsersAsync(resetList: true);
+    }
+
+    private async Task ShowEditUserModal(UserDto user)
+    {
+        if (editUserModal != null)
+        {
+            await editUserModal.Show(user);
+        }
+    }
+
+    private async Task HandleUserUpdated(UpdateUserResponse result)
+    {
+        successMessage = $"User {result.Email} updated successfully.";
+
+        // Reload the user list to reflect the changes
         await LoadUsersAsync(resetList: true);
     }
 

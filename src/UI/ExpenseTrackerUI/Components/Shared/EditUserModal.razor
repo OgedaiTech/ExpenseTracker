@@ -1,0 +1,210 @@
+@rendermode InteractiveServer
+@using ExpenseTrackerUI.Services.User
+@using Microsoft.AspNetCore.Components.Forms
+@inject UserService UserService
+
+@if (isVisible)
+{
+    <div class="modal fade show" style="display: block;" tabindex="-1" aria-labelledby="editUserModalLabel"
+        aria-modal="true" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editUserModalLabel">Edit User</h5>
+                    <button type="button" class="btn-close" @onclick="HandleCancel" disabled="@isSubmitting"></button>
+                </div>
+
+                <EditForm Model="@model" OnValidSubmit="HandleValidSubmit" FormName="EditUserForm">
+                    <DataAnnotationsValidator />
+
+                    <div class="modal-body">
+                        @if (!string.IsNullOrEmpty(errorMessage))
+                        {
+                            <div class="alert alert-danger">
+                                <strong>Error:</strong> @errorMessage
+                            </div>
+                        }
+
+                        <div class="mb-4">
+                            <h6 class="text-muted mb-3">Account Information</h6>
+                            <div class="mb-3">
+                                <label class="form-label">Email</label>
+                                <input type="text" class="form-control" value="@currentUser?.Email" disabled />
+                                <small class="form-text text-muted">Email cannot be changed</small>
+                            </div>
+                            @if (currentUser?.IsDeactivated == true)
+                            {
+                                <div class="alert alert-warning">
+                                    <small><strong>Note:</strong> This user is currently deactivated</small>
+                                </div>
+                            }
+                        </div>
+
+                        <div class="mb-4">
+                            <h6 class="text-muted mb-3">Personal Information</h6>
+                            <div class="mb-3">
+                                <label for="firstName" class="form-label">First Name</label>
+                                <InputText id="firstName" class="form-control" @bind-Value="model!.FirstName"
+                                    disabled="@isSubmitting" />
+                                <ValidationMessage For="() => model!.FirstName" />
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="lastName" class="form-label">Last Name</label>
+                                <InputText id="lastName" class="form-control" @bind-Value="model!.LastName"
+                                    disabled="@isSubmitting" />
+                                <ValidationMessage For="() => model!.LastName" />
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <h6 class="text-muted mb-3">Employment Details</h6>
+                            <div class="mb-3">
+                                <label for="employeeId" class="form-label">Employee ID</label>
+                                <InputText id="employeeId" class="form-control" @bind-Value="model!.EmployeeId"
+                                    disabled="@isSubmitting" />
+                                <ValidationMessage For="() => model!.EmployeeId" />
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="title" class="form-label">Title</label>
+                                <InputText id="title" class="form-control" @bind-Value="model!.Title"
+                                    disabled="@isSubmitting" />
+                                <ValidationMessage For="() => model!.Title" />
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <h6 class="text-muted mb-3">Tax Information</h6>
+                            <div class="mb-3">
+                                <label for="nationalIdentityNo" class="form-label">National Identity Number</label>
+                                <InputText id="nationalIdentityNo" class="form-control"
+                                    @bind-Value="model!.NationalIdentityNo" disabled="@isSubmitting" />
+                                <ValidationMessage For="() => model!.NationalIdentityNo" />
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="taxIdNo" class="form-label">Tax ID Number</label>
+                                <InputText id="taxIdNo" class="form-control" @bind-Value="model!.TaxIdNo"
+                                    disabled="@isSubmitting" />
+                                <ValidationMessage For="() => model!.TaxIdNo" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" @onclick="HandleCancel" disabled="@isSubmitting">
+                            Cancel
+                        </button>
+                        <button type="submit" class="btn btn-primary" disabled="@isSubmitting">
+                            @if (isSubmitting)
+                            {
+                                <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                <span>Updating...</span>
+                            }
+                            else
+                            {
+                                <span>Update User</span>
+                            }
+                        </button>
+                    </div>
+                </EditForm>
+            </div>
+        </div>
+    </div>
+    <div class="modal-backdrop fade show"></div>
+}
+
+@code {
+    [Parameter]
+    public EventCallback<UpdateUserResponse> OnUserUpdated { get; set; }
+
+    [SupplyParameterFromForm]
+    private UpdateUserDto? model { get; set; }
+
+    private UserDto? currentUser;
+    private bool isVisible = false;
+    private bool isSubmitting = false;
+    private string? errorMessage;
+
+    protected override void OnInitialized()
+    {
+        model ??= new();
+    }
+
+    public Task Show(UserDto user)
+    {
+        currentUser = user;
+
+        model = new UpdateUserDto
+        {
+            FirstName = user.FirstName,
+            LastName = user.LastName,
+            NationalIdentityNo = user.NationalIdentityNo,
+            TaxIdNo = user.TaxIdNo,
+            EmployeeId = user.EmployeeId,
+            Title = user.Title
+        };
+
+        errorMessage = null;
+        isSubmitting = false;
+        isVisible = true;
+
+        StateHasChanged();
+        return Task.CompletedTask;
+    }
+
+    private void Hide()
+    {
+        isVisible = false;
+        StateHasChanged();
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        if (model == null || currentUser == null) return;
+
+        isSubmitting = true;
+        errorMessage = null;
+
+        try
+        {
+            var result = await UserService.UpdateUserAsync(currentUser.Id, model);
+
+            if (result.IsSuccess)
+            {
+                Hide();
+                await OnUserUpdated.InvokeAsync(result.Data);
+            }
+            else
+            {
+                errorMessage = MapErrorToUserMessage(result.ErrorCode, result.ErrorMessage);
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"An unexpected error occurred: {ex.Message}";
+        }
+        finally
+        {
+            isSubmitting = false;
+        }
+    }
+
+    private void HandleCancel()
+    {
+        Hide();
+    }
+
+    private string MapErrorToUserMessage(string? errorCode, string? defaultMessage)
+    {
+        return errorCode switch
+        {
+            "USER_NOT_FOUND" => "User not found. They may have been deleted.",
+            "FORBIDDEN" => "You don't have permission to update this user.",
+            "INVALID_USER_DATA" => "Invalid user data provided. Please check the form.",
+            "TENANT_MISMATCH" => "Cannot update users from a different tenant.",
+            _ => defaultMessage ?? "An error occurred while updating the user."
+        };
+    }
+}
