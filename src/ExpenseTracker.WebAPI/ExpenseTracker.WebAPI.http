@@ -167,3 +167,14 @@ Authorization: Bearer {{login.response.body.$.accessToken}}
 GET {{ExpenseTracker.WebAPI_HostAddress}}/users?searchQuery=tt&pageSize=2&cursor={{searchCursor}}
 Accept: application/json
 Authorization: Bearer {{login.response.body.$.accessToken}}
+
+### ========== UPDATE USER ==========
+@userId = 086ca3f6-3136-4c16-8b6c-52211aea4a88
+PUT {{ExpenseTracker.WebAPI_HostAddress}}/users/{{userId}}
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer {{login.response.body.$.accessToken}}
+
+{
+  "email": "barb@test.com"
+}
