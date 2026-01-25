@@ -1,4 +1,5 @@
 ﻿using System.Net;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace ExpenseTrackerUI.Services.Authentication;
@@ -42,7 +43,7 @@ public class AuthService(IHttpClientFactory httpClient)
 
       if (response.IsSuccessStatusCode)
       {
-        return Services.ServiceResult<bool>.Success(true);
+        return ServiceResult<bool>.Success(true);
       }
 
       // Try to parse error response
@@ -51,7 +52,7 @@ public class AuthService(IHttpClientFactory httpClient)
       // Try FastEndpoints error format first
       try
       {
-        var fastEndpointsError = System.Text.Json.JsonSerializer.Deserialize<FastEndpointsErrorResponse>(errorContent);
+        var fastEndpointsError = JsonSerializer.Deserialize<FastEndpointsErrorResponse>(errorContent);
         if (fastEndpointsError?.Errors != null && fastEndpointsError.Errors.Count > 0)
         {
           // Collect all error messages
@@ -65,7 +66,7 @@ public class AuthService(IHttpClientFactory httpClient)
           {
             // Join all error messages with line breaks
             var combinedMessage = string.Join(" ", errorMessages);
-            return Services.ServiceResult<bool>.Failure(
+            return ServiceResult<bool>.Failure(
                 response.StatusCode,
                 null,
                 combinedMessage
@@ -81,8 +82,8 @@ public class AuthService(IHttpClientFactory httpClient)
       // Try ProblemDetails format
       try
       {
-        var problemDetails = System.Text.Json.JsonSerializer.Deserialize<ProblemDetailsResponse>(errorContent);
-        return Services.ServiceResult<bool>.Failure(
+        var problemDetails = JsonSerializer.Deserialize<ProblemDetailsResponse>(errorContent);
+        return ServiceResult<bool>.Failure(
             response.StatusCode,
             problemDetails?.Detail,
             problemDetails?.Title
@@ -91,7 +92,7 @@ public class AuthService(IHttpClientFactory httpClient)
       catch
       {
         // Fallback to raw error content
-        return Services.ServiceResult<bool>.Failure(
+        return ServiceResult<bool>.Failure(
             response.StatusCode,
             null,
             errorContent
@@ -100,7 +101,7 @@ public class AuthService(IHttpClientFactory httpClient)
     }
     catch (Exception ex)
     {
-      return Services.ServiceResult<bool>.Failure(
+      return ServiceResult<bool>.Failure(
           HttpStatusCode.InternalServerError,
           null,
           ex.Message
