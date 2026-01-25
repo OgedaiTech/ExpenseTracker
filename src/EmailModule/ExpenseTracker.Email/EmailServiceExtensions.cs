@@ -16,9 +16,22 @@ public static class EmailServiceExtensions
     services.Configure<EmailSettings>(configuration.GetSection("Email"));
     services.Configure<InvitationEmailSettings>(configuration.GetSection("InvitationEmail"));
 
+    // In Development, use SMTP if configured, otherwise fall back to Console
     if (environment.IsDevelopment())
     {
-      services.AddScoped<IEmailService, ConsoleEmailService>();
+      var emailSettings = configuration.GetSection("Email").Get<EmailSettings>();
+
+      // If Gmail SMTP is configured (via user secrets), use SMTP; otherwise use Console
+      if (!string.IsNullOrEmpty(emailSettings?.SmtpHost) &&
+          emailSettings.SmtpHost != "smtp.example.com" &&
+          !string.IsNullOrEmpty(emailSettings.SmtpUsername))
+      {
+        services.AddScoped<IEmailService, SmtpEmailService>();
+      }
+      else
+      {
+        services.AddScoped<IEmailService, ConsoleEmailService>();
+      }
     }
     else
     {

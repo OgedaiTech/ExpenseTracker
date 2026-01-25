@@ -1,5 +1,6 @@
 using System.Web;
 using MailKit.Net.Smtp;
+using MailKit.Security;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MimeKit;
@@ -38,10 +39,15 @@ public partial class SmtpEmailService(
 
         try
         {
+            // Use STARTTLS for port 587 (Gmail), direct SSL for port 465
+            var secureSocketOptions = _emailSettings.SmtpPort == 465
+                ? SecureSocketOptions.SslOnConnect
+                : SecureSocketOptions.StartTls;
+
             await client.ConnectAsync(
                 _emailSettings.SmtpHost,
                 _emailSettings.SmtpPort,
-                _emailSettings.UseSsl,
+                secureSocketOptions,
                 cancellationToken);
 
             if (!string.IsNullOrEmpty(_emailSettings.SmtpUsername))
