@@ -23,13 +23,43 @@ public partial class ConsoleEmailService(
 
         Console.WriteLine();
         Console.WriteLine("========================================");
-        Console.WriteLine($"📧 EMAIL SENT (Development Mode)");
+        Console.WriteLine($"📧 INVITATION EMAIL SENT (Development Mode)");
         Console.WriteLine("========================================");
         Console.WriteLine($"To: {recipientEmail}");
         Console.WriteLine($"Subject: {subject}");
         Console.WriteLine();
         Console.WriteLine("Invitation Link:");
         Console.WriteLine(invitationLink);
+        Console.WriteLine();
+        Console.WriteLine("Password Reset Token (for manual testing):");
+        Console.WriteLine(passwordResetToken);
+        Console.WriteLine("========================================");
+        Console.WriteLine();
+
+        return Task.CompletedTask;
+    }
+
+    public Task SendPasswordResetEmailAsync(
+        string recipientEmail,
+        string passwordResetToken,
+        CancellationToken cancellationToken)
+    {
+        var resetLink = BuildInvitationLink(recipientEmail, passwordResetToken);
+        var (subject, htmlBody, textBody) = EmailTemplates.GetPasswordResetEmail(resetLink);
+
+        LogEmailDetails(logger, recipientEmail, subject);
+        LogResetLink(logger, resetLink);
+        LogPasswordResetToken(logger, passwordResetToken);
+
+        Console.WriteLine();
+        Console.WriteLine("========================================");
+        Console.WriteLine($"📧 PASSWORD RESET EMAIL SENT (Development Mode)");
+        Console.WriteLine("========================================");
+        Console.WriteLine($"To: {recipientEmail}");
+        Console.WriteLine($"Subject: {subject}");
+        Console.WriteLine();
+        Console.WriteLine("Password Reset Link:");
+        Console.WriteLine(resetLink);
         Console.WriteLine();
         Console.WriteLine("Password Reset Token (for manual testing):");
         Console.WriteLine(passwordResetToken);
@@ -63,4 +93,10 @@ public partial class ConsoleEmailService(
         Level = LogLevel.Information,
         Message = "[DEV] Password reset token: {Token}")]
     private static partial void LogPasswordResetToken(ILogger logger, string token);
+
+    [LoggerMessage(
+        EventId = 204,
+        Level = LogLevel.Information,
+        Message = "[DEV] Password reset link: {ResetLink}")]
+    private static partial void LogResetLink(ILogger logger, string resetLink);
 }

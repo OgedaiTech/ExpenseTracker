@@ -6,4 +6,9 @@ public interface IEmailService
         string recipientEmail,
         string passwordResetToken,
         CancellationToken cancellationToken);
+
+    Task SendPasswordResetEmailAsync(
+        string recipientEmail,
+        string passwordResetToken,
+        CancellationToken cancellationToken);
 }
