@@ -23,6 +23,29 @@ public partial class SmtpEmailService(
         var invitationLink = BuildInvitationLink(recipientEmail, passwordResetToken);
         var (subject, htmlBody, textBody) = EmailTemplates.GetInvitationEmail(invitationLink);
 
+        await SendEmailAsync(recipientEmail, subject, htmlBody, textBody, cancellationToken);
+        LogInvitationEmailSent(logger, recipientEmail);
+    }
+
+    public async Task SendPasswordResetEmailAsync(
+        string recipientEmail,
+        string passwordResetToken,
+        CancellationToken cancellationToken)
+    {
+        var resetLink = BuildInvitationLink(recipientEmail, passwordResetToken);
+        var (subject, htmlBody, textBody) = EmailTemplates.GetPasswordResetEmail(resetLink);
+
+        await SendEmailAsync(recipientEmail, subject, htmlBody, textBody, cancellationToken);
+        LogPasswordResetEmailSent(logger, recipientEmail);
+    }
+
+    private async Task SendEmailAsync(
+        string recipientEmail,
+        string subject,
+        string htmlBody,
+        string textBody,
+        CancellationToken cancellationToken)
+    {
         var message = new MimeMessage();
         message.From.Add(new MailboxAddress(_emailSettings.FromName, _emailSettings.FromAddress));
         message.To.Add(new MailboxAddress(recipientEmail, recipientEmail));
@@ -59,7 +82,6 @@ public partial class SmtpEmailService(
             }
 
             await client.SendAsync(message, cancellationToken);
-            LogEmailSent(logger, recipientEmail);
         }
         finally
         {
@@ -78,5 +100,11 @@ public partial class SmtpEmailService(
         EventId = 200,
         Level = LogLevel.Information,
         Message = "Invitation email sent to {Email}")]
-    private static partial void LogEmailSent(ILogger logger, string email);
+    private static partial void LogInvitationEmailSent(ILogger logger, string email);
+
+    [LoggerMessage(
+        EventId = 201,
+        Level = LogLevel.Information,
+        Message = "Password reset email sent to {Email}")]
+    private static partial void LogPasswordResetEmailSent(ILogger logger, string email);
 }
