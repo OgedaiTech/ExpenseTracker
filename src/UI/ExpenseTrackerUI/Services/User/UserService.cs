@@ -308,6 +308,90 @@ public class UserService(IHttpClientFactory httpClientFactory, CustomAuthStatePr
     }
   }
 
+  public async Task<ServiceResult<bool>> AssignApproverRoleAsync(Guid userId)
+  {
+    try
+    {
+      var client = await GetAuthenticatedClientAsync();
+      var response = await client.PostAsync($"/users/{userId}/roles/approver-role", null);
+
+      if (response.IsSuccessStatusCode)
+      {
+        return ServiceResult<bool>.Success(true);
+      }
+
+      // Try to parse error response
+      try
+      {
+        var problemDetails = await response.Content.ReadFromJsonAsync<ProblemDetailsResponse>();
+        return ServiceResult<bool>.Failure(
+            response.StatusCode,
+            problemDetails?.Detail,
+            problemDetails?.Title
+        );
+      }
+      catch
+      {
+        var errorContent = await response.Content.ReadAsStringAsync();
+        return ServiceResult<bool>.Failure(
+            response.StatusCode,
+            null,
+            errorContent
+        );
+      }
+    }
+    catch (Exception ex)
+    {
+      return ServiceResult<bool>.Failure(
+          HttpStatusCode.InternalServerError,
+          null,
+          ex.Message
+      );
+    }
+  }
+
+  public async Task<ServiceResult<bool>> RemoveApproverRoleAsync(Guid userId)
+  {
+    try
+    {
+      var client = await GetAuthenticatedClientAsync();
+      var response = await client.DeleteAsync($"/users/{userId}/roles/approver-role");
+
+      if (response.IsSuccessStatusCode)
+      {
+        return ServiceResult<bool>.Success(true);
+      }
+
+      // Try to parse error response
+      try
+      {
+        var problemDetails = await response.Content.ReadFromJsonAsync<ProblemDetailsResponse>();
+        return ServiceResult<bool>.Failure(
+            response.StatusCode,
+            problemDetails?.Detail,
+            problemDetails?.Title
+        );
+      }
+      catch
+      {
+        var errorContent = await response.Content.ReadAsStringAsync();
+        return ServiceResult<bool>.Failure(
+            response.StatusCode,
+            null,
+            errorContent
+        );
+      }
+    }
+    catch (Exception ex)
+    {
+      return ServiceResult<bool>.Failure(
+          HttpStatusCode.InternalServerError,
+          null,
+          ex.Message
+      );
+    }
+  }
+
   private sealed class ProblemDetailsResponse
   {
     [JsonPropertyName("type")]

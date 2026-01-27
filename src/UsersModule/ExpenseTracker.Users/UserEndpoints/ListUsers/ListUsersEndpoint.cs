@@ -1,9 +1,11 @@
 ﻿using FastEndpoints;
+using Microsoft.AspNetCore.Identity;
 
 namespace ExpenseTracker.Users.UserEndpoints.ListUsers;
 
 internal class ListUsersEndpoint(
-  IListUsersService service
+  IListUsersService service,
+  UserManager<ApplicationUser> userManager
 ) : Endpoint<ListUsersRequest, ListUsersResponse>
 {
   public override void Configure()
@@ -31,9 +33,13 @@ internal class ListUsersEndpoint(
       return;
     }
 
-    var response = new ListUsersResponse
+    var userDtos = new List<UserDto>();
+    foreach (var u in serviceResult.Data!.Users)
     {
-      Users = [.. serviceResult.Data!.Users.Select(u => new UserDto
+      var roles = await userManager.GetRolesAsync(u);
+      var isApprover = roles.Contains("Approver");
+
+      userDtos.Add(new UserDto
       {
         Id = Guid.Parse(u.Id),
         Email = u.Email,
@@ -43,8 +49,14 @@ internal class ListUsersEndpoint(
         TaxIdNo = u.TaxIdNo,
         EmployeeId = u.EmployeeId,
         Title = u.Title,
-        IsDeactivated = u.IsDeactivated
-      })],
+        IsDeactivated = u.IsDeactivated,
+        IsApprover = isApprover
+      });
+    }
+
+    var response = new ListUsersResponse
+    {
+      Users = [.. userDtos],
       NextCursor = serviceResult.Data.NextCursor,
       HasMore = serviceResult.Data.HasMore,
       PageSize = req.PageSize

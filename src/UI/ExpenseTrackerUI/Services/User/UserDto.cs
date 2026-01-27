@@ -11,6 +11,7 @@ public class UserDto
     public string? EmployeeId { get; set; }
     public string? Title { get; set; }
     public bool IsDeactivated { get; set; }
+    public bool IsApprover { get; set; }
 }
 
 public class ListUsersResponse
