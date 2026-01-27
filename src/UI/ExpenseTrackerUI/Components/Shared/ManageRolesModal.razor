@@ -70,7 +70,7 @@
 
 @code {
     [Parameter]
-    public EventCallback<bool> OnRolesUpdated { get; set; }
+    public EventCallback<RoleUpdateResult?> OnRolesUpdated { get; set; }
 
     private UserDto? currentUser;
     private bool isVisible = false;
@@ -131,7 +131,11 @@
 
             // Success - close modal and notify parent
             Hide();
-            await OnRolesUpdated.InvokeAsync(true);
+            await OnRolesUpdated.InvokeAsync(new RoleUpdateResult
+            {
+                UserId = currentUser.Id,
+                IsApprover = isApprover
+            });
         }
         catch (Exception ex)
         {
