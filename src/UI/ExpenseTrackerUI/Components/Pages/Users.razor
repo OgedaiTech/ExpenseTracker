@@ -320,13 +320,24 @@ else
         }
     }
 
-    private async Task HandleRolesUpdated(bool success)
+    private async Task HandleRolesUpdated(RoleUpdateResult? result)
     {
-        if (success)
+        if (result != null)
         {
             successMessage = "User roles updated successfully.";
-            // Reload the user list to reflect role changes
-            await LoadUsersAsync(resetList: true);
+
+            // Find and update the user in the existing list
+            var userToUpdate = users.FirstOrDefault(u => u.Id == result.UserId);
+            if (userToUpdate != null)
+            {
+                userToUpdate.IsApprover = result.IsApprover;
+                StateHasChanged();
+            }
+            else
+            {
+                // Fallback: reload if user not found (edge case)
+                await LoadUsersAsync(resetList: true);
+            }
         }
     }
 
