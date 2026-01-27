@@ -68,6 +68,7 @@ else
                 <th>Last Name</th>
                 <th>Employee ID</th>
                 <th>Title</th>
+                <th>Role</th>
                 <th>Actions</th>
             </tr>
         </thead>
@@ -81,11 +82,22 @@ else
                     <td>@user.EmployeeId</td>
                     <td>@user.Title</td>
                     <td>
+                        @if (user.IsApprover)
+                        {
+                            <span class="badge bg-success">
+                                <span class="bi bi-check-circle me-1"></span>Approver
+                            </span>
+                        }
+                    </td>
+                    <td>
                         <button class="btn btn-sm btn-primary me-2" disabled>
                             View
                         </button>
                         <button class="btn btn-sm btn-secondary me-2" @onclick="() => ShowEditUserModal(user)">
                             Edit
+                        </button>
+                        <button class="btn btn-sm btn-info me-2" @onclick="() => ShowManageRolesModal(user)">
+                            Roles
                         </button>
                         <button class="btn btn-sm btn-danger" disabled>
                             Deactivate
@@ -117,11 +129,13 @@ else
 <CreateUserModal @ref="createUserModal" OnUserCreated="HandleUserCreated" />
 <BulkCreateUsersModal @ref="bulkCreateModal" OnUploadCompleted="HandleBulkUploadCompleted" />
 <EditUserModal @ref="editUserModal" OnUserUpdated="HandleUserUpdated" />
+<ManageRolesModal @ref="manageRolesModal" OnRolesUpdated="HandleRolesUpdated" />
 
 @code {
     private CreateUserModal? createUserModal;
     private BulkCreateUsersModal? bulkCreateModal;
     private EditUserModal? editUserModal;
+    private ManageRolesModal? manageRolesModal;
     private string? successMessage;
     private string? errorMessage;
 
@@ -296,6 +310,24 @@ else
 
         // Reload the user list to reflect the changes
         await LoadUsersAsync(resetList: true);
+    }
+
+    private async Task ShowManageRolesModal(UserDto user)
+    {
+        if (manageRolesModal != null)
+        {
+            await manageRolesModal.Show(user);
+        }
+    }
+
+    private async Task HandleRolesUpdated(bool success)
+    {
+        if (success)
+        {
+            successMessage = "User roles updated successfully.";
+            // Reload the user list to reflect role changes
+            await LoadUsersAsync(resetList: true);
+        }
     }
 
     public void Dispose()

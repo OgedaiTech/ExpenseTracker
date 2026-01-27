@@ -1,0 +1,162 @@
+@rendermode InteractiveServer
+@using ExpenseTrackerUI.Services
+@using ExpenseTrackerUI.Services.User
+@inject UserService UserService
+
+@if (isVisible)
+{
+    <div class="modal fade show" style="display: block;" tabindex="-1"
+         aria-labelledby="manageRolesModalLabel" aria-modal="true" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="manageRolesModalLabel">
+                        Manage Roles - @currentUser?.Email
+                    </h5>
+                    <button type="button" class="btn-close" @onclick="HandleCancel"
+                            disabled="@isSubmitting"></button>
+                </div>
+
+                <div class="modal-body">
+                    @if (!string.IsNullOrEmpty(errorMessage))
+                    {
+                        <div class="alert alert-danger">
+                            <strong>Error:</strong> @errorMessage
+                        </div>
+                    }
+
+                    <p class="text-muted mb-3">
+                        Select roles for this user. Changes will be saved when you click "Save Changes".
+                    </p>
+
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox"
+                               id="approverRole" @bind="isApprover"
+                               disabled="@isSubmitting" />
+                        <label class="form-check-label" for="approverRole">
+                            <strong>Approver</strong>
+                            <br />
+                            <small class="text-muted">Can approve expense requests</small>
+                        </label>
+                    </div>
+
+                    <!-- Future roles can be added here as additional checkboxes -->
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary"
+                            @onclick="HandleCancel" disabled="@isSubmitting">
+                        Cancel
+                    </button>
+                    <button type="button" class="btn btn-primary"
+                            @onclick="HandleSave" disabled="@isSubmitting">
+                        @if (isSubmitting)
+                        {
+                            <span class="spinner-border spinner-border-sm me-2"
+                                  role="status" aria-hidden="true"></span>
+                            <span>Saving...</span>
+                        }
+                        else
+                        {
+                            <span>Save Changes</span>
+                        }
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-backdrop fade show"></div>
+}
+
+@code {
+    [Parameter]
+    public EventCallback<bool> OnRolesUpdated { get; set; }
+
+    private UserDto? currentUser;
+    private bool isVisible = false;
+    private bool isSubmitting = false;
+    private string? errorMessage;
+
+    // Role states
+    private bool isApprover = false;
+    private bool originalIsApprover = false;
+
+    public Task Show(UserDto user)
+    {
+        currentUser = user;
+        isApprover = user.IsApprover;
+        originalIsApprover = user.IsApprover;
+        errorMessage = null;
+        isSubmitting = false;
+        isVisible = true;
+        StateHasChanged();
+        return Task.CompletedTask;
+    }
+
+    private void Hide()
+    {
+        isVisible = false;
+        StateHasChanged();
+    }
+
+    private async Task HandleSave()
+    {
+        if (currentUser == null) return;
+
+        isSubmitting = true;
+        errorMessage = null;
+
+        try
+        {
+            // Check if Approver role changed
+            if (isApprover != originalIsApprover)
+            {
+                ServiceResult<bool> result;
+
+                if (isApprover)
+                {
+                    result = await UserService.AssignApproverRoleAsync(currentUser.Id);
+                }
+                else
+                {
+                    result = await UserService.RemoveApproverRoleAsync(currentUser.Id);
+                }
+
+                if (!result.IsSuccess)
+                {
+                    errorMessage = MapErrorToUserMessage(result.ErrorCode, result.ErrorMessage);
+                    return;
+                }
+            }
+
+            // Success - close modal and notify parent
+            Hide();
+            await OnRolesUpdated.InvokeAsync(true);
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"An unexpected error occurred: {ex.Message}";
+        }
+        finally
+        {
+            isSubmitting = false;
+            StateHasChanged();
+        }
+    }
+
+    private void HandleCancel()
+    {
+        Hide();
+    }
+
+    private string MapErrorToUserMessage(string? errorCode, string? defaultMessage)
+    {
+        return errorCode switch
+        {
+            "USER_NOT_FOUND" => "User not found. They may have been deleted.",
+            "FORBIDDEN" => "You don't have permission to manage roles for this user.",
+            "TENANT_MISMATCH" => "Cannot manage roles for users from a different tenant.",
+            _ => defaultMessage ?? "An error occurred while updating roles."
+        };
+    }
+}

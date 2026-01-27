@@ -11,4 +11,5 @@ public class UserDto
     public string? EmployeeId { get; set; } = string.Empty;
     public string? Title { get; set; } = string.Empty;
     public bool IsDeactivated { get; set; }
+    public bool IsApprover { get; set; }
 }
