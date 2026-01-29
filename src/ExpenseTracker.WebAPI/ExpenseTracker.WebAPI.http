@@ -24,6 +24,34 @@ GET {{ExpenseTracker.WebAPI_HostAddress}}/expenses/users
 Accept: application/json
 Authorization: Bearer {{login.response.body.$.accessToken}}
 
+### ======== SUBMIT AN EXPENSE ==========
+
+@ExpenseId3 = 019b8ef4-cfd3-798a-8ba6-59708c5f70c2
+POST {{ExpenseTracker.WebAPI_HostAddress}}/expenses/{{ExpenseId3}}/submit
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer {{login.response.body.$.accessToken}}
+
+{
+  "approverId": "9bde275a-0174-4b8e-bf53-fc6d8c166d30"
+}
+
+### ========= REJECT AN EXPENSE ==========
+@ExpenseId5 = 019b8ef4-cfd3-798a-8ba6-59708c5f70c2
+POST {{ExpenseTracker.WebAPI_HostAddress}}/expenses/{{ExpenseId5}}/reject
+Accept: application/json
+Authorization: Bearer {{login.response.body.$.accessToken}}
+
+{
+  "rejectionReason": "Insufficient details provided."
+}
+
+### ======== APPROVE AN EXPENSE ==========
+@ExpenseId4 = 019b8ef4-cfd3-798a-8ba6-59708c5f70c2
+POST {{ExpenseTracker.WebAPI_HostAddress}}/expenses/{{ExpenseId4}}/approve
+Accept: application/json
+Authorization: Bearer {{login.response.body.$.accessToken}}
+
 ### ======== CREATE RECEIPT ==========
 
 POST {{ExpenseTracker.WebAPI_HostAddress}}/receipts/
@@ -76,7 +104,7 @@ Accept: application/json
 Content-Type: application/json
 
 {
-  "email": "admin@ttt.com",
+  "email": "barbaros.yurttagul@gmail.com",
   "password": "Password1!"
 }
 ###

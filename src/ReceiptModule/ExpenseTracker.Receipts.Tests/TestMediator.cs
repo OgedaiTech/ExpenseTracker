@@ -1,4 +1,5 @@
-using ExpenseTracker.Core;
+﻿using ExpenseTracker.Core;
+using ExpenseTracker.Expenses.Contracts;
 using ExpenseTracker.Receipts.UseCases;
 using MediatR;
 
@@ -31,6 +32,10 @@ public class TestMediator : IMediator
     if (request is AddAmountToExpenseCommand)
     {
       return Task.FromResult((TResponse)(object)new ServiceResult<Guid>(Guid.Empty));
+    }
+    if (request is GetExpenseStatusQuery)
+    {
+      return Task.FromResult((TResponse)(object)new ServiceResult<ExpenseStatusDto>(new ExpenseStatusDto(1)));
     }
 
     throw new NotImplementedException("Unhandled request in test mediator");

@@ -17,5 +17,19 @@ internal class ExpenseConfiguration : IEntityTypeConfiguration<Expense>
     builder.Property(e => e.TenantId).IsRequired();
     builder.Property(e => e.UpdatedAt).IsRequired(false);
     builder.Property(e => e.DeletedAt).IsRequired(false);
+
+    // Approval workflow properties
+    builder.Property(e => e.Status).IsRequired().HasConversion<int>();
+    builder.Property(e => e.SubmittedToApproverId).IsRequired(false);
+    builder.Property(e => e.SubmittedAt).IsRequired(false);
+    builder.Property(e => e.ApprovedByUserId).IsRequired(false);
+    builder.Property(e => e.ApprovedAt).IsRequired(false);
+    builder.Property(e => e.RejectedByUserId).IsRequired(false);
+    builder.Property(e => e.RejectedAt).IsRequired(false);
+    builder.Property(e => e.RejectionReason).IsRequired(false).HasMaxLength(1000);
+
+    // Indexes for query performance
+    builder.HasIndex(e => e.Status);
+    builder.HasIndex(e => e.SubmittedToApproverId);
   }
 }

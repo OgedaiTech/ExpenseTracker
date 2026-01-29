@@ -1,4 +1,5 @@
-using ExpenseTracker.Core;
+﻿using ExpenseTracker.Core;
+using ExpenseTracker.Expenses.Contracts;
 using ExpenseTracker.Receipts.Endpoints;
 using ExpenseTracker.Receipts.Endpoints.Create;
 using ExpenseTracker.Receipts.UseCases;
@@ -30,6 +31,11 @@ public class CreateServiceTests
       Vendor = "Test Vendor",
       Date = DateTime.UtcNow
     };
+
+    _mediator
+      .Setup(r => r.Send(It.IsAny<GetExpenseStatusQuery>(), It.IsAny<CancellationToken>()))
+      .Returns(Task.FromResult(new ServiceResult<ExpenseStatusDto>(It.IsAny<ExpenseStatusDto>())));
+
     Mock.Get(_repository)
       .Setup(r => r.CreateReceiptAsync(request, It.IsAny<CancellationToken>()))
       .Returns(Task.CompletedTask);
@@ -58,6 +64,11 @@ public class CreateServiceTests
       Vendor = "Test Vendor",
       Date = DateTime.UtcNow
     };
+
+    _mediator
+      .Setup(r => r.Send(It.IsAny<GetExpenseStatusQuery>(), It.IsAny<CancellationToken>()))
+      .Returns(Task.FromResult(new ServiceResult<ExpenseStatusDto>(It.IsAny<ExpenseStatusDto>())));
+
     Mock.Get(_repository)
       .Setup(r => r.CreateReceiptAsync(request, It.IsAny<CancellationToken>()))
       .Returns(Task.CompletedTask);
