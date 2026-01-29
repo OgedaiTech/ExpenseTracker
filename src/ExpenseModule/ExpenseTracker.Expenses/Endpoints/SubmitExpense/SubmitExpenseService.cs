@@ -1,5 +1,5 @@
 using ExpenseTracker.Core;
-using ExpenseTracker.Receipts.UseCases;
+using ExpenseTracker.Receipts.Contracts;
 using MediatR;
 
 namespace ExpenseTracker.Expenses.Endpoints.SubmitExpense;

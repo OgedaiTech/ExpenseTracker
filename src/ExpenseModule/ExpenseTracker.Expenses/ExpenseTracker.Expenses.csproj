@@ -22,7 +22,7 @@
   <ItemGroup>
     <ProjectReference Include="../ExpenseTracker.Expenses.Contracts/ExpenseTracker.Expenses.Contracts.csproj" />
     <ProjectReference Include="../../UsersModule/ExpenseTracker.Users.Contracts/ExpenseTracker.Users.Contracts.csproj" />
-    <ProjectReference Include="../../ReceiptModule/ExpenseTracker.Receipts/ExpenseTracker.Receipts.csproj" />
+    <ProjectReference Include="../../ReceiptModule/ExpenseTracker.Receipts.Contracts/ExpenseTracker.Receipts.Contracts.csproj" />
   </ItemGroup>
 
   <ItemGroup>

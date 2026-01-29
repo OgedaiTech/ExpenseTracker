@@ -1,6 +1,6 @@
 using ExpenseTracker.Core;
+using ExpenseTracker.Receipts.Contracts;
 using ExpenseTracker.Receipts.Data;
-using ExpenseTracker.Receipts.UseCases;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 

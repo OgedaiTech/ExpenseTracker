@@ -16,6 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="../ExpenseTracker.Receipts.Contracts/ExpenseTracker.Receipts.Contracts.csproj" />
     <ProjectReference Include="../../ExpenseModule/ExpenseTracker.Expenses.Contracts/ExpenseTracker.Expenses.Contracts.csproj" />
   </ItemGroup>
 
