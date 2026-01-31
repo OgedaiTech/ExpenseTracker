@@ -3,6 +3,7 @@
 @rendermode InteractiveServer
 
 @using ExpenseTrackerUI.Services.Expense
+@using Microsoft.AspNetCore.Components
 @inject ExpenseService ExpenseService
 @inject NavigationManager Navigation
 
@@ -25,6 +26,7 @@ else
                 <th>Name</th>
                 <th>Amount</th>
                 <th>Date</th>
+                <th>Status</th>
                 <th>Actions</th>
             </tr>
         </thead>
@@ -35,6 +37,7 @@ else
                     <td>@expense.Name</td>
                     <td>@expense.Amount.ToString("C")</td>
                     <td>@expense.CreatedAt.ToString("MM/dd/yyyy")</td>
+                    <td>@GetStatusBadge(expense.Status)</td>
                     <td>
                         <button class="btn btn-sm btn-primary me-2" @onclick="() => ViewReceipts(expense.Id)">
                             View
@@ -77,5 +80,19 @@ else
     private void ViewReceipts(Guid expenseId)
     {
         Navigation.NavigateTo($"/expenses/{expenseId}/receipts");
+    }
+
+    private MarkupString GetStatusBadge(ExpenseStatus status)
+    {
+        var (badgeClass, icon, text) = status switch
+        {
+            ExpenseStatus.Draft => ("bg-secondary", "bi-pencil", "Draft"),
+            ExpenseStatus.Submitted => ("bg-info", "bi-clock", "Submitted"),
+            ExpenseStatus.Approved => ("bg-success", "bi-check-circle", "Approved"),
+            ExpenseStatus.Rejected => ("bg-danger", "bi-x-circle", "Rejected"),
+            _ => ("bg-secondary", "bi-question-circle", "Unknown")
+        };
+
+        return new MarkupString($"<span class=\"badge {badgeClass}\"><span class=\"{icon} me-1\"></span>{text}</span>");
     }
 }

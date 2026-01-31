@@ -25,7 +25,7 @@ internal class ListUsersExpenses(
       {
         var response = new ListUsersExpensesResponse
         {
-          Items = [.. serviceResult.Data!.Select(e => new ExpenseDto(e.Id, e.Name, e.Amount, e.CreatedAt))],
+          Items = [.. serviceResult.Data!.Select(e => new ExpenseDto(e.Id, e.Name, e.Amount, e.CreatedAt, e.Status))],
           TotalCount = serviceResult.Data!.Length
         };
         await Send.OkAsync(response, ct);
