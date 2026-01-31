@@ -68,10 +68,10 @@ Authorization: Bearer {{login.response.body.$.accessToken}}
 }
 
 ### ======== GET RECEIPTS BY EXPENSE ID ==========
-@ExpenseId = 019aa7b8-d04a-73ca-9b95-707dffb5a0a6
+@ExpenseId = 019c14c3-e3f3-788f-933e-379181afecd1
 GET {{ExpenseTracker.WebAPI_HostAddress}}/expenses/{{ExpenseId}}/receipts
 Accept: application/json
-Authorization: Bearer {{login.response.body.$.token}}
+Authorization: Bearer {{login.response.body.$.accessToken}}
 
 ### ========== CREATE USERS ==========
 
@@ -104,7 +104,7 @@ Accept: application/json
 Content-Type: application/json
 
 {
-  "email": "barbaros.yurttagul@gmail.com",
+  "email": "admin@ttt.com",
   "password": "Password1!"
 }
 ###
