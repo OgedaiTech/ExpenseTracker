@@ -4,6 +4,7 @@ using ExpenseTracker.Users.Data;
 using ExpenseTracker.Users.TokenService;
 using ExpenseTracker.Users.UserEndpoints.BulkCreate;
 using ExpenseTracker.Users.UserEndpoints.ListUsers;
+using ExpenseTracker.Users.UserEndpoints.ListApprovers;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -32,6 +33,8 @@ public static class UsersModuleServiceExtensions
 
     services.AddScoped<IListUsersService, ListUsersService>();
     services.AddScoped<IListUsersRepository, ListUsersRepository>();
+
+    services.AddScoped<IListApproversService, ListApproversService>();
 
     mediatRAssemblies.Add(typeof(UsersModuleServiceExtensions).Assembly);
     return services;

@@ -10,6 +10,7 @@
     <Project Path="src/ExpenseModule/ExpenseTracker.Expenses/ExpenseTracker.Expenses.csproj" />
   </Folder>
   <Folder Name="/src/ReceiptModule/">
+    <Project Path="src/ReceiptModule/ExpenseTracker.Receipts.Contracts/ExpenseTracker.Receipts.Contracts.csproj" />
     <Project Path="src/ReceiptModule/ExpenseTracker.Receipts.Tests/ExpenseTracker.Receipts.Tests.csproj" />
     <Project Path="src/ReceiptModule/ExpenseTracker.Receipts/ExpenseTracker.Receipts.csproj" />
   </Folder>
