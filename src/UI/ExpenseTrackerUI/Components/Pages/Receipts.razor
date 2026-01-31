@@ -109,7 +109,7 @@ else
                     Navigation.NavigateTo("/expenses");
                     return;
                 }
-                expense = await expenseResponse.Data!;
+                expense = expenseResponse.Data;
 
                 var receiptsResponse = await receiptsTask;
                 receipts = receiptsResponse?.Items ?? new List<ReceiptDto>();
