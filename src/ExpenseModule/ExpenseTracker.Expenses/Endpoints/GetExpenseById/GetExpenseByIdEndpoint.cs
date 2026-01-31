@@ -32,7 +32,8 @@ internal class GetExpenseByIdEndpoint(
                 serviceResult.Data!.Id,
                 serviceResult.Data!.Name,
                 serviceResult.Data!.Amount,
-                serviceResult.Data!.CreatedAt));
+                serviceResult.Data!.CreatedAt,
+                serviceResult.Data!.Status));
 
         await Send.OkAsync(response, ct);
         return;

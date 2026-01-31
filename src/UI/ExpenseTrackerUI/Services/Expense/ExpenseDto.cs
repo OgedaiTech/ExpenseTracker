@@ -4,5 +4,6 @@ public record ExpenseDto(
   Guid Id,
   string Name,
   decimal Amount,
-  DateTime CreatedAt
+  DateTime CreatedAt,
+  ExpenseStatus Status
 );
