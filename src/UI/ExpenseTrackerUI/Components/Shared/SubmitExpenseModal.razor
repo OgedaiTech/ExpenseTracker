@@ -1,0 +1,263 @@
+@rendermode InteractiveServer
+@using ExpenseTrackerUI.Services.User
+@using ExpenseTrackerUI.Services.Expense
+@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
+@inject UserService UserService
+@inject ExpenseService ExpenseService
+@inject ProtectedLocalStorage LocalStorage
+
+@if (isVisible)
+{
+    <div class="modal fade show" style="display: block;" tabindex="-1" aria-labelledby="submitExpenseModalLabel"
+        aria-modal="true" role="dialog">
+        <div class="modal-dialog modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="submitExpenseModalLabel">Submit Expense for Approval</h5>
+                    <button type="button" class="btn-close" @onclick="HandleCancel" disabled="@isSubmitting"></button>
+                </div>
+
+                <div class="modal-body">
+                    @if (!string.IsNullOrEmpty(errorMessage))
+                    {
+                        <div class="alert alert-danger">
+                            <strong>Error:</strong> @errorMessage
+                        </div>
+                    }
+
+                    @if (isLoading)
+                    {
+                        <div class="text-center">
+                            <div class="spinner-border" role="status">
+                                <span class="visually-hidden">Loading approvers...</span>
+                            </div>
+                            <p class="mt-2">Loading approvers...</p>
+                        </div>
+                    }
+                    else if (approvers == null || !approvers.Any())
+                    {
+                        <div class="alert alert-warning">
+                            No approvers available. Please contact your administrator.
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-muted mb-3">Select an approver for this expense:</p>
+
+                        <div class="list-group" style="max-height: 400px; overflow-y: auto;">
+                            @foreach (var approver in GetSortedApprovers())
+                            {
+                                <button type="button"
+                                        class="list-group-item list-group-item-action d-flex justify-content-between align-items-start @(selectedApproverId == approver.Id ? "active" : "")"
+                                        @onclick="() => SelectApprover(approver.Id)"
+                                        disabled="@isSubmitting">
+                                    <div class="flex-grow-1">
+                                        <div class="fw-bold">@approver.FullName</div>
+                                        <small class="@(selectedApproverId == approver.Id ? "text-white-50" : "text-muted")">@approver.Email</small>
+                                    </div>
+                                    <button type="button"
+                                            class="btn btn-link p-0 ms-2"
+                                            @onclick:stopPropagation="true"
+                                            @onclick="() => ToggleFavorite(approver.Id)"
+                                            disabled="@isSubmitting"
+                                            title="@(approver.IsFavorite ? "Remove from favorites" : "Add to favorites")">
+                                        <i class="@(approver.IsFavorite ? "bi bi-star-fill text-warning" : "bi bi-star")"></i>
+                                    </button>
+                                </button>
+                            }
+                        </div>
+                    }
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="HandleCancel" disabled="@isSubmitting">
+                        Cancel
+                    </button>
+                    <button type="button"
+                            class="btn btn-primary"
+                            @onclick="HandleSubmit"
+                            disabled="@(isSubmitting || selectedApproverId == null || isLoading)">
+                        @if (isSubmitting)
+                        {
+                            <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                            <span>Submitting...</span>
+                        }
+                        else
+                        {
+                            <span>Submit Expense</span>
+                        }
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-backdrop fade show"></div>
+}
+
+@code {
+    private const string FavoriteApproversKey = "favorite_approvers";
+
+    [Parameter]
+    public EventCallback<SubmitExpenseResponse> OnExpenseSubmitted { get; set; }
+
+    private bool isVisible = false;
+    private bool isLoading = false;
+    private bool isSubmitting = false;
+    private string? errorMessage;
+    private Guid? currentExpenseId;
+    private Guid? selectedApproverId;
+    private List<ApproverDto>? approvers;
+    private List<Guid> favoriteApproverIds = new();
+
+    public async Task Show(Guid expenseId)
+    {
+        currentExpenseId = expenseId;
+        selectedApproverId = null;
+        errorMessage = null;
+        isSubmitting = false;
+        isVisible = true;
+        isLoading = true;
+
+        StateHasChanged();
+
+        // Load approvers and favorites in parallel
+        await LoadApproversAndFavoritesAsync();
+
+        isLoading = false;
+        StateHasChanged();
+    }
+
+    private void Hide()
+    {
+        isVisible = false;
+        approvers = null;
+        StateHasChanged();
+    }
+
+    private async Task LoadApproversAndFavoritesAsync()
+    {
+        try
+        {
+            // Load favorites from local storage
+            var favoritesResult = await LocalStorage.GetAsync<List<Guid>>(FavoriteApproversKey);
+            favoriteApproverIds = favoritesResult.Success && favoritesResult.Value != null
+                ? favoritesResult.Value
+                : new List<Guid>();
+
+            // Load approvers from API
+            var result = await UserService.GetApproversAsync();
+
+            if (result.IsSuccess && result.Data != null)
+            {
+                approvers = result.Data;
+
+                // Mark favorites
+                foreach (var approver in approvers)
+                {
+                    approver.IsFavorite = favoriteApproverIds.Contains(approver.Id);
+                }
+            }
+            else
+            {
+                errorMessage = result.ErrorMessage ?? "Failed to load approvers";
+                approvers = new List<ApproverDto>();
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"An unexpected error occurred: {ex.Message}";
+            approvers = new List<ApproverDto>();
+        }
+    }
+
+    private List<ApproverDto> GetSortedApprovers()
+    {
+        if (approvers == null) return new List<ApproverDto>();
+
+        // Sort: Favorites first, then alphabetically by last name
+        return approvers
+            .OrderByDescending(a => a.IsFavorite)
+            .ThenBy(a => a.LastName)
+            .ThenBy(a => a.FirstName)
+            .ToList();
+    }
+
+    private void SelectApprover(Guid approverId)
+    {
+        selectedApproverId = approverId;
+    }
+
+    private async Task ToggleFavorite(Guid approverId)
+    {
+        var approver = approvers?.FirstOrDefault(a => a.Id == approverId);
+        if (approver == null) return;
+
+        approver.IsFavorite = !approver.IsFavorite;
+
+        if (approver.IsFavorite)
+        {
+            if (!favoriteApproverIds.Contains(approverId))
+            {
+                favoriteApproverIds.Add(approverId);
+            }
+        }
+        else
+        {
+            favoriteApproverIds.Remove(approverId);
+        }
+
+        // Save to local storage
+        await LocalStorage.SetAsync(FavoriteApproversKey, favoriteApproverIds);
+
+        StateHasChanged();
+    }
+
+    private async Task HandleSubmit()
+    {
+        if (currentExpenseId == null || selectedApproverId == null) return;
+
+        isSubmitting = true;
+        errorMessage = null;
+
+        try
+        {
+            var request = new SubmitExpenseRequest { ApproverId = selectedApproverId.Value };
+            var result = await ExpenseService.SubmitExpenseAsync(currentExpenseId.Value, request);
+
+            if (result.IsSuccess && result.Data != null)
+            {
+                Hide();
+                await OnExpenseSubmitted.InvokeAsync(result.Data);
+            }
+            else
+            {
+                errorMessage = MapErrorToUserMessage(result.ErrorCode, result.ErrorMessage);
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"An unexpected error occurred: {ex.Message}";
+        }
+        finally
+        {
+            isSubmitting = false;
+        }
+    }
+
+    private void HandleCancel()
+    {
+        Hide();
+    }
+
+    private string MapErrorToUserMessage(string? errorCode, string? defaultMessage)
+    {
+        return errorCode switch
+        {
+            "ExpenseNotFound" => "Expense not found. It may have been deleted.",
+            "ExpenseAlreadySubmitted" => "This expense has already been submitted.",
+            "InvalidExpenseStatus" => "This expense cannot be submitted in its current status.",
+            "ApproverNotFound" => "Selected approver is no longer available.",
+            _ => defaultMessage ?? "An error occurred while submitting the expense."
+        };
+    }
+}

@@ -4,15 +4,26 @@
 
 @using ExpenseTrackerUI.Services.Receipt
 @using ExpenseTrackerUI.Services.Expense
+@using ExpenseTrackerUI.Components.Shared
 @inject ReceiptService ReceiptService
 @inject ExpenseService ExpenseService
 @inject NavigationManager Navigation
+
+<SubmitExpenseModal @ref="submitExpenseModal" OnExpenseSubmitted="HandleExpenseSubmitted" />
 
 <div class="mb-3">
     <button class="btn btn-secondary" @onclick="NavigateBack">
         <span class="bi bi-arrow-left"></span> Back to Expenses
     </button>
 </div>
+
+@if (!string.IsNullOrEmpty(successMessage))
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @successMessage
+        <button type="button" class="btn-close" @onclick="() => successMessage = null"></button>
+    </div>
+}
 
 @if (expense == null || receipts == null)
 {
@@ -30,6 +41,34 @@ else
                 </div>
                 <div class="col-md-6">
                     <p class="mb-1"><strong>Date:</strong> @expense.CreatedAt.ToString("MM/dd/yyyy")</p>
+                </div>
+            </div>
+            <div class="row mt-3">
+                <div class="col-12">
+                    @if (CanSubmitExpense())
+                    {
+                        <button class="btn btn-success" @onclick="ShowSubmitModal">
+                            <span class="bi bi-send me-1"></span> Submit for Approval
+                        </button>
+                    }
+                    else if (expense.Status == ExpenseStatus.Submitted)
+                    {
+                        <span class="badge bg-info">
+                            <span class="bi bi-clock me-1"></span> Pending Approval
+                        </span>
+                    }
+                    else if (expense.Status == ExpenseStatus.Approved)
+                    {
+                        <span class="badge bg-success">
+                            <span class="bi bi-check-circle me-1"></span> Approved
+                        </span>
+                    }
+                    else if (expense.Status == ExpenseStatus.Rejected)
+                    {
+                        <span class="badge bg-danger">
+                            <span class="bi bi-x-circle me-1"></span> Rejected
+                        </span>
+                    }
                 </div>
             </div>
         </div>
@@ -89,6 +128,8 @@ else
     private ExpenseDto? expense;
     private List<ReceiptDto>? receipts;
     private bool hasRendered;
+    private SubmitExpenseModal? submitExpenseModal;
+    private string? successMessage;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -126,5 +167,30 @@ else
     private void NavigateBack()
     {
         Navigation.NavigateTo("/expenses");
+    }
+
+    private bool CanSubmitExpense()
+    {
+        return expense?.Status == ExpenseStatus.Draft || expense?.Status == ExpenseStatus.Rejected;
+    }
+
+    private async Task ShowSubmitModal()
+    {
+        if (submitExpenseModal != null && expense != null)
+        {
+            await submitExpenseModal.Show(expense.Id);
+        }
+    }
+
+    private void HandleExpenseSubmitted(SubmitExpenseResponse response)
+    {
+        // Update expense status locally
+        if (expense != null)
+        {
+            expense = expense with { Status = response.Status };
+        }
+
+        successMessage = $"Expense submitted successfully on {response.SubmittedAt:g}";
+        StateHasChanged();
     }
 }
