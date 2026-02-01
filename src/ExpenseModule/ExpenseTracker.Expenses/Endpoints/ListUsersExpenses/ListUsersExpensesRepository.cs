@@ -1,4 +1,4 @@
-using ExpenseTracker.Expenses.Data;
+﻿using ExpenseTracker.Expenses.Data;
 using Microsoft.EntityFrameworkCore;
 
 namespace ExpenseTracker.Expenses.Endpoints.ListUsersExpenses;
@@ -10,7 +10,8 @@ public class ListUsersExpensesRepository(ExpenseDbContext context) : IListUsersE
     return context.Expenses
     .Where(
       e => e.CreatedByUserId == Guid.Parse(userId) &&
-      e.TenantId == Guid.Parse(tenantId))
+      e.TenantId == Guid.Parse(tenantId) &&
+      e.DeletedAt == null)
     .ToListAsync(ct);
   }
 

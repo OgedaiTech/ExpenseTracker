@@ -39,5 +39,25 @@ public class ExpenseService(IHttpClientFactory httpClientFactory, CustomAuthStat
     }
   }
 
+  public async Task<ServiceResult> DeleteExpenseAsync(Guid expenseId)
+  {
+    var client = await GetAuthenticatedClientAsync();
+
+    var response = await client.DeleteAsync($"/expenses/{expenseId}");
+    if (response.IsSuccessStatusCode)
+    {
+      return new ServiceResult();
+    }
+    else if (response.StatusCode is HttpStatusCode.BadRequest)
+    {
+      var errorDetail = await response.Content.ReadAsStringAsync();
+      return new ServiceResult(errorDetail);
+    }
+    else
+    {
+      return new ServiceResult("An error occurred while deleting the expense.");
+    }
+  }
+
   private sealed record GetExpenseByIdResponse(ExpenseDto Expense);
 }
