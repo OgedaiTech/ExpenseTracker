@@ -1,4 +1,5 @@
 ﻿using System.Net;
+using System.Text.Json.Serialization;
 using ExpenseTrackerUI.Services.Authentication;
 
 namespace ExpenseTrackerUI.Services.Expense;
@@ -39,5 +40,43 @@ public class ExpenseService(IHttpClientFactory httpClientFactory, CustomAuthStat
     }
   }
 
+  public async Task<ServiceResult> DeleteExpenseAsync(Guid expenseId)
+  {
+    var client = await GetAuthenticatedClientAsync();
+
+    var response = await client.DeleteAsync($"/expenses/{expenseId}");
+    if (response.IsSuccessStatusCode)
+    {
+      return new ServiceResult();
+    }
+    else if (response.StatusCode is HttpStatusCode.BadRequest)
+    {
+      var problemDetails = await response.Content.ReadFromJsonAsync<ProblemDetailsResponse>();
+      return new ServiceResult(problemDetails?.Detail ?? "An error occurred while deleting the expense.");
+    }
+    else
+    {
+      return new ServiceResult("An error occurred while deleting the expense.");
+    }
+  }
+
   private sealed record GetExpenseByIdResponse(ExpenseDto Expense);
+
+  private sealed class ProblemDetailsResponse
+  {
+    [JsonPropertyName("type")]
+    public string? Type { get; set; }
+
+    [JsonPropertyName("title")]
+    public string? Title { get; set; }
+
+    [JsonPropertyName("status")]
+    public int? Status { get; set; }
+
+    [JsonPropertyName("detail")]
+    public string? Detail { get; set; }
+
+    [JsonPropertyName("instance")]
+    public string? Instance { get; set; }
+  }
 }

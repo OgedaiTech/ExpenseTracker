@@ -1,6 +1,23 @@
-using System.Net;
+﻿using System.Net;
 
 namespace ExpenseTrackerUI.Services;
+
+public class ServiceResult
+{
+  public string? Message { get; set; }
+  public bool Success { get; set; }
+
+  public ServiceResult()
+  {
+    Success = true;
+  }
+
+  public ServiceResult(string message)
+  {
+    Message = message;
+    Success = false;
+  }
+}
 
 public class ServiceResult<T>
 {
