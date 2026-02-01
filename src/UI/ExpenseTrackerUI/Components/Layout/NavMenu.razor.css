@@ -24,7 +24,12 @@
     font-size: 1.1rem;
 }
 
-.bi {
+.bi-house-door-fill-nav-menu,
+.bi-receipt,
+.bi-building,
+.bi-people,
+.bi-box-arrow-right,
+.bi-box-arrow-in-right {
     display: inline-block;
     position: relative;
     width: 1.25rem;
@@ -32,6 +37,15 @@
     margin-right: 0.75rem;
     top: -1px;
     background-size: cover;
+}
+
+.bi-house-door-fill-nav-menu::before,
+.bi-receipt::before,
+.bi-building::before,
+.bi-people::before,
+.bi-box-arrow-right::before,
+.bi-box-arrow-in-right::before {
+    content: none !important;
 }
 
 .bi-house-door-fill-nav-menu {
