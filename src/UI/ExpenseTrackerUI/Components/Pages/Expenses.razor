@@ -10,6 +10,14 @@
 
 <h3>My Expenses</h3>
 
+@if (errorMessage != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        @errorMessage
+        <button type="button" class="btn-close" @onclick="() => errorMessage = null"></button>
+    </div>
+}
+
 @if (expenses == null)
 {
     <p>Loading...</p>
@@ -58,6 +66,7 @@ else
 @code {
     private List<ExpenseDto>? expenses;
     private bool hasRendered;
+    private string? errorMessage;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -106,8 +115,8 @@ else
         }
         else
         {
-            // Handle error case (e.g., show error message)
-            Console.WriteLine($"Failed to delete expense: {response.Message}");
+            errorMessage = response.Message;
+            StateHasChanged();
         }
     }
 }
