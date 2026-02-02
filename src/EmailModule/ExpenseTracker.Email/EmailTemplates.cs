@@ -1,12 +1,12 @@
-namespace ExpenseTracker.Email;
+﻿namespace ExpenseTracker.Email;
 
 public static class EmailTemplates
 {
-    public static (string Subject, string HtmlBody, string TextBody) GetInvitationEmail(string invitationLink)
-    {
-        var subject = "You've been invited to ExpenseTracker";
+  public static (string Subject, string HtmlBody, string TextBody) GetInvitationEmail(string invitationLink)
+  {
+    var subject = "You've been invited to ExpenseTracker";
 
-        var htmlBody = $"""
+    var htmlBody = $"""
             <html>
             <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
                 <h1>Welcome to ExpenseTracker</h1>
@@ -25,7 +25,7 @@ public static class EmailTemplates
             </html>
             """;
 
-        var textBody = $"""
+    var textBody = $"""
             Welcome to ExpenseTracker
 
             You have been invited to join ExpenseTracker.
@@ -38,14 +38,14 @@ public static class EmailTemplates
             If you did not expect this invitation, you can safely ignore this email.
             """;
 
-        return (subject, htmlBody, textBody);
-    }
+    return (subject, htmlBody, textBody);
+  }
 
-    public static (string Subject, string HtmlBody, string TextBody) GetPasswordResetEmail(string resetLink)
-    {
-        var subject = "Password Reset Request - ExpenseTracker";
+  public static (string Subject, string HtmlBody, string TextBody) GetPasswordResetEmail(string resetLink)
+  {
+    var subject = "Password Reset Request - ExpenseTracker";
 
-        var htmlBody = $"""
+    var htmlBody = $"""
             <html>
             <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
                 <h1>Password Reset Request</h1>
@@ -65,7 +65,7 @@ public static class EmailTemplates
             </html>
             """;
 
-        var textBody = $"""
+    var textBody = $"""
             Password Reset Request
 
             You have requested to reset your password for your ExpenseTracker account.
@@ -79,6 +79,37 @@ public static class EmailTemplates
             Your password will remain unchanged.
             """;
 
-        return (subject, htmlBody, textBody);
-    }
+    return (subject, htmlBody, textBody);
+  }
+
+  public static (string Subject, string HtmlBody, string TextBody) GetSubmitExpenseToApproverEmail(string expenseName, string approverEmail, string submitterName)
+  {
+    var subject = "New Expense Submitted for Your Approval";
+
+    var htmlBody = $"""
+            <html>
+            <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                <h1>Expense Submitted for Approval</h1>
+                <p>Dear {approverEmail},</p>
+                <p>{submitterName} has submitted a new expense titled "<strong>{expenseName}</strong>" for your approval.</p>
+                <p>Please log in to the ExpenseTracker system to review and approve the expense at your earliest convenience.</p>
+                <p>Thank you for your attention to this matter.</p>
+            </body>
+            </html>
+            """;
+
+    var textBody = $"""
+            Expense Submitted for Approval
+
+            Dear {approverEmail},
+
+            {submitterName} has submitted a new expense titled "{expenseName}" for your approval.
+
+            Please log in to the ExpenseTracker system to review and approve the expense at your earliest convenience.
+
+            Thank you for your attention to this matter.
+            """;
+
+    return (subject, htmlBody, textBody);
+  }
 }

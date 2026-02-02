@@ -20,6 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="../../EmailModule/ExpenseTracker.Email.Contracts/ExpenseTracker.Email.Contracts.csproj" />
     <ProjectReference Include="../ExpenseTracker.Expenses.Contracts/ExpenseTracker.Expenses.Contracts.csproj" />
     <ProjectReference Include="../../UsersModule/ExpenseTracker.Users.Contracts/ExpenseTracker.Users.Contracts.csproj" />
     <ProjectReference Include="../../ReceiptModule/ExpenseTracker.Receipts.Contracts/ExpenseTracker.Receipts.Contracts.csproj" />

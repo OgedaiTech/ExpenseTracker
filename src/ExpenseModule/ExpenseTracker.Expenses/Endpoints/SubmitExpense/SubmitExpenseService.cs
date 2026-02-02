@@ -1,4 +1,5 @@
 ﻿using ExpenseTracker.Core;
+using ExpenseTracker.Email.Contracts;
 using ExpenseTracker.Receipts.Contracts;
 using ExpenseTracker.Users.Contracts;
 using MediatR;
@@ -65,6 +66,28 @@ public class SubmitExpenseService(
     expense.SubmittedAt = DateTime.UtcNow;
 
     await submitExpenseRepository.UpdateExpenseAsync(expense, cancellationToken);
+
+    // Send notification email to the approver
+    var getApproverEmailQuery = new GetUserEmailQuery(approverId);
+    var approverEmailResult = await mediator.Send(getApproverEmailQuery, cancellationToken);
+    if (approverEmailResult.Success)
+    {
+      var getSubmitterEmailQuery = new GetUserEmailQuery(userGuid);
+      var submitterEmailResult = await mediator.Send(getSubmitterEmailQuery, cancellationToken);
+
+      if (!submitterEmailResult.Success)
+      {
+        // Log warning but continue
+      }
+
+      var sendEmailCommand = new SendSubmitExpenseToApproverEmailCommand(
+        expense.Name,
+        approverId,
+        approverEmailResult.Data!.Email,
+        submitterEmailResult.Success ? $"{submitterEmailResult.Data!.FirstName} {submitterEmailResult.Data.LastName}" : "A user");
+
+      await mediator.Send(sendEmailCommand, cancellationToken);
+    }
 
     return new ServiceResult<SubmitExpenseResponse>(new SubmitExpenseResponse
     {
