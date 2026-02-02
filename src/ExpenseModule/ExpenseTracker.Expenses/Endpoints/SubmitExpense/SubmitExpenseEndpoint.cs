@@ -30,6 +30,13 @@ internal class SubmitExpenseEndpoint(ISubmitExpenseService submitExpenseService)
       var statusCode = serviceResult.Message switch
       {
         SubmitExpenseConstants.FailedToRetrieveSubmitterEmail => StatusCodes.Status500InternalServerError,
+        SubmitExpenseConstants.FailedToRetrieveApproverEmail => StatusCodes.Status500InternalServerError,
+        SubmitExpenseConstants.SelectedApproverIsNotInYourOrganization => StatusCodes.Status400BadRequest,
+        SubmitExpenseConstants.CannotSubmitExpenseWithoutReceipts => StatusCodes.Status400BadRequest,
+        SubmitExpenseConstants.ExpenseNotFound => StatusCodes.Status400BadRequest,
+        SubmitExpenseConstants.OnlyDraftOrRejectedExpensesCanBeSubmitted => StatusCodes.Status400BadRequest,
+        SubmitExpenseConstants.YouCanNotSubmitExpensesToYourselfForApproval => StatusCodes.Status400BadRequest,
+        SubmitExpenseConstants.YouCanOnlySubmitYourOwnExpenses => StatusCodes.Status400BadRequest,
         _ => StatusCodes.Status400BadRequest
       };
 

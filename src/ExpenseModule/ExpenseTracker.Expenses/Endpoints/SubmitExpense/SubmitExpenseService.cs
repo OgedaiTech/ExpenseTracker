@@ -23,26 +23,26 @@ public class SubmitExpenseService(
     // Validate that the user is not submitting to themselves
     if (userGuid == approverId)
     {
-      return new ServiceResult<SubmitExpenseResponse>("You cannot submit expenses to yourself for approval");
+      return new ServiceResult<SubmitExpenseResponse>(SubmitExpenseConstants.YouCanNotSubmitExpensesToYourselfForApproval);
     }
 
     // Get the expense
     var expense = await submitExpenseRepository.GetExpenseByIdAsync(expenseId, tenantGuid, cancellationToken);
     if (expense is null)
     {
-      return new ServiceResult<SubmitExpenseResponse>("Expense not found");
+      return new ServiceResult<SubmitExpenseResponse>(SubmitExpenseConstants.ExpenseNotFound);
     }
 
     // Validate that the expense belongs to the user
     if (expense.CreatedByUserId != userGuid)
     {
-      return new ServiceResult<SubmitExpenseResponse>("You can only submit your own expenses");
+      return new ServiceResult<SubmitExpenseResponse>(SubmitExpenseConstants.YouCanOnlySubmitYourOwnExpenses);
     }
 
     // Validate that the expense is in Draft or Rejected status
     if (expense.Status != ExpenseStatus.Draft && expense.Status != ExpenseStatus.Rejected)
     {
-      return new ServiceResult<SubmitExpenseResponse>("Only draft or rejected expenses can be submitted for approval");
+      return new ServiceResult<SubmitExpenseResponse>(SubmitExpenseConstants.OnlyDraftOrRejectedExpensesCanBeSubmitted);
     }
 
     // Validate that the expense has at least one receipt
@@ -50,14 +50,14 @@ public class SubmitExpenseService(
     var receiptCountResult = await mediator.Send(receiptCountQuery, cancellationToken);
     if (receiptCountResult.Success && receiptCountResult.Data == 0)
     {
-      return new ServiceResult<SubmitExpenseResponse>("Cannot submit expense without at least one receipt");
+      return new ServiceResult<SubmitExpenseResponse>(SubmitExpenseConstants.CannotSubmitExpenseWithoutReceipts);
     }
 
     // Validate that the approver exists, is in the same tenant, and has Approver role
     var isUserApproverResult = await mediator.Send(new IsUserApproverQuery(approverId, tenantGuid), cancellationToken);
     if (!isUserApproverResult.Success || !isUserApproverResult.Data)
     {
-      return new ServiceResult<SubmitExpenseResponse>("The selected user is not an approver in your organization");
+      return new ServiceResult<SubmitExpenseResponse>(SubmitExpenseConstants.SelectedApproverIsNotInYourOrganization);
     }
 
     // Update the expense status to Submitted
@@ -70,7 +70,11 @@ public class SubmitExpenseService(
     // Send notification email to the approver
     var getApproverEmailQuery = new GetUserEmailQuery(approverId);
     var approverEmailResult = await mediator.Send(getApproverEmailQuery, cancellationToken);
-    if (approverEmailResult.Success)
+    if (!approverEmailResult.Success)
+    {
+      return new ServiceResult<SubmitExpenseResponse>(SubmitExpenseConstants.FailedToRetrieveApproverEmail);
+    }
+    else
     {
       var getSubmitterEmailQuery = new GetUserEmailQuery(userGuid);
       var submitterEmailResult = await mediator.Send(getSubmitterEmailQuery, cancellationToken);
