@@ -40,7 +40,7 @@ else
                     <p class="mb-1"><strong>Amount:</strong> @expense.Amount.ToString("C")</p>
                 </div>
                 <div class="col-md-6">
-                    <p class="mb-1"><strong>Date:</strong> @expense.CreatedAt.ToString("MM/dd/yyyy")</p>
+                    <p class="mb-1"><strong>Date:</strong> @expense.CreatedAt.ToString("dd/M/yyyy")</p>
                 </div>
             </div>
             <div class="row mt-3">
@@ -100,9 +100,9 @@ else
                     <tr>
                         <td>@receipt.ReceiptNo</td>
                         <td>@receipt.Vendor</td>
-                        <td>@receipt.Date.ToString("MM/dd/yyyy")</td>
+                        <td>@receipt.Date.ToString("dd/M/yyyy")</td>
                         <td>@receipt.Amount.ToString("C")</td>
-                        <td>@receipt.CreatedAt.ToString("MM/dd/yyyy")</td>
+                        <td>@receipt.CreatedAt.ToString("dd/M/yyyy")</td>
                         <td>
                             <button class="btn btn-sm btn-primary me-2" disabled>
                                 View
