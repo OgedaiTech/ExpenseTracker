@@ -10,6 +10,7 @@ using ExpenseTracker.Users;
 using ExpenseTracker.Users.Data;
 using FastEndpoints;
 using FastEndpoints.Security;
+using Serilog;
 
 namespace ExpenseTracker.WebAPI;
 
@@ -17,7 +18,16 @@ public partial class Program
 {
   private static async Task Main(string[] args)
   {
-    var builder = WebApplication.CreateBuilder(args);
+    // Configure bootstrap logger for startup
+    Log.Logger = new LoggerConfiguration()
+        .WriteTo.Console()
+        .CreateBootstrapLogger();
+
+    try
+    {
+      Log.Information("Starting ExpenseTracker WebAPI");
+
+      var builder = WebApplication.CreateBuilder(args);
 
     builder.AddServiceDefaults();
 
@@ -84,7 +94,18 @@ public partial class Program
 
     app.MapHealthChecks("/health");
 
+    Log.Information("ExpenseTracker WebAPI started successfully");
     await app.RunAsync();
+    }
+    catch (Exception ex)
+    {
+      Log.Fatal(ex, "Application start-up failed");
+      throw;
+    }
+    finally
+    {
+      Log.CloseAndFlush();
+    }
   }
 }
 public partial class Program { }
