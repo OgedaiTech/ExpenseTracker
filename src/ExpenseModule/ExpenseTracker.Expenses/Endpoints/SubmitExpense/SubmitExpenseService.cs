@@ -77,7 +77,7 @@ public class SubmitExpenseService(
 
       if (!submitterEmailResult.Success)
       {
-        // Log warning but continue
+        return new ServiceResult<SubmitExpenseResponse>(SubmitExpenseConstants.FailedToRetrieveSubmitterEmail);
       }
 
       var sendEmailCommand = new SendSubmitExpenseToApproverEmailCommand(
