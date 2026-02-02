@@ -392,6 +392,59 @@ public class UserService(IHttpClientFactory httpClientFactory, CustomAuthStatePr
     }
   }
 
+  public async Task<ServiceResult<List<ApproverDto>>> GetApproversAsync()
+  {
+    try
+    {
+      var client = await GetAuthenticatedClientAsync();
+      var response = await client.GetAsync("/users/approvers");
+
+      if (response.IsSuccessStatusCode)
+      {
+        var result = await response.Content.ReadFromJsonAsync<List<ListApproversResponse>>();
+        // Map to ApproverDto (IsFavorite will be set by component)
+        var approvers = result?.Select(r => new ApproverDto
+        {
+          Id = r.Id,
+          FirstName = r.FirstName,
+          LastName = r.LastName,
+          Email = r.Email,
+          IsFavorite = false
+        }).ToList() ?? new List<ApproverDto>();
+
+        return ServiceResult<List<ApproverDto>>.Success(approvers);
+      }
+
+      // Try to parse error response
+      try
+      {
+        var problemDetails = await response.Content.ReadFromJsonAsync<ProblemDetailsResponse>();
+        return ServiceResult<List<ApproverDto>>.Failure(
+            response.StatusCode,
+            problemDetails?.Detail,
+            problemDetails?.Title
+        );
+      }
+      catch
+      {
+        var errorContent = await response.Content.ReadAsStringAsync();
+        return ServiceResult<List<ApproverDto>>.Failure(
+            response.StatusCode,
+            null,
+            errorContent
+        );
+      }
+    }
+    catch (Exception ex)
+    {
+      return ServiceResult<List<ApproverDto>>.Failure(
+          HttpStatusCode.InternalServerError,
+          null,
+          ex.Message
+      );
+    }
+  }
+
   private sealed class ProblemDetailsResponse
   {
     [JsonPropertyName("type")]

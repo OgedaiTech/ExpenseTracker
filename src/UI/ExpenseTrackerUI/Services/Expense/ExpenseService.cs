@@ -60,6 +60,27 @@ public class ExpenseService(IHttpClientFactory httpClientFactory, CustomAuthStat
     }
   }
 
+  public async Task<ServiceResult<SubmitExpenseResponse?>> SubmitExpenseAsync(Guid expenseId, SubmitExpenseRequest request)
+  {
+    var client = await GetAuthenticatedClientAsync();
+
+    var response = await client.PostAsJsonAsync($"/expenses/{expenseId}/submit", request);
+    if (response.IsSuccessStatusCode)
+    {
+      var result = await response.Content.ReadFromJsonAsync<SubmitExpenseResponse>();
+      return ServiceResult<SubmitExpenseResponse?>.Success(result);
+    }
+    else if (response.StatusCode is HttpStatusCode.BadRequest)
+    {
+      var problemDetails = await response.Content.ReadFromJsonAsync<ProblemDetailsResponse>();
+      return ServiceResult<SubmitExpenseResponse?>.Failure(response.StatusCode, "ExpenseSubmissionError", problemDetails?.Detail ?? "An error occurred while submitting the expense.");
+    }
+    else
+    {
+      return ServiceResult<SubmitExpenseResponse?>.Failure(response.StatusCode, "ExpenseSubmissionError", "An error occurred while submitting the expense.");
+    }
+  }
+
   private sealed record GetExpenseByIdResponse(ExpenseDto Expense);
 
   private sealed class ProblemDetailsResponse
