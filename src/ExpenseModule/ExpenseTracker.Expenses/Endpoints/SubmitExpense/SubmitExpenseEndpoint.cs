@@ -1,4 +1,4 @@
-using FastEndpoints;
+﻿using FastEndpoints;
 using Microsoft.AspNetCore.Http;
 
 namespace ExpenseTracker.Expenses.Endpoints.SubmitExpense;
@@ -27,11 +27,24 @@ internal class SubmitExpenseEndpoint(ISubmitExpenseService submitExpenseService)
 
     if (!serviceResult.Success)
     {
+      var statusCode = serviceResult.Message switch
+      {
+        SubmitExpenseConstants.FailedToRetrieveSubmitterEmail => StatusCodes.Status500InternalServerError,
+        SubmitExpenseConstants.FailedToRetrieveApproverEmail => StatusCodes.Status500InternalServerError,
+        SubmitExpenseConstants.SelectedApproverIsNotInYourOrganization => StatusCodes.Status400BadRequest,
+        SubmitExpenseConstants.CannotSubmitExpenseWithoutReceipts => StatusCodes.Status400BadRequest,
+        SubmitExpenseConstants.ExpenseNotFound => StatusCodes.Status400BadRequest,
+        SubmitExpenseConstants.OnlyDraftOrRejectedExpensesCanBeSubmitted => StatusCodes.Status400BadRequest,
+        SubmitExpenseConstants.YouCanNotSubmitExpensesToYourselfForApproval => StatusCodes.Status400BadRequest,
+        SubmitExpenseConstants.YouCanOnlySubmitYourOwnExpenses => StatusCodes.Status400BadRequest,
+        _ => StatusCodes.Status400BadRequest
+      };
+
       var problem = Results.Problem(
-        title: "Invalid request",
-        detail: serviceResult.Message,
-        statusCode: StatusCodes.Status400BadRequest,
-        instance: HttpContext.Request.Path);
+          detail: serviceResult.Message,
+          statusCode: statusCode,
+          instance: HttpContext.Request.Path);
+
       await Send.ResultAsync(problem);
       return;
     }
