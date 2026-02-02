@@ -1,9 +1,12 @@
 ﻿using FastEndpoints;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
 
 namespace ExpenseTracker.Expenses.Endpoints.SubmitExpense;
 
-internal class SubmitExpenseEndpoint(ISubmitExpenseService submitExpenseService)
+internal partial class SubmitExpenseEndpoint(
+  ISubmitExpenseService submitExpenseService,
+  ILogger<SubmitExpenseEndpoint> logger)
   : Endpoint<SubmitExpenseRequest, SubmitExpenseResponse>
 {
   public override void Configure()
@@ -45,10 +48,13 @@ internal class SubmitExpenseEndpoint(ISubmitExpenseService submitExpenseService)
           statusCode: statusCode,
           instance: HttpContext.Request.Path);
 
+      LogSubmitExpenseFailed(logger, serviceResult.Message ?? "Unknown error", null);
+
       await Send.ResultAsync(problem);
       return;
     }
 
+    LogSubmitExpenseSucceeded(logger, expenseId, userId, null);
     await Send.OkAsync(serviceResult.Data!, ct);
   }
 }
