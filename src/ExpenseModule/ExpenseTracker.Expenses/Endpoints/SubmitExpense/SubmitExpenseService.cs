@@ -1,5 +1,6 @@
-using ExpenseTracker.Core;
+﻿using ExpenseTracker.Core;
 using ExpenseTracker.Receipts.Contracts;
+using ExpenseTracker.Users.Contracts;
 using MediatR;
 
 namespace ExpenseTracker.Expenses.Endpoints.SubmitExpense;
@@ -52,8 +53,8 @@ public class SubmitExpenseService(
     }
 
     // Validate that the approver exists, is in the same tenant, and has Approver role
-    var isApprover = await submitExpenseRepository.IsUserApproverAsync(approverId, tenantGuid, cancellationToken);
-    if (!isApprover)
+    var isUserApproverResult = await mediator.Send(new IsUserApproverQuery(approverId, tenantGuid), cancellationToken);
+    if (!isUserApproverResult.Success || !isUserApproverResult.Data)
     {
       return new ServiceResult<SubmitExpenseResponse>("The selected user is not an approver in your organization");
     }
