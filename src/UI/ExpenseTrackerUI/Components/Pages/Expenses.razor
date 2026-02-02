@@ -44,7 +44,7 @@ else
                 <tr>
                     <td>@expense.Name</td>
                     <td>@expense.Amount.ToString("C")</td>
-                    <td>@expense.CreatedAt.ToString("MM/dd/yyyy")</td>
+                    <td>@expense.CreatedAt.ToString("dd/M/yyyy")</td>
                     <td>@GetStatusBadge(expense.Status)</td>
                     <td>
                         <button class="btn btn-sm btn-primary me-2" @onclick="() => ViewReceipts(expense.Id)">
