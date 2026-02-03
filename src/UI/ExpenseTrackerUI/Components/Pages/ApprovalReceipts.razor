@@ -208,6 +208,7 @@ else
         errorMessage = null;
         successMessage = null;
         StateHasChanged();
+        await Task.Yield(); // Ensure UI updates before API call
 
         try
         {
@@ -216,6 +217,8 @@ else
             if (result.IsSuccess && result.Data != null)
             {
                 successMessage = $"Expense approved successfully on {result.Data.ApprovedAt:g}";
+                approvingExpense = false;
+                StateHasChanged(); // Trigger re-render to show success message
                 await Task.Delay(2500); // Brief delay to show success message
                 Navigation.NavigateTo("/approvals");
             }
