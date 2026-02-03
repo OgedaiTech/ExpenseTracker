@@ -1,4 +1,6 @@
-﻿namespace ExpenseTracker.Email;
+﻿using ExpenseTracker.Core;
+
+namespace ExpenseTracker.Email;
 
 public interface IEmailService
 {
@@ -16,5 +18,11 @@ public interface IEmailService
       string expenseName,
       string approverEmail,
       string submitterName,
+      CancellationToken cancellationToken);
+
+  Task<ServiceResult> SendApproveExpenseResultEmailAsync(
+      string to,
+      string subject,
+      string body,
       CancellationToken cancellationToken);
 }

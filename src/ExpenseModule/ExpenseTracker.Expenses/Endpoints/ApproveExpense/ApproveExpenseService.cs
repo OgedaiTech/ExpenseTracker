@@ -1,8 +1,13 @@
-using ExpenseTracker.Core;
+﻿using ExpenseTracker.Core;
+using ExpenseTracker.Email.Contracts;
+using ExpenseTracker.Users.Contracts;
+using MediatR;
 
 namespace ExpenseTracker.Expenses.Endpoints.ApproveExpense;
 
-public class ApproveExpenseService(IApproveExpenseRepository approveExpenseRepository) : IApproveExpenseService
+public class ApproveExpenseService(
+  IApproveExpenseRepository approveExpenseRepository,
+  IMediator mediator) : IApproveExpenseService
 {
   public async Task<ServiceResult<ApproveExpenseResponse>> ApproveExpenseAsync(
     Guid expenseId,
@@ -40,6 +45,21 @@ public class ApproveExpenseService(IApproveExpenseRepository approveExpenseRepos
     await approveExpenseRepository.UpdateExpenseAsync(expense, cancellationToken);
 
     // TODO: Send approval email notification in Phase 5
+    var approversEmailQuery = new GetUserEmailQuery(expense.ApprovedByUserId.Value);
+    var approver = await mediator.Send(approversEmailQuery, cancellationToken);
+    if (approver.Success)
+    {
+      var userEmailQuery = new GetUserEmailQuery(expense.CreatedByUserId);
+      var expenseSubmitter = await mediator.Send(userEmailQuery, cancellationToken);
+      if (expenseSubmitter.Success)
+      {
+        var sendEmailCommand = new SendApproveExpenseResultEmailCommand(
+          expense.Name,
+          approver.Data!.Email,
+          expenseSubmitter.Data!.Email);
+        await mediator.Send(sendEmailCommand, cancellationToken);
+      }
+    }
 
     return new ServiceResult<ApproveExpenseResponse>(new ApproveExpenseResponse
     {

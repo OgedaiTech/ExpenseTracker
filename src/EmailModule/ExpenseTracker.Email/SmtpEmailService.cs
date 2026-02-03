@@ -1,4 +1,5 @@
 ﻿using System.Web;
+using ExpenseTracker.Core;
 using MailKit.Net.Smtp;
 using MailKit.Security;
 using Microsoft.Extensions.Logging;
@@ -114,4 +115,17 @@ public partial class SmtpEmailService(
       Level = LogLevel.Information,
       Message = "Password reset email sent to {Email}")]
   private static partial void LogPasswordResetEmailSent(ILogger logger, string email);
+
+  public Task<ServiceResult> SendApproveExpenseResultEmailAsync(string to, string subject, string body, CancellationToken cancellationToken)
+  {
+    return SendEmailAsync(to, subject, body, body, cancellationToken)
+      .ContinueWith(t =>
+      {
+        if (t.IsFaulted)
+        {
+          return new ServiceResult("Failed to send approval email");
+        }
+        return new ServiceResult();
+      }, cancellationToken);
+  }
 }

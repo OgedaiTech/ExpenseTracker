@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using ExpenseTracker.Core;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace ExpenseTracker.Email;
@@ -101,6 +102,11 @@ public partial class ConsoleEmailService(
   private static partial void LogResetLink(ILogger logger, string resetLink);
 
   public Task SendSubmitExpenseToApproverEmailAsync(string expenseName, string approverEmail, string submitterName, CancellationToken cancellationToken)
+  {
+    throw new NotImplementedException();
+  }
+
+  public Task<ServiceResult> SendApproveExpenseResultEmailAsync(string to, string subject, string body, CancellationToken cancellationToken)
   {
     throw new NotImplementedException();
   }
