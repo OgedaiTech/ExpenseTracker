@@ -20,11 +20,11 @@ public class ExpenseService(IHttpClientFactory httpClientFactory, CustomAuthStat
     return null;
   }
 
-  public async Task<ServiceResult<ExpenseDto?>> GetExpenseByIdAsync(Guid expenseId)
+  public async Task<ServiceResult<ExpenseDto?>> GetExpenseByIdAsync(Guid expenseId, Guid? createdByUserId)
   {
     var client = await GetAuthenticatedClientAsync();
 
-    var response = await client.GetAsync($"/expenses/{expenseId}");
+    var response = await client.GetAsync($"/expenses/{expenseId}?createdByUserId={createdByUserId}");
     if (response.IsSuccessStatusCode)
     {
       var result = await response.Content.ReadFromJsonAsync<GetExpenseByIdResponse>();

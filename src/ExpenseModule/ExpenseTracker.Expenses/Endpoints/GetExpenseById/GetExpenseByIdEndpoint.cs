@@ -1,4 +1,4 @@
-using ExpenseTracker.Expenses.Endpoints.ListUsersExpenses;
+﻿using ExpenseTracker.Expenses.Endpoints.ListUsersExpenses;
 using FastEndpoints;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
@@ -7,7 +7,7 @@ namespace ExpenseTracker.Expenses.Endpoints.GetExpenseById;
 
 internal class GetExpenseByIdEndpoint(
     IGetExpenseByIdService service,
-    ILogger<GetExpenseByIdEndpoint> logger) : EndpointWithoutRequest
+    ILogger<GetExpenseByIdEndpoint> logger) : Endpoint<GetExpenseByIdRequest, GetExpenseByIdResponse>
 {
   public override void Configure()
   {
@@ -15,12 +15,16 @@ internal class GetExpenseByIdEndpoint(
     Claims("EmailAddress");
   }
 
-  public override async Task HandleAsync(CancellationToken ct)
+  public override async Task HandleAsync(GetExpenseByIdRequest request, CancellationToken ct)
   {
     try
     {
       var expenseId = Route<string>("id") ?? string.Empty;
-      var userId = User.Claims.First(c => c.Type == "UserId").Value;
+      // if approver is getting expense on behalf of user, use createdByUserId query param otherwise use userId from token
+      var createdByUserIdQuery = Query<string>("createdByUserId", false);
+      var userId = !string.IsNullOrEmpty(createdByUserIdQuery)
+        ? createdByUserIdQuery
+        : (request.UserId?.ToString() ?? User.Claims.First(c => c.Type == "UserId").Value);
       var tenantId = User.Claims.First(c => c.Type == "TenantId").Value;
 
       var serviceResult = await service.GetExpenseByIdAsync(expenseId, userId, tenantId, ct);
@@ -73,3 +77,5 @@ internal class GetExpenseByIdEndpoint(
     }
   }
 }
+
+public record GetExpenseByIdRequest(Guid? UserId);
