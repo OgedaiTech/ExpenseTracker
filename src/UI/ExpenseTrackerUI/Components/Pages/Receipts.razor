@@ -139,7 +139,7 @@ else
             try
             {
                 // Fetch expense details and receipts in parallel
-                var expenseTask = ExpenseService.GetExpenseByIdAsync(ExpenseId);
+                var expenseTask = ExpenseService.GetExpenseByIdAsync(ExpenseId, null);
                 var receiptsTask = ReceiptService.GetReceiptsAsync(ExpenseId);
 
                 await Task.WhenAll(expenseTask, receiptsTask);

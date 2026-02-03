@@ -1,0 +1,248 @@
+﻿@page "/approvals/{ExpenseId:guid}/{CreatedByUserId:guid}/receipts"
+@attribute [Authorize(Roles = "Approver")]
+@rendermode InteractiveServer
+
+@using ExpenseTrackerUI.Services.Receipt
+@using ExpenseTrackerUI.Services.Expense
+@using ExpenseTrackerUI.Services.Approval
+@using ExpenseTrackerUI.Components.Shared
+@using Microsoft.AspNetCore.Components.Authorization
+@inject ReceiptService ReceiptService
+@inject ExpenseService ExpenseService
+@inject ApprovalService ApprovalService
+@inject NavigationManager Navigation
+@inject AuthenticationStateProvider AuthStateProvider
+
+<div class="mb-3">
+    <button class="btn btn-secondary" @onclick="NavigateBack">
+        <span class="bi bi-arrow-left"></span> Back to Approvals
+    </button>
+</div>
+
+@if (!string.IsNullOrEmpty(successMessage))
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @successMessage
+        <button type="button" class="btn-close" @onclick="() => successMessage = null"></button>
+    </div>
+}
+
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        @errorMessage
+        <button type="button" class="btn-close" @onclick="() => errorMessage = null"></button>
+    </div>
+}
+
+@if (expense == null || receipts == null)
+{
+    <p>Loading...</p>
+}
+else
+{
+    <!-- Expense Details Section -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <h4 class="card-title">@expense.Name</h4>
+            <div class="row">
+                <div class="col-md-6">
+                    <p class="mb-1"><strong>Amount:</strong> @expense.Amount.ToString("C")</p>
+                </div>
+                <div class="col-md-6">
+                    <p class="mb-1"><strong>Date:</strong> @expense.CreatedAt.ToString("dd/M/yyyy")</p>
+                </div>
+            </div>
+            <div class="row mt-3">
+                <div class="col-12">
+                    @if (expense.Status == ExpenseStatus.Submitted && isApprover)
+                    {
+                        <button class="btn btn-success me-2" @onclick="ApproveExpense" disabled="@approvingExpense">
+                            @if (approvingExpense)
+                            {
+                                <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                                <span>Approving...</span>
+                            }
+                            else
+                            {
+                                <span class="bi bi-check-circle me-1"></span>
+                                <span>Approve</span>
+                            }
+                        </button>
+                        <button class="btn btn-secondary" disabled="true" title="Coming soon">
+                            <span class="bi bi-x-circle me-1"></span> Reject
+                        </button>
+                    }
+                    else if (expense.Status == ExpenseStatus.Submitted)
+                    {
+                        <span class="badge bg-info">
+                            <span class="bi bi-clock me-1"></span> Pending Approval
+                        </span>
+                    }
+                    else if (expense.Status == ExpenseStatus.Approved)
+                    {
+                        <span class="badge bg-success">
+                            <span class="bi bi-check-circle me-1"></span> Approved
+                        </span>
+                    }
+                    else if (expense.Status == ExpenseStatus.Rejected)
+                    {
+                        <span class="badge bg-danger">
+                            <span class="bi bi-x-circle me-1"></span> Rejected
+                        </span>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Receipts Table Section -->
+    <h5>Receipts</h5>
+
+    @if (!receipts.Any())
+    {
+        <p class="text-muted">No receipts found for this expense.</p>
+    }
+    else
+    {
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Receipt No</th>
+                    <th>Vendor</th>
+                    <th>Date</th>
+                    <th>Amount</th>
+                    <th>Created</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var receipt in receipts)
+                {
+                    <tr>
+                        <td>@receipt.ReceiptNo</td>
+                        <td>@receipt.Vendor</td>
+                        <td>@receipt.Date.ToString("dd/M/yyyy")</td>
+                        <td>@receipt.Amount.ToString("C")</td>
+                        <td>@receipt.CreatedAt.ToString("dd/M/yyyy")</td>
+                        <td>
+                            <button class="btn btn-sm btn-primary me-2" disabled>
+                                View
+                            </button>
+                            <button class="btn btn-sm btn-secondary me-2" disabled>
+                                Edit
+                            </button>
+                            <button class="btn btn-sm btn-danger" disabled>
+                                Delete
+                            </button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+}
+
+@code {
+    [Parameter]
+    public Guid ExpenseId { get; set; }
+
+    [Parameter]
+    public Guid CreatedByUserId { get; set; }
+
+    private ExpenseDto? expense;
+    private List<ReceiptDto>? receipts;
+    private bool hasRendered;
+    private string? successMessage;
+    private string? errorMessage;
+    private bool approvingExpense;
+    private bool isApprover;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && !hasRendered)
+        {
+            hasRendered = true;
+            try
+            {
+                // Check if user has Approver role
+                var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+                isApprover = authState.User.IsInRole("Approver");
+
+                // Fetch expense details and receipts in parallel
+                var expenseTask = ExpenseService.GetExpenseByIdAsync(ExpenseId, CreatedByUserId);
+                var receiptsTask = ReceiptService.GetReceiptsAsync(ExpenseId);
+
+                await Task.WhenAll(expenseTask, receiptsTask);
+
+                var expenseResponse = await expenseTask;
+                if (expenseResponse.StatusCode is HttpStatusCode.NotFound)
+                {
+                    Navigation.NavigateTo("/approvals");
+                    return;
+                }
+                expense = expenseResponse.Data;
+
+                var receiptsResponse = await receiptsTask;
+                receipts = receiptsResponse?.Items ?? new List<ReceiptDto>();
+            }
+            catch
+            {
+                // Handle error - initialize empty list
+                receipts = new List<ReceiptDto>();
+            }
+            StateHasChanged();
+        }
+    }
+
+    private void NavigateBack()
+    {
+        Navigation.NavigateTo("/approvals");
+    }
+
+    private async Task ApproveExpense()
+    {
+        if (expense == null) return;
+
+        approvingExpense = true;
+        errorMessage = null;
+        successMessage = null;
+        StateHasChanged();
+
+        try
+        {
+            var result = await ApprovalService.ApproveExpenseAsync(expense.Id);
+
+            if (result.IsSuccess && result.Data != null)
+            {
+                successMessage = $"Expense approved successfully on {result.Data.ApprovedAt:g}";
+                await Task.Delay(2500); // Brief delay to show success message
+                Navigation.NavigateTo("/approvals");
+            }
+            else
+            {
+                errorMessage = MapErrorToUserMessage(result.ErrorCode, result.ErrorMessage);
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"An unexpected error occurred: {ex.Message}";
+        }
+        finally
+        {
+            approvingExpense = false;
+            StateHasChanged();
+        }
+    }
+
+    private string MapErrorToUserMessage(string? errorCode, string? defaultMessage)
+    {
+        return errorCode switch
+        {
+            "ExpenseNotFound" => "Expense not found. It may have been deleted or already processed.",
+            "InvalidExpenseStatus" => "This expense cannot be approved in its current status.",
+            "UnauthorizedApprover" => "You are not authorized to approve this expense.",
+            _ => defaultMessage ?? "An error occurred while approving the expense."
+        };
+    }
+}

@@ -59,7 +59,7 @@ public class GetExpenseByIdEndpointTests
         .ReturnsAsync(new ServiceResult<Expense>(expense));
 
     // Act
-    await _endpoint.HandleAsync(ct);
+    await _endpoint.HandleAsync(new GetExpenseByIdRequest(null), ct);
 
     // Assert
     _getExpenseByIdService.Verify(
@@ -78,7 +78,7 @@ public class GetExpenseByIdEndpointTests
         .ReturnsAsync(new ServiceResult<Expense>("Expense not found."));
 
     // Act
-    await _endpoint.HandleAsync(ct);
+    await _endpoint.HandleAsync(new GetExpenseByIdRequest(null), ct);
 
     // Assert
     _getExpenseByIdService.Verify(
@@ -97,7 +97,7 @@ public class GetExpenseByIdEndpointTests
         .ReturnsAsync(new ServiceResult<Expense>("Invalid expense ID."));
 
     // Act
-    await _endpoint.HandleAsync(ct);
+    await _endpoint.HandleAsync(new GetExpenseByIdRequest(null), ct);
 
     // Assert
     _getExpenseByIdService.Verify(
