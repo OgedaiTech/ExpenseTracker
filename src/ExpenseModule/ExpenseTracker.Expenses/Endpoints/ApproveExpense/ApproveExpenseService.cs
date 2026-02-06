@@ -22,19 +22,19 @@ public class ApproveExpenseService(
     var expense = await approveExpenseRepository.GetExpenseByIdAsync(expenseId, tenantGuid, cancellationToken);
     if (expense is null)
     {
-      return new ServiceResult<ApproveExpenseResponse>("Expense not found");
+      return new ServiceResult<ApproveExpenseResponse>(ApproveExpenseConstants.ExpenseNotFound);
     }
 
     // Validate that the expense is in Submitted status
     if (expense.Status != ExpenseStatus.Submitted)
     {
-      return new ServiceResult<ApproveExpenseResponse>("Only submitted expenses can be approved");
+      return new ServiceResult<ApproveExpenseResponse>(ApproveExpenseConstants.OnlySubmittedExpensesCanBeApproved);
     }
 
     // Validate that the current user is the designated approver
     if (expense.SubmittedToApproverId != userGuid)
     {
-      return new ServiceResult<ApproveExpenseResponse>("You are not authorized to approve this expense");
+      return new ServiceResult<ApproveExpenseResponse>(ApproveExpenseConstants.YouAreNotAuthorizedToApproveThisExpense);
     }
 
     // Update the expense status to Approved
@@ -44,9 +44,7 @@ public class ApproveExpenseService(
 
     await approveExpenseRepository.UpdateExpenseAsync(expense, cancellationToken);
 
-    // TODO: Send approval email notification in Phase 5
-    var approversEmailQuery = new GetUserEmailQuery(expense.ApprovedByUserId.Value);
-    var approver = await mediator.Send(approversEmailQuery, cancellationToken);
+    var approver = await mediator.Send(new GetUserEmailQuery(expense.ApprovedByUserId.Value), cancellationToken);
     if (approver.Success)
     {
       var userEmailQuery = new GetUserEmailQuery(expense.CreatedByUserId);
@@ -59,6 +57,14 @@ public class ApproveExpenseService(
           expenseSubmitter.Data!.Email);
         await mediator.Send(sendEmailCommand, cancellationToken);
       }
+      else
+      {
+        return new ServiceResult<ApproveExpenseResponse>(ApproveExpenseConstants.FailedToRetrieveSubmitterEmail);
+      }
+    }
+    else
+    {
+      return new ServiceResult<ApproveExpenseResponse>(ApproveExpenseConstants.FailedToRetrieveApproverEmail);
     }
 
     return new ServiceResult<ApproveExpenseResponse>(new ApproveExpenseResponse
