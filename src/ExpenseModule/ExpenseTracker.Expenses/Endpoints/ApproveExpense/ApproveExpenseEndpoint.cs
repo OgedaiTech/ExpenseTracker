@@ -1,4 +1,4 @@
-using FastEndpoints;
+﻿using FastEndpoints;
 using Microsoft.AspNetCore.Http;
 
 namespace ExpenseTracker.Expenses.Endpoints.ApproveExpense;
@@ -27,10 +27,19 @@ internal class ApproveExpenseEndpoint(IApproveExpenseService approveExpenseServi
 
     if (!serviceResult.Success)
     {
+      var statusCode = serviceResult.Message switch
+      {
+        ApproveExpenseConstants.ExpenseNotFound => StatusCodes.Status404NotFound,
+        ApproveExpenseConstants.OnlySubmittedExpensesCanBeApproved => StatusCodes.Status400BadRequest,
+        ApproveExpenseConstants.YouAreNotAuthorizedToApproveThisExpense => StatusCodes.Status403Forbidden,
+        ApproveExpenseConstants.FailedToRetrieveApproverEmail => StatusCodes.Status500InternalServerError,
+        ApproveExpenseConstants.FailedToRetrieveSubmitterEmail => StatusCodes.Status500InternalServerError,
+        _ => StatusCodes.Status400BadRequest
+      };
       var problem = Results.Problem(
         title: "Invalid request",
         detail: serviceResult.Message,
-        statusCode: StatusCodes.Status400BadRequest,
+        statusCode: statusCode,
         instance: HttpContext.Request.Path);
       await Send.ResultAsync(problem);
       return;
