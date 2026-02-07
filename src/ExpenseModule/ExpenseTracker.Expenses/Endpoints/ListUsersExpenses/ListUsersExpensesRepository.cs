@@ -15,6 +15,14 @@ public class ListUsersExpensesRepository(ExpenseDbContext context) : IListUsersE
     .ToListAsync(ct);
   }
 
+  public Task<bool> HasExpenseAsync(string userId, string tenantId, CancellationToken ct)
+  {
+    return context.Expenses.AnyAsync(e =>
+      e.CreatedByUserId == Guid.Parse(userId) &&
+      e.TenantId == Guid.Parse(tenantId) &&
+      e.DeletedAt == null, ct);
+  }
+
   public Task<bool> VerifyUserAccessAsync(string requestingUserId, string tenantId, CancellationToken ct)
   {
     return context.Expenses

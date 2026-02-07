@@ -1,4 +1,4 @@
-using ExpenseTracker.Core;
+﻿using ExpenseTracker.Core;
 
 namespace ExpenseTracker.Expenses.Endpoints.ListUsersExpenses;
 
@@ -6,10 +6,16 @@ public class ListUsersExpensesService(IListUsersExpensesRepository repository) :
 {
   public async Task<ServiceResult<Expense[]>> ListUsersExpensesAsync(string userId, string tenantId, CancellationToken ct)
   {
+    var hasExpense = await repository.HasExpenseAsync(userId, tenantId, ct);
+    if (!hasExpense)
+    {
+      return new ServiceResult<Expense[]>([]);
+    }
+
     var hasAccess = await repository.VerifyUserAccessAsync(userId, tenantId, ct);
     if (!hasAccess)
     {
-      return new ServiceResult<Expense[]>("User does not have access to the requested expenses.");
+      return new ServiceResult<Expense[]>(ListUsersConstants.UserDoesNotHaveAccess);
     }
 
     var expenses =

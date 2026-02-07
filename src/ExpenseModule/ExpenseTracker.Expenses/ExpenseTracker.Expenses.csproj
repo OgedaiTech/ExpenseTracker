@@ -26,8 +26,4 @@
     <ProjectReference Include="../../ReceiptModule/ExpenseTracker.Receipts.Contracts/ExpenseTracker.Receipts.Contracts.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Endpoints/ListUsersExpenses/" />
-  </ItemGroup>
-
 </Project>
