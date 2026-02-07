@@ -4,7 +4,7 @@ using Microsoft.Extensions.Logging;
 
 namespace ExpenseTracker.Expenses.Endpoints.ListUsersExpenses;
 
-internal class ListUsersExpenses(
+internal partial class ListUsersExpenses(
   IListUsersExpensesService service,
   ILogger<ListUsersExpenses> logger) : EndpointWithoutRequest
 {
@@ -23,6 +23,8 @@ internal class ListUsersExpenses(
       var serviceResult = await service.ListUsersExpensesAsync(userId, tenantId, ct);
       if (serviceResult.Success)
       {
+        LogSuccessfullyListedUsersExpenses(logger, userId, tenantId, serviceResult.Data!.Length, null);
+
         var response = new ListUsersExpensesResponse
         {
           Items = [.. serviceResult.Data!.Select(e => new ExpenseDto(e.Id, e.Name, e.Amount, e.CreatedAt, e.Status))],
@@ -39,10 +41,7 @@ internal class ListUsersExpenses(
           _ => StatusCodes.Status400BadRequest
         };
 
-        if (logger.IsEnabled(LogLevel.Warning))
-        {
-          logger.LogWarning("Failed to list user's expenses. Reason: {Reason}", serviceResult.Message);
-        }
+        LogFailedToListUsersExpenses(logger, serviceResult.Message ?? "Unknown error", null);
 
         var problem = Results.Problem(
         title: "Invalid request",
