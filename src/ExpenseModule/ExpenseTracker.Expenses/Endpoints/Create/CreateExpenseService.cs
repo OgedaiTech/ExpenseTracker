@@ -1,4 +1,4 @@
-using ExpenseTracker.Core;
+﻿using ExpenseTracker.Core;
 
 namespace ExpenseTracker.Expenses.Endpoints.Create;
 
@@ -8,11 +8,11 @@ public class CreateExpenseService(ICreateExpenseRepository createExpenseReposito
   {
     if (string.IsNullOrWhiteSpace(name))
     {
-      return new ServiceResult(message: "Expense name cannot be empty.");
+      return new ServiceResult(message: CreateExpenseConstants.ExpenseNameCannotBeEmpty);
     }
     else if (name.Length > 128)
     {
-      return new ServiceResult(message: "Expense name cannot exceed 128 characters.");
+      return new ServiceResult(message: CreateExpenseConstants.ExpenseNameCannotExceed128Characters);
     }
     await createExpenseRepository.CreateExpenseAsync(name, userId, tenantId, cancellationToken);
     return new ServiceResult();
