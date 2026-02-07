@@ -1,9 +1,11 @@
-using FastEndpoints;
+﻿using FastEndpoints;
+using Microsoft.Extensions.Logging;
 
 namespace ExpenseTracker.Receipts.Endpoints.ListExpenseReceipts;
 
-internal class ListExpenseReceiptsEndpoint
-  (IListExpenseReceiptsService service)
+internal partial class ListExpenseReceiptsEndpoint
+  (IListExpenseReceiptsService service,
+  ILogger<ListExpenseReceiptsEndpoint> logger)
   : Endpoint<ListExpenseReceiptsRequest, ListExpenseReceiptsResponse>
 {
   public override void Configure()
@@ -16,17 +18,26 @@ internal class ListExpenseReceiptsEndpoint
     ListExpenseReceiptsRequest request,
     CancellationToken ct)
   {
-    var serviceResult = await service.ListExpenseReceiptsAsync(request.ExpenseId, ct);
-    if (serviceResult.Success)
+    try
     {
-      var response = new ListExpenseReceiptsResponse
+      var serviceResult = await service.ListExpenseReceiptsAsync(request.ExpenseId, ct);
+      if (serviceResult.Success)
       {
-        Items = serviceResult.Data,
-        TotalCount = serviceResult.Data!.Count
-      };
-      await Send.OkAsync(response, ct);
+        LogSuccessfullyRetrievedExpenseReceipts(logger, serviceResult.Data!.Count, request.ExpenseId, null);
+        var response = new ListExpenseReceiptsResponse
+        {
+          Items = serviceResult.Data,
+          TotalCount = serviceResult.Data!.Count
+        };
+        await Send.OkAsync(response, ct);
+        return;
+      }
+    }
+    catch (Exception)
+    {
+      LogErrorWhenTryingToListExpenseReceipts(logger, request.ExpenseId, null);
+      await Send.ErrorsAsync(statusCode: 400, cancellation: ct);
       return;
     }
-    await Send.ErrorsAsync(statusCode: 400, cancellation: ct);
   }
 }
