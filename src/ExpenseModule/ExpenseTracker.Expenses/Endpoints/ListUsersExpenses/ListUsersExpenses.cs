@@ -1,4 +1,4 @@
-using FastEndpoints;
+﻿using FastEndpoints;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 
@@ -35,7 +35,7 @@ internal class ListUsersExpenses(
       {
         var statusCode = serviceResult.Message switch
         {
-          "User does not have access to the requested expenses." => StatusCodes.Status403Forbidden,
+          ListUsersConstants.UserDoesNotHaveAccess => StatusCodes.Status403Forbidden,
           _ => StatusCodes.Status400BadRequest
         };
 

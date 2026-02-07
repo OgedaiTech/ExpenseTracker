@@ -1,4 +1,4 @@
-using ExpenseTracker.Expenses.Endpoints.ListUsersExpenses;
+﻿using ExpenseTracker.Expenses.Endpoints.ListUsersExpenses;
 using Moq;
 
 namespace ExpenseTracker.Expenses.Tests.ListUsersExpenses;
@@ -19,6 +19,10 @@ public class ListUserExpensesServiceTests
   public async Task ReturnsServiceResultFailureWhenRequestingUserAndCreatingUserDoNotMatchAsync()
   {
     // Arrange
+    Mock.Get(_repository)
+      .Setup(r => r.HasExpenseAsync(_userId, _tenantId, It.IsAny<CancellationToken>()))
+      .ReturnsAsync(true);
+
     Mock.Get(_repository)
       .Setup(r => r.VerifyUserAccessAsync(_userId, _tenantId, It.IsAny<CancellationToken>()))
       .ReturnsAsync(false);
