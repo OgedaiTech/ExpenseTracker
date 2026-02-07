@@ -21,17 +21,17 @@ internal partial class CreateExpenseEndpoint
     var serviceResult = await createExpenseService.CreateExpenseAsync(request.Name, userId, tenantId, ct);
     if (!serviceResult.Success)
     {
-      if (serviceResult.Message == CreateExpenseConstants.ExpenseNameCannotBeEmpty)
+      switch (serviceResult.Message)
       {
-        LogExpenseNameCannotBeEmpty(logger, userId, tenantId, null);
-      }
-      else if (serviceResult.Message == CreateExpenseConstants.ExpenseNameCannotExceed128Characters)
-      {
-        LogExpenseNameCannotExceed128Characters(logger, userId, tenantId, null);
-      }
-      else
-      {
-        LogFailedToCreateExpense(logger, userId, tenantId, serviceResult.Message ?? "Unknown error", null);
+        case CreateExpenseConstants.ExpenseNameCannotBeEmpty:
+          LogExpenseNameCannotBeEmpty(logger, userId, tenantId, null);
+          break;
+        case CreateExpenseConstants.ExpenseNameCannotExceed128Characters:
+          LogExpenseNameCannotExceed128Characters(logger, userId, tenantId, null);
+          break;
+        default:
+          LogFailedToCreateExpense(logger, userId, tenantId, serviceResult.Message ?? "Unknown error", null);
+          break;
       }
       var problem = Results.Problem(
         detail: serviceResult.Message,
