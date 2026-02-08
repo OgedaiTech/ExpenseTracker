@@ -1,4 +1,5 @@
 ﻿using FastEndpoints;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 
 namespace ExpenseTracker.Receipts.Endpoints.ListExpenseReceipts;
@@ -36,7 +37,11 @@ internal partial class ListExpenseReceiptsEndpoint
     catch (Exception)
     {
       LogErrorWhenTryingToListExpenseReceipts(logger, request.ExpenseId, null);
-      await Send.ErrorsAsync(statusCode: 400, cancellation: ct);
+      var problem = Results.Problem(
+        detail: "An unexpected error occurred while trying to retrieve the receipts for the specified expense. Please try again later.",
+        statusCode: StatusCodes.Status500InternalServerError,
+        instance: HttpContext.Request.Path);
+      await Send.ResultAsync(problem);
       return;
     }
   }

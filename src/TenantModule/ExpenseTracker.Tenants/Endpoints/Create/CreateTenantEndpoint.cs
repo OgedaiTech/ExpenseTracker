@@ -1,10 +1,12 @@
-using FastEndpoints;
+﻿using FastEndpoints;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
 
 namespace ExpenseTracker.Tenants.Endpoints.Create;
 
-internal class CreateTenantEndpoint(
-  ICreateTenantService createTenantService) : Endpoint<CreateTenantRequest>
+internal partial class CreateTenantEndpoint(
+  ICreateTenantService createTenantService,
+  ILogger<CreateTenantEndpoint> logger) : Endpoint<CreateTenantRequest>
 {
   public override void Configure()
   {
@@ -22,11 +24,13 @@ internal class CreateTenantEndpoint(
       {
         var statusCode = serviceResult.Message switch
         {
-          "TENANT_CODE_IS_REQUIRED" => StatusCodes.Status400BadRequest,
-          "CANT_CREATE_TENANT_ADMIN_USER" => StatusCodes.Status500InternalServerError,
-          "TENANT_CODE_ALREADY_EXISTS" => StatusCodes.Status409Conflict,
+          CreateTenantConstants.TenantCodeIsRequired => StatusCodes.Status400BadRequest,
+          CreateTenantConstants.CantCreateTenantAdminUser => StatusCodes.Status500InternalServerError,
+          CreateTenantConstants.TenantCodeAlreadyExists => StatusCodes.Status409Conflict,
           _ => StatusCodes.Status500InternalServerError
         };
+
+        LogErrorWhenTryingToCreateTenant(logger, request.Name, serviceResult.Message ?? "Unknown error", null);
 
         await Send.ResultAsync(Results.Problem(
           detail: serviceResult.Message,
@@ -34,6 +38,7 @@ internal class CreateTenantEndpoint(
         return;
       }
 
+      LogSuccessfullyCreatedTenant(logger, request.Name, null);
       await Send.CreatedAtAsync("tenants", cancellation: ct);
     }
     catch (Exception ex)

@@ -1,4 +1,4 @@
-using ExpenseTracker.Core;
+﻿using ExpenseTracker.Core;
 using ExpenseTracker.Tenants.Endpoints.Create;
 using FastEndpoints;
 using Microsoft.AspNetCore.Http;
@@ -28,16 +28,17 @@ public class CreateEndpointTests
   public async Task ShouldCallCreateExpenseServiceWithGivenValidRequestAsync()
   {
     // Arrange
+    var request = new CreateTenantRequest { Name = "Test Tenant", Email = "test@example.com", Password = "TestPassword123!" };
     _createTenantService
         .Setup(s => s.CreateTenantAsync(It.IsAny<CreateTenantRequest>(), It.IsAny<CancellationToken>()))
         .ReturnsAsync(new ServiceResult<Guid>(Guid.Empty));
 
     // Act
-    await _endpoint.HandleAsync(It.IsAny<CreateTenantRequest>(), It.IsAny<CancellationToken>());
+    await _endpoint.HandleAsync(request, It.IsAny<CancellationToken>());
 
     // Assert
     _createTenantService.Verify(
-        s => s.CreateTenantAsync(It.IsAny<CreateTenantRequest>(), It.IsAny<CancellationToken>()),
+        s => s.CreateTenantAsync(request, It.IsAny<CancellationToken>()),
         Times.Once);
   }
 }
