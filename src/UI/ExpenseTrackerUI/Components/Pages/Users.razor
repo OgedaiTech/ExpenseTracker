@@ -40,7 +40,7 @@
             <span class="bi bi-search"></span>
         </span>
         <input type="text" class="form-control" placeholder="Search users..." @bind="searchInput"
-            @bind:event="oninput" />
+               @bind:event="oninput" />
         @if (!string.IsNullOrEmpty(searchInput))
         {
             <button class="btn btn-outline-secondary" type="button" @onclick="ClearSearch">

@@ -1,5 +1,6 @@
-using System.Net;
+﻿using System.Net;
 using System.Net.Http.Headers;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 using ExpenseTrackerUI.Services.Authentication;
 using Microsoft.AspNetCore.Components.Forms;
@@ -41,26 +42,12 @@ public class UserService(IHttpClientFactory httpClientFactory, CustomAuthStatePr
         return ServiceResult<BulkCreateUsersResponse>.Success(result!);
       }
 
-      // Try to parse ProblemDetails for error information
-      try
-      {
-        var problemDetails = await response.Content.ReadFromJsonAsync<ProblemDetailsResponse>();
-        return ServiceResult<BulkCreateUsersResponse>.Failure(
-            response.StatusCode,
-            problemDetails?.Detail,
-            null
-        );
-      }
-      catch
-      {
-        // Fallback if response is not ProblemDetails
-        var errorContent = await response.Content.ReadAsStringAsync();
-        return ServiceResult<BulkCreateUsersResponse>.Failure(
-            response.StatusCode,
-            null,
-            errorContent
-        );
-      }
+      var problemDetails = await response.Content.ReadFromJsonAsync<ProblemDetailsResponse>();
+      return ServiceResult<BulkCreateUsersResponse>.Failure(
+          response.StatusCode,
+          null,
+          problemDetails?.Detail
+      );
     }
     catch (Exception ex)
     {
@@ -88,58 +75,12 @@ public class UserService(IHttpClientFactory httpClientFactory, CustomAuthStatePr
       // Try to parse error response
       var errorContent = await response.Content.ReadAsStringAsync();
 
-      // Try FastEndpoints error format first
-      try
-      {
-        var fastEndpointsError = System.Text.Json.JsonSerializer.Deserialize<FastEndpointsErrorResponse>(errorContent);
-        if (fastEndpointsError?.Errors != null && fastEndpointsError.Errors.Count > 0)
-        {
-          // FastEndpoints returns errors under "GeneralErrors" key
-          // The actual error code is in the array values
-          if (fastEndpointsError.Errors.TryGetValue("GeneralErrors", out var generalErrors) && generalErrors.Length > 0)
-          {
-            var errorCode = generalErrors[0]; // The error code is the first item in the array
-            return ServiceResult<CreateUserWithInvitationResponse>.Failure(
-                response.StatusCode,
-                errorCode,
-                null
-            );
-          }
-
-          // Fallback: if not under GeneralErrors, use the first error
-          var firstError = fastEndpointsError.Errors.First();
-          var fallbackErrorCode = firstError.Value.FirstOrDefault();
-          return ServiceResult<CreateUserWithInvitationResponse>.Failure(
-              response.StatusCode,
-              fallbackErrorCode,
-              null
-          );
-        }
-      }
-      catch
-      {
-        // Not FastEndpoints format, try ProblemDetails
-      }
-
-      // Try ProblemDetails format
-      try
-      {
-        var problemDetails = System.Text.Json.JsonSerializer.Deserialize<ProblemDetailsResponse>(errorContent);
-        return ServiceResult<CreateUserWithInvitationResponse>.Failure(
-            response.StatusCode,
-            problemDetails?.Detail,
-            problemDetails?.Title
-        );
-      }
-      catch
-      {
-        // Fallback to raw error content
-        return ServiceResult<CreateUserWithInvitationResponse>.Failure(
-            response.StatusCode,
-            null,
-            errorContent
-        );
-      }
+      var problemDetails = JsonSerializer.Deserialize<ProblemDetailsResponse>(errorContent);
+      return ServiceResult<CreateUserWithInvitationResponse>.Failure(
+          response.StatusCode,
+          null,
+          message: problemDetails?.Detail
+      );
     }
     catch (Exception ex)
     {
@@ -149,18 +90,6 @@ public class UserService(IHttpClientFactory httpClientFactory, CustomAuthStatePr
           ex.Message
       );
     }
-  }
-
-  private sealed class FastEndpointsErrorResponse
-  {
-    [JsonPropertyName("statusCode")]
-    public int? StatusCode { get; set; }
-
-    [JsonPropertyName("message")]
-    public string? Message { get; set; }
-
-    [JsonPropertyName("errors")]
-    public Dictionary<string, string[]>? Errors { get; set; }
   }
 
   public async Task<ServiceResult<ListUsersResponse>> GetUsersAsync(
@@ -202,25 +131,12 @@ public class UserService(IHttpClientFactory httpClientFactory, CustomAuthStatePr
         return ServiceResult<ListUsersResponse>.Success(result!);
       }
 
-      // Try to parse error response
-      try
-      {
-        var problemDetails = await response.Content.ReadFromJsonAsync<ProblemDetailsResponse>();
-        return ServiceResult<ListUsersResponse>.Failure(
-            response.StatusCode,
-            problemDetails?.Detail,
-            problemDetails?.Title
-        );
-      }
-      catch
-      {
-        var errorContent = await response.Content.ReadAsStringAsync();
-        return ServiceResult<ListUsersResponse>.Failure(
-            response.StatusCode,
-            null,
-            errorContent
-        );
-      }
+      var problemDetails = await response.Content.ReadFromJsonAsync<ProblemDetailsResponse>();
+      return ServiceResult<ListUsersResponse>.Failure(
+          response.StatusCode,
+          null,
+          problemDetails?.Detail
+      );
     }
     catch (Exception ex)
     {
@@ -248,55 +164,12 @@ public class UserService(IHttpClientFactory httpClientFactory, CustomAuthStatePr
       // Try to parse error response
       var errorContent = await response.Content.ReadAsStringAsync();
 
-      // Try FastEndpoints error format first
-      try
-      {
-        var fastEndpointsError = System.Text.Json.JsonSerializer.Deserialize<FastEndpointsErrorResponse>(errorContent);
-        if (fastEndpointsError?.Errors != null && fastEndpointsError.Errors.Count > 0)
-        {
-          // FastEndpoints returns errors under "GeneralErrors" key
-          if (fastEndpointsError.Errors.TryGetValue("GeneralErrors", out var generalErrors) && generalErrors.Length > 0)
-          {
-            return ServiceResult<UpdateUserResponse>.Failure(
-                response.StatusCode,
-                generalErrors[0],
-                null
-            );
-          }
-
-          // Fallback: use the first error
-          var firstError = fastEndpointsError.Errors.First();
-          return ServiceResult<UpdateUserResponse>.Failure(
-              response.StatusCode,
-              firstError.Value.FirstOrDefault(),
-              null
-          );
-        }
-      }
-      catch
-      {
-        // Not FastEndpoints format, try ProblemDetails
-      }
-
-      // Try ProblemDetails format
-      try
-      {
-        var problemDetails = System.Text.Json.JsonSerializer.Deserialize<ProblemDetailsResponse>(errorContent);
-        return ServiceResult<UpdateUserResponse>.Failure(
-            response.StatusCode,
-            problemDetails?.Detail,
-            problemDetails?.Title
-        );
-      }
-      catch
-      {
-        // Fallback to raw error content
-        return ServiceResult<UpdateUserResponse>.Failure(
-            response.StatusCode,
-            null,
-            errorContent
-        );
-      }
+      var problemDetails = JsonSerializer.Deserialize<ProblemDetailsResponse>(errorContent);
+      return ServiceResult<UpdateUserResponse>.Failure(
+          response.StatusCode,
+          null,
+          problemDetails?.Detail
+      );
     }
     catch (Exception ex)
     {
@@ -320,25 +193,12 @@ public class UserService(IHttpClientFactory httpClientFactory, CustomAuthStatePr
         return ServiceResult<bool>.Success(true);
       }
 
-      // Try to parse error response
-      try
-      {
-        var problemDetails = await response.Content.ReadFromJsonAsync<ProblemDetailsResponse>();
-        return ServiceResult<bool>.Failure(
-            response.StatusCode,
-            problemDetails?.Detail,
-            problemDetails?.Title
-        );
-      }
-      catch
-      {
-        var errorContent = await response.Content.ReadAsStringAsync();
-        return ServiceResult<bool>.Failure(
-            response.StatusCode,
-            null,
-            errorContent
-        );
-      }
+      var problemDetails = await response.Content.ReadFromJsonAsync<ProblemDetailsResponse>();
+      return ServiceResult<bool>.Failure(
+          response.StatusCode,
+          null,
+          problemDetails?.Detail
+      );
     }
     catch (Exception ex)
     {
@@ -362,25 +222,12 @@ public class UserService(IHttpClientFactory httpClientFactory, CustomAuthStatePr
         return ServiceResult<bool>.Success(true);
       }
 
-      // Try to parse error response
-      try
-      {
-        var problemDetails = await response.Content.ReadFromJsonAsync<ProblemDetailsResponse>();
-        return ServiceResult<bool>.Failure(
-            response.StatusCode,
-            problemDetails?.Detail,
-            problemDetails?.Title
-        );
-      }
-      catch
-      {
-        var errorContent = await response.Content.ReadAsStringAsync();
-        return ServiceResult<bool>.Failure(
-            response.StatusCode,
-            null,
-            errorContent
-        );
-      }
+      var problemDetails = await response.Content.ReadFromJsonAsync<ProblemDetailsResponse>();
+      return ServiceResult<bool>.Failure(
+          response.StatusCode,
+          null,
+          problemDetails?.Detail
+      );
     }
     catch (Exception ex)
     {
@@ -410,30 +257,17 @@ public class UserService(IHttpClientFactory httpClientFactory, CustomAuthStatePr
           LastName = r.LastName,
           Email = r.Email,
           IsFavorite = false
-        }).ToList() ?? new List<ApproverDto>();
+        }).ToList() ?? [];
 
         return ServiceResult<List<ApproverDto>>.Success(approvers);
       }
 
-      // Try to parse error response
-      try
-      {
-        var problemDetails = await response.Content.ReadFromJsonAsync<ProblemDetailsResponse>();
-        return ServiceResult<List<ApproverDto>>.Failure(
-            response.StatusCode,
-            problemDetails?.Detail,
-            problemDetails?.Title
-        );
-      }
-      catch
-      {
-        var errorContent = await response.Content.ReadAsStringAsync();
-        return ServiceResult<List<ApproverDto>>.Failure(
-            response.StatusCode,
-            null,
-            errorContent
-        );
-      }
+      var problemDetails = await response.Content.ReadFromJsonAsync<ProblemDetailsResponse>();
+      return ServiceResult<List<ApproverDto>>.Failure(
+          response.StatusCode,
+          null,
+          problemDetails?.Detail
+      );
     }
     catch (Exception ex)
     {

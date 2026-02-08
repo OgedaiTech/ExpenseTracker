@@ -78,7 +78,7 @@ Authorization: Bearer {{login.response.body.$.accessToken}}
 POST {{ExpenseTracker.WebAPI_HostAddress}}/users/
 Accept: application/json
 Content-Type: application/json
-Authorization: Bearer {{login.response.body.$.token}}
+Authorization: Bearer {{login.response.body.$.accessToken}}
 
 {
   "email": "test1+tt@test.com",
