@@ -1,5 +1,4 @@
 ﻿using System.Net;
-using System.Text.Json.Serialization;
 using ExpenseTrackerUI.Services.Authentication;
 
 namespace ExpenseTrackerUI.Services.Expense;
@@ -82,22 +81,4 @@ public class ExpenseService(IHttpClientFactory httpClientFactory, CustomAuthStat
   }
 
   private sealed record GetExpenseByIdResponse(ExpenseDto Expense);
-
-  private sealed class ProblemDetailsResponse
-  {
-    [JsonPropertyName("type")]
-    public string? Type { get; set; }
-
-    [JsonPropertyName("title")]
-    public string? Title { get; set; }
-
-    [JsonPropertyName("status")]
-    public int? Status { get; set; }
-
-    [JsonPropertyName("detail")]
-    public string? Detail { get; set; }
-
-    [JsonPropertyName("instance")]
-    public string? Instance { get; set; }
-  }
 }

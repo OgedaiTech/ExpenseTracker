@@ -1,7 +1,6 @@
 ﻿using System.Net;
 using System.Net.Http.Headers;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 using ExpenseTrackerUI.Services.Authentication;
 using Microsoft.AspNetCore.Components.Forms;
 
@@ -277,23 +276,5 @@ public class UserService(IHttpClientFactory httpClientFactory, CustomAuthStatePr
           ex.Message
       );
     }
-  }
-
-  private sealed class ProblemDetailsResponse
-  {
-    [JsonPropertyName("type")]
-    public string? Type { get; set; }
-
-    [JsonPropertyName("title")]
-    public string? Title { get; set; }
-
-    [JsonPropertyName("status")]
-    public int? Status { get; set; }
-
-    [JsonPropertyName("detail")]
-    public string? Detail { get; set; }
-
-    [JsonPropertyName("instance")]
-    public string? Instance { get; set; }
   }
 }
