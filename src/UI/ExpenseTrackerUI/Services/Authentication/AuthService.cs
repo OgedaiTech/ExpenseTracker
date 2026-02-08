@@ -1,6 +1,5 @@
 ﻿using System.Net;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 
 namespace ExpenseTrackerUI.Services.Authentication;
 
@@ -49,55 +48,12 @@ public class AuthService(IHttpClientFactory httpClient)
       // Try to parse error response
       var errorContent = await response.Content.ReadAsStringAsync();
 
-      // Try FastEndpoints error format first
-      try
-      {
-        var fastEndpointsError = JsonSerializer.Deserialize<FastEndpointsErrorResponse>(errorContent);
-        if (fastEndpointsError?.Errors != null && fastEndpointsError.Errors.Count > 0)
-        {
-          // Collect all error messages
-          var errorMessages = new List<string>();
-          foreach (var errorGroup in fastEndpointsError.Errors)
-          {
-            errorMessages.AddRange(errorGroup.Value);
-          }
-
-          if (errorMessages.Count > 0)
-          {
-            // Join all error messages with line breaks
-            var combinedMessage = string.Join(" ", errorMessages);
-            return ServiceResult<bool>.Failure(
-                response.StatusCode,
-                null,
-                combinedMessage
-            );
-          }
-        }
-      }
-      catch
-      {
-        // Not FastEndpoints format, try ProblemDetails
-      }
-
-      // Try ProblemDetails format
-      try
-      {
-        var problemDetails = JsonSerializer.Deserialize<ProblemDetailsResponse>(errorContent);
-        return ServiceResult<bool>.Failure(
-            response.StatusCode,
-            problemDetails?.Detail,
-            problemDetails?.Title
-        );
-      }
-      catch
-      {
-        // Fallback to raw error content
-        return ServiceResult<bool>.Failure(
-            response.StatusCode,
-            null,
-            errorContent
-        );
-      }
+      var problemDetails = JsonSerializer.Deserialize<ProblemDetailsResponse>(errorContent);
+      return ServiceResult<bool>.Failure(
+          response.StatusCode,
+          null,
+          problemDetails?.Detail
+      );
     }
     catch (Exception ex)
     {
@@ -124,53 +80,12 @@ public class AuthService(IHttpClientFactory httpClient)
       // Try to parse error response
       var errorContent = await response.Content.ReadAsStringAsync();
 
-      // Try FastEndpoints error format first
-      try
-      {
-        var fastEndpointsError = JsonSerializer.Deserialize<FastEndpointsErrorResponse>(errorContent);
-        if (fastEndpointsError?.Errors != null && fastEndpointsError.Errors.Count > 0)
-        {
-          var errorMessages = new List<string>();
-          foreach (var errorGroup in fastEndpointsError.Errors)
-          {
-            errorMessages.AddRange(errorGroup.Value);
-          }
-
-          if (errorMessages.Count > 0)
-          {
-            var combinedMessage = string.Join(" ", errorMessages);
-            return ServiceResult<bool>.Failure(
-                response.StatusCode,
-                null,
-                combinedMessage
-            );
-          }
-        }
-      }
-      catch
-      {
-        // Not FastEndpoints format, try ProblemDetails
-      }
-
-      // Try ProblemDetails format
-      try
-      {
-        var problemDetails = JsonSerializer.Deserialize<ProblemDetailsResponse>(errorContent);
-        return ServiceResult<bool>.Failure(
-            response.StatusCode,
-            problemDetails?.Detail,
-            problemDetails?.Title
-        );
-      }
-      catch
-      {
-        // Fallback to raw error content
-        return ServiceResult<bool>.Failure(
-            response.StatusCode,
-            null,
-            errorContent
-        );
-      }
+      var problemDetails = JsonSerializer.Deserialize<ProblemDetailsResponse>(errorContent);
+      return ServiceResult<bool>.Failure(
+          response.StatusCode,
+          null,
+          problemDetails?.Detail
+      );
     }
     catch (Exception ex)
     {
@@ -180,35 +95,5 @@ public class AuthService(IHttpClientFactory httpClient)
           ex.Message
       );
     }
-  }
-
-  private sealed class FastEndpointsErrorResponse
-  {
-    [JsonPropertyName("statusCode")]
-    public int? StatusCode { get; set; }
-
-    [JsonPropertyName("message")]
-    public string? Message { get; set; }
-
-    [JsonPropertyName("errors")]
-    public Dictionary<string, string[]>? Errors { get; set; }
-  }
-
-  private sealed class ProblemDetailsResponse
-  {
-    [JsonPropertyName("type")]
-    public string? Type { get; set; }
-
-    [JsonPropertyName("title")]
-    public string? Title { get; set; }
-
-    [JsonPropertyName("status")]
-    public int? Status { get; set; }
-
-    [JsonPropertyName("detail")]
-    public string? Detail { get; set; }
-
-    [JsonPropertyName("instance")]
-    public string? Instance { get; set; }
   }
 }
