@@ -104,25 +104,21 @@ internal partial class ForgotPasswordEndpoint(
   }
 
   [LoggerMessage(
-      EventId = 300,
       Level = LogLevel.Information,
       Message = "Password reset requested for non-existent email: {Email}")]
   private static partial void LogUserNotFound(ILogger logger, string email);
 
   [LoggerMessage(
-      EventId = 301,
       Level = LogLevel.Information,
       Message = "Password reset requested for deactivated user: {Email}")]
   private static partial void LogUserDeactivated(ILogger logger, string email);
 
   [LoggerMessage(
-      EventId = 302,
       Level = LogLevel.Information,
       Message = "Password reset email sent successfully to {Email}")]
   private static partial void LogPasswordResetEmailSent(ILogger logger, string email);
 
   [LoggerMessage(
-      EventId = 303,
       Level = LogLevel.Warning,
       Message = "Failed to send password reset email to {Email}: {Error}")]
   private static partial void LogPasswordResetEmailFailed(ILogger logger, string email, string error);
