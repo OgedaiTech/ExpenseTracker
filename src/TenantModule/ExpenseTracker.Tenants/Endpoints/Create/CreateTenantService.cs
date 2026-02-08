@@ -1,4 +1,4 @@
-using ExpenseTracker.Core;
+﻿using ExpenseTracker.Core;
 using MediatR;
 
 namespace ExpenseTracker.Tenants.Endpoints.Create;
@@ -21,11 +21,11 @@ public class CreateTenantService(ICreateTenantRepository repository,
     if (!createTenantAdminResult.Success)
     {
       await repository.DeleteTenantAsync(tenantId);
-      if (createTenantAdminResult.Message == "TENANT_ADMIN_USER_EMAIL_ALREADY_EXISTS")
+      if (createTenantAdminResult.Message == CreateTenantConstants.TenantAdminUserEmailAlreadyExists)
       {
-        return new ServiceResult("TENANT_ADMIN_USER_EMAIL_ALREADY_EXISTS");
+        return new ServiceResult(CreateTenantConstants.TenantAdminUserEmailAlreadyExists);
       }
-      return new ServiceResult("CANT_CREATE_TENANT_ADMIN_USER");
+      return new ServiceResult(CreateTenantConstants.CantCreateTenantAdminUser);
     }
     return new ServiceResult();
   }
@@ -34,7 +34,7 @@ public class CreateTenantService(ICreateTenantRepository repository,
   {
     if (string.IsNullOrEmpty(code))
     {
-      return new ServiceResult("TENANT_CODE_IS_REQUIRED");
+      return new ServiceResult(CreateTenantConstants.TenantCodeIsRequired);
     }
 
     var result = await repository.TenantExistsAsync(code);
