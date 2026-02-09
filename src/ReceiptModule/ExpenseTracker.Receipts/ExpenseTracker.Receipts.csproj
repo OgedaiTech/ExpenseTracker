@@ -24,4 +24,8 @@
     <InternalsVisibleTo Include="ExpenseTracker.Receipts.Tests" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Endpoints/Delete/" />
+  </ItemGroup>
+
 </Project>
