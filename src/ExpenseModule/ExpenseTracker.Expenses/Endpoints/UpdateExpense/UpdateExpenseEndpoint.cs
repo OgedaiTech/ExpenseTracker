@@ -1,9 +1,12 @@
-using FastEndpoints;
+﻿using FastEndpoints;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
 
 namespace ExpenseTracker.Expenses.Endpoints.UpdateExpense;
 
-internal class UpdateExpenseEndpoint(IUpdateExpenseService updateExpenseService)
+internal partial class UpdateExpenseEndpoint(
+  IUpdateExpenseService updateExpenseService,
+  ILogger<UpdateExpenseEndpoint> logger)
   : Endpoint<UpdateExpenseRequest, UpdateExpenseResponse>
 {
   public override void Configure()
@@ -27,15 +30,28 @@ internal class UpdateExpenseEndpoint(IUpdateExpenseService updateExpenseService)
 
     if (!serviceResult.Success)
     {
+
+      var statusCode = serviceResult.Message switch
+      {
+        UpdateExpenseConstants.ExpenseNotFoundErrorMessage => StatusCodes.Status404NotFound,
+        UpdateExpenseConstants.ExpenseNameEmptyErrorMessage => StatusCodes.Status400BadRequest,
+        UpdateExpenseConstants.ExpenseNameTooLongErrorMessage => StatusCodes.Status400BadRequest,
+        UpdateExpenseConstants.ExpenseOwnershipErrorMessage => StatusCodes.Status403Forbidden,
+        UpdateExpenseConstants.ExpenseStatusImmutableErrorMessage => StatusCodes.Status400BadRequest,
+        _ => StatusCodes.Status400BadRequest
+      };
+
+      LogFailedToUpdateExpense(logger, serviceResult.Message ?? "Unknown error", expenseId.ToString(), userId, null);
+
       var problem = Results.Problem(
-        title: "Invalid request",
         detail: serviceResult.Message,
-        statusCode: StatusCodes.Status400BadRequest,
+        statusCode: statusCode,
         instance: HttpContext.Request.Path);
       await Send.ResultAsync(problem);
       return;
     }
 
+    LogSuccessfullyUpdatedExpense(logger, expenseId.ToString(), userId, null);
     await Send.OkAsync(serviceResult.Data!, ct);
   }
 }

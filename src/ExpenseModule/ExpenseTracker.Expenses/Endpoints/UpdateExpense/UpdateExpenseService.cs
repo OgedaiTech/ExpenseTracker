@@ -1,4 +1,4 @@
-using ExpenseTracker.Core;
+﻿using ExpenseTracker.Core;
 
 namespace ExpenseTracker.Expenses.Endpoints.UpdateExpense;
 
@@ -14,12 +14,12 @@ public class UpdateExpenseService(IUpdateExpenseRepository updateExpenseReposito
     // Validate name
     if (string.IsNullOrWhiteSpace(name))
     {
-      return new ServiceResult<UpdateExpenseResponse>("Expense name cannot be empty");
+      return new ServiceResult<UpdateExpenseResponse>(UpdateExpenseConstants.ExpenseNameEmptyErrorMessage);
     }
 
     if (name.Length > 128)
     {
-      return new ServiceResult<UpdateExpenseResponse>("Expense name cannot exceed 128 characters");
+      return new ServiceResult<UpdateExpenseResponse>(UpdateExpenseConstants.ExpenseNameTooLongErrorMessage);
     }
 
     var userGuid = Guid.Parse(userId);
@@ -29,20 +29,20 @@ public class UpdateExpenseService(IUpdateExpenseRepository updateExpenseReposito
     var expense = await updateExpenseRepository.GetExpenseByIdAsync(expenseId, tenantGuid, cancellationToken);
     if (expense is null)
     {
-      return new ServiceResult<UpdateExpenseResponse>("Expense not found");
+      return new ServiceResult<UpdateExpenseResponse>(UpdateExpenseConstants.ExpenseNotFoundErrorMessage);
     }
 
     // Validate that the expense belongs to the user
     if (expense.CreatedByUserId != userGuid)
     {
-      return new ServiceResult<UpdateExpenseResponse>("You can only update your own expenses");
+      return new ServiceResult<UpdateExpenseResponse>(UpdateExpenseConstants.ExpenseOwnershipErrorMessage);
     }
 
     // Validate that the expense is in Draft or Rejected status (immutability check)
     if (expense.Status != ExpenseStatus.Draft && expense.Status != ExpenseStatus.Rejected)
     {
       return new ServiceResult<UpdateExpenseResponse>(
-        "Cannot update expense. Only draft or rejected expenses can be modified.");
+        UpdateExpenseConstants.ExpenseStatusImmutableErrorMessage);
     }
 
     // Update the expense

@@ -1,0 +1,152 @@
+@rendermode InteractiveServer
+@using ExpenseTrackerUI.Services.Expense
+@using Microsoft.AspNetCore.Components.Forms
+@inject ExpenseService ExpenseService
+
+@if (isVisible)
+{
+  <div class="modal fade show" style="display: block;" tabindex="-1" aria-labelledby="editExpenseModalLabel"
+       aria-modal="true" role="dialog">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="editExpenseModalLabel">Edit Expense</h5>
+          <button type="button" class="btn-close" @onclick="HandleCancel" disabled="@isSubmitting"></button>
+        </div>
+
+        <EditForm Model="@model" OnValidSubmit="HandleValidSubmit" FormName="EditExpenseForm">
+          <DataAnnotationsValidator />
+
+          <div class="modal-body">
+            @if (!string.IsNullOrEmpty(errorMessage))
+            {
+              <div class="alert alert-danger">
+                <strong>Error:</strong> @errorMessage
+              </div>
+            }
+
+            <div class="mb-3">
+              <label for="expenseName" class="form-label">Expense Name</label>
+              <InputText id="expenseName" class="form-control" @bind-Value="model!.Name"
+                         disabled="@isSubmitting" placeholder="Enter expense name" />
+              <ValidationMessage For="() => model!.Name" />
+            </div>
+
+            @if (currentExpense?.Status == ExpenseStatus.Rejected)
+            {
+              <div class="alert alert-info">
+                <small><i class="bi bi-info-circle me-1"></i>This expense was rejected and can be edited before resubmitting.</small>
+              </div>
+            }
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" @onclick="HandleCancel" disabled="@isSubmitting">
+              Cancel
+            </button>
+            <button type="submit" class="btn btn-primary" disabled="@isSubmitting">
+              @if (isSubmitting)
+              {
+                <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                <span>Updating...</span>
+              }
+              else
+              {
+                <span>Update Expense</span>
+              }
+            </button>
+          </div>
+        </EditForm>
+      </div>
+    </div>
+  </div>
+  <div class="modal-backdrop fade show"></div>
+}
+
+@code {
+  [Parameter]
+  public EventCallback<UpdateExpenseResponse> OnExpenseUpdated { get; set; }
+
+  [SupplyParameterFromForm]
+  private UpdateExpenseDto? model { get; set; }
+
+  private ExpenseDto? currentExpense;
+  private bool isVisible = false;
+  private bool isSubmitting = false;
+  private string? errorMessage;
+
+  protected override void OnInitialized()
+  {
+    model ??= new();
+  }
+
+  public Task Show(ExpenseDto expense)
+  {
+    currentExpense = expense;
+
+    model = new UpdateExpenseDto
+    {
+      Name = expense.Name
+    };
+
+    errorMessage = null;
+    isSubmitting = false;
+    isVisible = true;
+
+    StateHasChanged();
+    return Task.CompletedTask;
+  }
+
+  private void Hide()
+  {
+    isVisible = false;
+    StateHasChanged();
+  }
+
+  private async Task HandleValidSubmit()
+  {
+    if (model == null || currentExpense == null) return;
+
+    isSubmitting = true;
+    errorMessage = null;
+
+    try
+    {
+      var result = await ExpenseService.UpdateExpenseAsync(currentExpense.Id, model);
+
+      if (result.IsSuccess && result.Data != null)
+      {
+        Hide();
+        await OnExpenseUpdated.InvokeAsync(result.Data);
+      }
+      else
+      {
+        errorMessage = MapErrorToUserMessage(result.ErrorCode, result.ErrorMessage);
+      }
+    }
+    catch (Exception ex)
+    {
+      errorMessage = $"An unexpected error occurred: {ex.Message}";
+    }
+    finally
+    {
+      isSubmitting = false;
+      StateHasChanged();
+    }
+  }
+
+  private void HandleCancel()
+  {
+    Hide();
+  }
+
+  private string MapErrorToUserMessage(string? errorCode, string? defaultMessage)
+  {
+    return errorCode switch
+    {
+      "ExpenseNotFound" => "Expense not found. It may have been deleted.",
+      "UpdateExpenseError" => defaultMessage ?? "Cannot update expense. Only draft or rejected expenses can be modified.",
+      _ => defaultMessage ?? "An error occurred while updating the expense."
+    };
+  }
+}
