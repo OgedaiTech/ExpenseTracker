@@ -1,5 +1,6 @@
-using System.Reflection;
+﻿using System.Reflection;
 using ExpenseTracker.Receipts.Endpoints.Create;
+using ExpenseTracker.Receipts.Endpoints.Delete;
 using ExpenseTracker.Receipts.Endpoints.ListExpenseReceipts;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -12,6 +13,7 @@ public static class ReceiptServiceExtensions
     List<Assembly> mediatRAssemblies)
   {
     services.AddScoped<ICreateReceiptService, CreateReceiptService>();
+    services.AddScoped<IDeleteReceiptService, DeleteReceiptService>();
     services.AddScoped<IListExpenseReceiptsService, ListExpenseReceiptsService>();
     mediatRAssemblies.Add(typeof(ReceiptServiceExtensions).Assembly);
   }
