@@ -80,5 +80,27 @@ public class ExpenseService(IHttpClientFactory httpClientFactory, CustomAuthStat
     }
   }
 
+  public async Task<ServiceResult<UpdateExpenseResponse?>> UpdateExpenseAsync(Guid expenseId, UpdateExpenseDto request)
+  {
+    var client = await GetAuthenticatedClientAsync();
+
+    var backendRequest = new { Name = request.Name };
+    var response = await client.PutAsJsonAsync($"/expenses/{expenseId}", backendRequest);
+    if (response.IsSuccessStatusCode)
+    {
+      var result = await response.Content.ReadFromJsonAsync<UpdateExpenseResponse>();
+      return ServiceResult<UpdateExpenseResponse?>.Success(result);
+    }
+    else if (response.StatusCode is HttpStatusCode.BadRequest)
+    {
+      var problemDetails = await response.Content.ReadFromJsonAsync<ProblemDetailsResponse>();
+      return ServiceResult<UpdateExpenseResponse?>.Failure(response.StatusCode, "UpdateExpenseError", problemDetails?.Detail ?? "An error occurred while updating the expense.");
+    }
+    else
+    {
+      return ServiceResult<UpdateExpenseResponse?>.Failure(response.StatusCode, "UpdateExpenseError", "An error occurred while updating the expense.");
+    }
+  }
+
   private sealed record GetExpenseByIdResponse(ExpenseDto Expense);
 }
