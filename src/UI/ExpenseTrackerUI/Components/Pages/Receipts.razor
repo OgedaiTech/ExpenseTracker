@@ -211,7 +211,12 @@ else
         var response = await ReceiptService.DeleteReceiptAsync(receiptId);
         if (response.Success)
         {
+            var deletedReceipt = receipts?.FirstOrDefault(r => r.Id == receiptId);
             receipts = receipts?.Where(r => r.Id != receiptId).ToList();
+            if (expense != null && deletedReceipt != null)
+            {
+                expense = expense with { Amount = expense.Amount - deletedReceipt.Amount };
+            }
             StateHasChanged();
         }
         else
