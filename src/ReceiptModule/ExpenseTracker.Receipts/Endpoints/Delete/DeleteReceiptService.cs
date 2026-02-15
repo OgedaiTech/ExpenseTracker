@@ -21,9 +21,9 @@ internal class DeleteReceiptService(
     if (expenseStatusResult.Data is not null &&
         !expenseStatusResult.Success ||
         expenseStatusResult.Data!.Status == (int)ExpenseStatus.Approved ||
-        expenseStatusResult.Data.Status == (int)ExpenseStatus.Rejected)
+        expenseStatusResult.Data.Status == (int)ExpenseStatus.Submitted)
     {
-      // approved or rejected expenses should not allow receipt deletion (immutability check)
+      // approved or submitted expenses should not allow receipt deletion (immutability check)
       return new ServiceResult(DeleteReceiptConstants.DELETE_FAILED);
     }
 
@@ -34,9 +34,13 @@ internal class DeleteReceiptService(
     }
 
     var savedChanges = await deleteReceiptRepository.SaveChangesAsync(ct);
-    return savedChanges > 0
-      ? new ServiceResult()
-      : new ServiceResult(DeleteReceiptConstants.DELETE_FAILED);
+    if (savedChanges > 0)
+    {
+      var reduceReceiptAmountFromExpenseCommand = new ReduceReceiptAmountFromExpenseCommand(receipt.ExpenseId, receipt.Amount);
+      await mediator.Send(reduceReceiptAmountFromExpenseCommand, ct);
+      return new ServiceResult();
+    }
+    return new ServiceResult(DeleteReceiptConstants.DELETE_FAILED);
   }
 }
 
