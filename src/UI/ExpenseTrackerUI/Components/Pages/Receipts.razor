@@ -25,6 +25,14 @@
     </div>
 }
 
+@if (errorMessage != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        @errorMessage
+        <button type="button" class="btn-close" @onclick="() => errorMessage = null"></button>
+    </div>
+}
+
 @if (expense == null || receipts == null)
 {
     <p>Loading...</p>
@@ -110,7 +118,7 @@ else
                             <button class="btn btn-sm btn-secondary me-2" disabled>
                                 Edit
                             </button>
-                            <button class="btn btn-sm btn-danger" disabled>
+                            <button class="btn btn-sm btn-danger" @onclick="() => DeleteReceipt(receipt.Id)">
                                 Delete
                             </button>
                         </td>
@@ -130,6 +138,7 @@ else
     private bool hasRendered;
     private SubmitExpenseModal? submitExpenseModal;
     private string? successMessage;
+    private string? errorMessage;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -171,7 +180,10 @@ else
 
     private bool CanSubmitExpense()
     {
-        return expense?.Status == ExpenseStatus.Draft || expense?.Status == ExpenseStatus.Rejected;
+        return expense?.Status == ExpenseStatus.Draft ||
+                expense?.Status == ExpenseStatus.Rejected ||
+                receipts == null ||
+                !receipts.Any();
     }
 
     private async Task ShowSubmitModal()
@@ -192,5 +204,25 @@ else
 
         successMessage = $"Expense submitted successfully on {response.SubmittedAt:g}";
         StateHasChanged();
+    }
+
+    private async Task DeleteReceipt(Guid receiptId)
+    {
+        var response = await ReceiptService.DeleteReceiptAsync(receiptId);
+        if (response.Success)
+        {
+            var deletedReceipt = receipts?.FirstOrDefault(r => r.Id == receiptId);
+            receipts = receipts?.Where(r => r.Id != receiptId).ToList();
+            if (expense != null && deletedReceipt != null)
+            {
+                expense = expense with { Amount = expense.Amount - deletedReceipt.Amount };
+            }
+            StateHasChanged();
+        }
+        else
+        {
+            errorMessage = response.Message;
+            StateHasChanged();
+        }
     }
 }

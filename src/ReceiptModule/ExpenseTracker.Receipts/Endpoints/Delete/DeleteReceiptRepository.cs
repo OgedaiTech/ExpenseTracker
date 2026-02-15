@@ -7,8 +7,13 @@ internal class DeleteReceiptRepository(ReceiptDbContext dbContext) : IDeleteRece
 {
   public Task<bool> DeleteAsync(Guid id)
   {
-    var entityEntry = dbContext.Receipts.Remove(new Receipt { Id = id });
-    return Task.FromResult(entityEntry.State == EntityState.Deleted);
+    var entity = dbContext.Receipts.FirstOrDefault(r => r.Id == id);
+    if (entity != null)
+    {
+      dbContext.Receipts.Remove(entity);
+      return Task.FromResult(true);
+    }
+    return Task.FromResult(false);
   }
 
   public Task<Receipt?> GetReceiptByIdAsync(Guid id, CancellationToken ct)

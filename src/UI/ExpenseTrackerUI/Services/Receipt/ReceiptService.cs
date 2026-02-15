@@ -1,4 +1,4 @@
-using ExpenseTrackerUI.Services.Authentication;
+﻿using ExpenseTrackerUI.Services.Authentication;
 
 namespace ExpenseTrackerUI.Services.Receipt;
 
@@ -16,5 +16,22 @@ public class ReceiptService(IHttpClientFactory httpClientFactory, CustomAuthStat
       return await response.Content.ReadFromJsonAsync<ReceiptListResponse>();
     }
     return null;
+  }
+
+  public async Task<ServiceResult> DeleteReceiptAsync(Guid receiptId)
+  {
+    var client = await GetAuthenticatedClientAsync();
+
+    var response = await client.DeleteAsync($"/receipts/{receiptId}");
+
+    if (response.IsSuccessStatusCode)
+    {
+      return new ServiceResult();
+    }
+    else
+    {
+      var problemDetails = await response.Content.ReadFromJsonAsync<ProblemDetailsResponse>();
+      return new ServiceResult(problemDetails?.Detail ?? "An error occurred while deleting the receipt.");
+    }
   }
 }
