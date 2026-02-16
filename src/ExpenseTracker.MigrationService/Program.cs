@@ -1,3 +1,4 @@
+using ExpenseTracker.Accounting.Data;
 using ExpenseTracker.Expenses.Data;
 using ExpenseTracker.MigrationService;
 using ExpenseTracker.Receipts.Data;
@@ -12,6 +13,7 @@ builder.Services.AddHostedService<Worker>();
 builder.Services.AddOpenTelemetry()
   .WithTracing(tracing => tracing.AddSource(Worker.ActivitySourceName));
 
+builder.AddNpgsqlDbContext<AccountingDbContext>("ExT");
 builder.AddNpgsqlDbContext<ExpenseDbContext>("ExT");
 builder.AddNpgsqlDbContext<ReceiptDbContext>("ExT");
 builder.AddNpgsqlDbContext<TenantDbContext>("ExT");

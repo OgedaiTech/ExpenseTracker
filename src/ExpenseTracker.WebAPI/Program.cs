@@ -1,4 +1,6 @@
 using System.Reflection;
+using ExpenseTracker.Accounting;
+using ExpenseTracker.Accounting.Data;
 using ExpenseTracker.Email;
 using ExpenseTracker.Expenses;
 using ExpenseTracker.Expenses.Data;
@@ -46,6 +48,7 @@ public partial class Program
 
     builder.Services.AddHealthChecks();
 
+    builder.AddNpgsqlDbContext<AccountingDbContext>("ExT");
     builder.AddNpgsqlDbContext<ExpenseDbContext>("ExT");
     builder.AddNpgsqlDbContext<ReceiptDbContext>("ExT");
     builder.AddNpgsqlDbContext<TenantDbContext>("ExT");
@@ -53,6 +56,7 @@ public partial class Program
 
     // Add Module Services and Repositories
     List<Assembly> mediatRAssemblies = [typeof(Program).Assembly];
+    builder.Services.AddAccountingServices(mediatRAssemblies, builder.Configuration);
     builder.Services.AddEmailServices(mediatRAssemblies, builder.Configuration, builder.Environment);
     builder.Services.AddExpenseServices(mediatRAssemblies);
     builder.Services.AddExpenseRepositories();
