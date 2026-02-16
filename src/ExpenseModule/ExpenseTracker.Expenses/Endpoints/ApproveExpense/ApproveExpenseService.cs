@@ -1,4 +1,5 @@
-﻿using ExpenseTracker.Core;
+﻿using ExpenseTracker.Accounting.Contracts;
+using ExpenseTracker.Core;
 using ExpenseTracker.Email.Contracts;
 using ExpenseTracker.Users.Contracts;
 using MediatR;
@@ -66,6 +67,13 @@ public class ApproveExpenseService(
     {
       return new ServiceResult<ApproveExpenseResponse>(ApproveExpenseConstants.FailedToRetrieveApproverEmail);
     }
+
+    await mediator.Send(new SendExpenseToAccountingCommand(
+        expense.Id,
+        expense.TenantId,
+        expense.Name,
+        expense.Amount,
+        expense.ApprovedAt!.Value), cancellationToken);
 
     return new ServiceResult<ApproveExpenseResponse>(new ApproveExpenseResponse
     {

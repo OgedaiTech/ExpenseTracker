@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using ExpenseTracker.Accounting.Data;
 using ExpenseTracker.Expenses.Data;
 using ExpenseTracker.Receipts.Data;
 using ExpenseTracker.Tenants.Data;
@@ -21,6 +22,9 @@ public class Worker(
     try
     {
       using var scope = serviceProvider.CreateScope();
+      var accountingDbContext = scope.ServiceProvider.GetRequiredService<AccountingDbContext>();
+      await RunMigrationForAccountingDbAsync(accountingDbContext, stoppingToken);
+
       var expenseDbContext = scope.ServiceProvider.GetRequiredService<ExpenseDbContext>();
       await RunMigrationForExpenseDbAsync(expenseDbContext, stoppingToken);
 
@@ -41,6 +45,16 @@ public class Worker(
     }
 
     hostApplicationLifetime.StopApplication();
+  }
+
+  private static async Task RunMigrationForAccountingDbAsync(AccountingDbContext dbContext, CancellationToken cancellationToken)
+  {
+    var strategy = dbContext.Database.CreateExecutionStrategy();
+    await strategy.ExecuteAsync(async () =>
+    {
+      // Run migration in a transaction to avoid partial migration if it fails.
+      await dbContext.Database.MigrateAsync(cancellationToken);
+    });
   }
 
   private static async Task RunMigrationForExpenseDbAsync(ExpenseDbContext dbContext, CancellationToken cancellationToken)
