@@ -137,6 +137,7 @@ public partial class ParasutAccountingProvider(
     var issueDate = command.ApprovedAt.ToString("yyyy-MM-dd");
 
     List<ParasutPurchaseBillDetailAttributes> details;
+    decimal netTotal;
 
     if (receipts.Count > 0)
     {
@@ -148,6 +149,7 @@ public partial class ParasutAccountingProvider(
         Quantity = 1,
         UnitPrice = r.Amount
       }).ToList();
+      netTotal = receipts.Sum(r => r.Amount);
     }
     else
     {
@@ -157,6 +159,7 @@ public partial class ParasutAccountingProvider(
         Quantity = 1,
         UnitPrice = command.ExpenseAmount
       }];
+      netTotal = command.ExpenseAmount;
     }
 
     return new ParasutPurchaseBillRequest
@@ -169,6 +172,8 @@ public partial class ParasutAccountingProvider(
           IssueDate = issueDate,
           DueDate = issueDate,
           Currency = "TRL",
+          NetTotal = netTotal,
+          TotalVat = 0,
           DetailsAttributes = details
         }
       }

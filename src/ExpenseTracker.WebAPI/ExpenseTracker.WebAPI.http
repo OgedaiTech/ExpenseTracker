@@ -60,7 +60,7 @@ Content-Type: application/json
 Authorization: Bearer {{login.response.body.$.accessToken}}
 
 {
-  "expenseId": "019b8ef4-cfd3-798a-8ba6-59708c5f70c2",
+  "expenseId": "019c63e4-996c-7864-9c3f-829500cfb644",
   "amount": 20,
   "date": "2024-06-20T12:00:00Z",
   "receiptNo": "R123456",
@@ -205,4 +205,19 @@ Authorization: Bearer {{login.response.body.$.accessToken}}
 
 {
   "email": "barb@test.com"
+}
+
+### ========== CREATE ACCOUNTING SETTINGS ==========
+PUT {{ExpenseTracker.WebAPI_HostAddress}}/accounting/settings
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer {{login.response.body.$.accessToken}}
+
+{
+  "provider": "Parasut",
+  "credentials": {
+    "companyId": "123456",
+    "username": "barbaros@gmail.com",
+    "password": "Abcdefgh"
+  }
 }

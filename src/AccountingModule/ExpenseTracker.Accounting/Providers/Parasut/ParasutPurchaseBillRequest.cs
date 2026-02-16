@@ -22,6 +22,9 @@ public class ParasutPurchaseBillAttributes
   [JsonPropertyName("description")]
   public string Description { get; set; } = string.Empty;
 
+  [JsonPropertyName("item_type")]
+  public string ItemType { get; set; } = "purchase_bill";
+
   [JsonPropertyName("issue_date")]
   public string IssueDate { get; set; } = string.Empty;
 
@@ -30,6 +33,12 @@ public class ParasutPurchaseBillAttributes
 
   [JsonPropertyName("currency")]
   public string Currency { get; set; } = "TRL";
+
+  [JsonPropertyName("net_total")]
+  public decimal NetTotal { get; set; }
+
+  [JsonPropertyName("total_vat")]
+  public decimal TotalVat { get; set; }
 
   [JsonPropertyName("details_attributes")]
   public List<ParasutPurchaseBillDetailAttributes> DetailsAttributes { get; set; } = [];
